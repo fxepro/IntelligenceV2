@@ -1,0 +1,22 @@
+{
+  "placeholderImages": [
+    {
+      "id": "landing-hero",
+      "description": "Abstract data visualization representing intelligence and speed",
+      "imageUrl": "https://picsum.photos/seed/hero/1200/600",
+      "imageHint": "abstract technology"
+    },
+    {
+      "id": "feature-transcribe",
+      "description": "Video transcription and analysis visualization",
+      "imageUrl": "https://picsum.photos/seed/transcribe/600/400",
+      "imageHint": "video analysis"
+    },
+    {
+      "id": "feature-ai",
+      "description": "AI intelligence gathering concept",
+      "imageUrl": "https://picsum.photos/seed/ai/600/400",
+      "imageHint": "artificial intelligence"
+    }
+  ]
+}

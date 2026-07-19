@@ -1,0 +1,21 @@
+# Python 3.14+ stack (Media Intelligence v2) — project standard forever
+fastapi==0.115.14
+uvicorn[standard]==0.34.3
+python-multipart==0.0.20
+sqlalchemy[asyncio]==2.0.41
+asyncpg==0.31.0
+psycopg[binary]==3.2.13
+alembic==1.16.2
+pydantic==2.13.4
+pydantic-settings==2.10.1
+python-dotenv==1.1.1
+celery[redis]==5.5.3
+redis==5.2.1
+httpx==0.28.1
+cryptography==45.0.4
+# Discovery / research connectors (workers + Connect login)
+yt-dlp>=2025.1.1
+feedparser==6.0.11
+playwright>=1.52.0
+imageio-ffmpeg>=0.6.0
+openai>=1.68.0

@@ -1,0 +1,2 @@
+# Requires Python 3.14.x (project standard — do not use OSGeo4W or other interpreters)
+python_version = 3.14

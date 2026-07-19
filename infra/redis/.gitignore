@@ -1,0 +1,5 @@
+# Project Redis — Windows portable binary (downloaded by install-redis.ps1)
+v2/infra/redis/bin/
+v2/infra/redis/data/
+v2/infra/redis/*.zip
+*.pdb

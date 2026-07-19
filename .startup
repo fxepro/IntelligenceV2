@@ -1,0 +1,61 @@
+# Media Intelligence v2 — start in this order (separate terminals)
+#
+# Tip: each step sets the console title so you can tell windows apart:
+#   MI Redis | MI API 8000 | MI Celery Worker | MI Celery Beat | MI Web 3000
+# Or use Settings → Stack → Start (opens titled consoles automatically).
+
+# ── 0. One-time setup ─────────────────────────────────────────────────────
+# From C:\AIProjects\intelligence\v2
+#   .\.venv\Scripts\Activate.ps1
+#   $env:PLAYWRIGHT_BROWSERS_PATH = "$PWD\infra\playwright-browsers"
+#   python -m playwright install chromium
+# Facebook Discover needs that Chromium. Restart Celery Worker after installing.
+#
+# Transcription (optional):
+#   powershell -ExecutionPolicy Bypass -File .\infra\whisper\install-whisper.ps1 -Model medium
+# Then choose engine/model in Settings → Transcription.
+
+# ── 1. Redis (broker for Celery) ──────────────────────────────────────────
+# From C:\AIProjects\intelligence\
+cd v2\infra\redis
+powershell -ExecutionPolicy Bypass -File .\start-redis.ps1
+
+# ── 2. API  →  http://127.0.0.1:8000/docs ────────────────────────────────
+# Console title: MI API 8000
+cd C:\AIProjects\intelligence\v2
+.\.venv\Scripts\Activate.ps1
+cd api
+$Host.UI.RawUI.WindowTitle = "MI API 8000"
+Write-Host "`n=== MI API 8000 ===`n" -ForegroundColor Cyan
+$env:PYTHONPATH = "$PWD;$PWD\..\workers"
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+
+# ── 3. Celery Worker (runs discover / acquire / transcribe jobs) ──────────
+# Console title: MI Celery Worker
+# NOT Beat — this one shows "celery@…" ready and task logs.
+cd C:\AIProjects\intelligence\v2
+.\.venv\Scripts\Activate.ps1
+cd workers
+$Host.UI.RawUI.WindowTitle = "MI Celery Worker"
+Write-Host "`n=== MI Celery Worker ===`n" -ForegroundColor Green
+$env:PYTHONPATH = "$PWD;$PWD\..\api"
+$env:PLAYWRIGHT_BROWSERS_PATH = "$PWD\..\infra\playwright-browsers"
+python -m celery -A celery_app.celery_app worker -l info -Q discovery,acquisition,transcription,intelligence,default --pool=solo
+
+# ── 4. Celery Beat (scheduler only — ticks Autorun) ───────────────────────
+# Console title: MI Celery Beat
+# NOT the worker — this one shows "Scheduler: Sending due task …"
+cd C:\AIProjects\intelligence\v2
+.\.venv\Scripts\Activate.ps1
+cd workers
+$Host.UI.RawUI.WindowTitle = "MI Celery Beat"
+Write-Host "`n=== MI Celery Beat ===`n" -ForegroundColor Yellow
+$env:PYTHONPATH = "$PWD;$PWD\..\api"
+python -m celery -A celery_app.celery_app beat -l info
+
+# ── 5. Web  →  http://localhost:3000 ──────────────────────────────────────
+# Console title: MI Web 3000
+cd C:\AIProjects\intelligence\v2\web
+$Host.UI.RawUI.WindowTitle = "MI Web 3000"
+Write-Host "`n=== MI Web 3000 ===`n" -ForegroundColor Magenta
+npm run dev

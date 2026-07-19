@@ -1,0 +1,19 @@
+/** Reusable page-body sections (standard §10). */
+export { AppPageHeader } from "./AppPageHeader";
+export { StatCard } from "./StatCard";
+export { SourceStatusBadge, MediaStatusPill } from "./StatusBadge";
+export { PlatformBadge, PlatformIcon } from "./PlatformBadge";
+export { ContentTypePill } from "./ContentTypePill";
+export { AddSourceDialog } from "./AddSourceDialog";
+export { PlatformFilterPills } from "./PlatformFilterPills";
+export { SourcesTable } from "./SourcesTable";
+export { DiscoveryResultsDialog } from "./DiscoveryResultsDialog";
+export { IntelligenceFilters } from "./IntelligenceFilters";
+export type { ReadFilter } from "./IntelligenceFilters";
+export { MediaList } from "./MediaList";
+export type { MediaRow } from "./MediaList";
+export { MediaDetailDialog } from "./MediaDetailDialog";
+export { ResearchSearchPanel, RESEARCH_PLATFORMS } from "./ResearchSearchPanel";
+export { CandidateCard } from "./CandidateCard";
+export type { Candidate } from "./CandidateCard";
+export { ResearchResults } from "./ResearchResults";

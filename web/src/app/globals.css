@@ -1,0 +1,173 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Brand kit:
+    #345a78 slate | #d8cec4 beige | #7a2f44 wine | #9a8a82 taupe
+    #a8b6c4 cool | #0E171C text | #8B9AA5 muted | #2A343C border
+  Light and dark are independent - do not mirror role swaps across modes.
+*/
+
+@layer base {
+  :root {
+    /* LIGHT - original warm beige kit */
+    --background: 30 20% 84%;
+    --foreground: 202 7% 8%;
+    --card: 30 28% 97%;
+    --card-foreground: 202 7% 8%;
+    --popover: 30 28% 97%;
+    --popover-foreground: 202 7% 8%;
+    --primary: 207 40% 34%;
+    --primary-foreground: 30 25% 96%;
+    --secondary: 30 16% 78%;
+    --secondary-foreground: 202 7% 8%;
+    --muted: 30 14% 80%;
+    --muted-foreground: 205 13% 38%;
+    --accent: 343 44% 33%;
+    --accent-foreground: 30 25% 96%;
+    --destructive: 343 50% 32%;
+    --destructive-foreground: 30 25% 96%;
+    --border: 20 12% 68%;
+    --input: 20 12% 72%;
+    --ring: 207 40% 34%;
+    --radius: 0.625rem;
+    --cool: 210 19% 71%;
+
+    --chart-1: 207 40% 34%;
+    --chart-2: 343 44% 33%;
+    --chart-3: 30 20% 65%;
+    --chart-4: 210 19% 55%;
+    --chart-5: 20 11% 45%;
+
+    --sidebar-background: 207 40% 34%;
+    --sidebar-foreground: 30 25% 92%;
+    --sidebar-primary: 30 25% 96%;
+    --sidebar-primary-foreground: 207 40% 28%;
+    --sidebar-accent: 207 38% 28%;
+    --sidebar-accent-foreground: 30 25% 96%;
+    --sidebar-border: 207 35% 28%;
+    --sidebar-ring: 210 19% 71%;
+  }
+
+  .dark {
+    /* DARK only - taupe/wine surface-accent swap (does not affect light) */
+    --background: 202 12% 9%;
+    --foreground: 30 22% 90%;
+    --card: 343 42% 14%;
+    --card-foreground: 30 22% 92%;
+    --popover: 343 42% 14%;
+    --popover-foreground: 30 22% 92%;
+    --primary: 210 22% 74%;
+    --primary-foreground: 202 12% 10%;
+    --secondary: 20 11% 56%;
+    --secondary-foreground: 202 12% 10%;
+    --muted: 343 42% 14%;
+    --muted-foreground: 205 13% 62%;
+    --accent: 20 11% 56%;
+    --accent-foreground: 202 12% 10%;
+    --destructive: 343 46% 48%;
+    --destructive-foreground: 30 25% 97%;
+    --border: 210 8% 28%;
+    --input: 210 8% 28%;
+    --ring: 20 11% 56%;
+    --cool: 210 19% 71%;
+
+    --chart-1: 210 22% 74%;
+    --chart-2: 20 11% 56%;
+    --chart-3: 343 42% 28%;
+    --chart-4: 207 36% 48%;
+    --chart-5: 20 12% 58%;
+
+    --sidebar-background: 207 26% 10%;
+    --sidebar-foreground: 30 18% 88%;
+    --sidebar-primary: 210 22% 74%;
+    --sidebar-primary-foreground: 202 12% 10%;
+    --sidebar-accent: 207 18% 16%;
+    --sidebar-accent-foreground: 30 20% 92%;
+    --sidebar-border: 30 10% 20%;
+    --sidebar-ring: 210 22% 74%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans text-body;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
+  }
+  h1 { @apply text-h1; }
+  h2 { @apply text-h2; }
+  h3 { @apply text-h3; }
+  h4 { @apply text-h4; }
+  h5 { @apply text-h5; }
+  h6 { @apply text-h6; }
+
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer components {
+  .page-title {
+    @apply font-display text-h3 tracking-tight;
+  }
+  .page-main {
+    @apply min-h-[calc(100vh-4rem)];
+  }
+  .page-body {
+    @apply pb-10;
+  }
+  .eyebrow {
+    @apply text-fine font-bold uppercase tracking-widest text-muted-foreground;
+  }
+  .label-caps {
+    @apply text-fine font-bold uppercase tracking-widest text-muted-foreground;
+  }
+}
+
+.glass {
+  @apply bg-[hsl(30_30%_99%/0.82)] backdrop-blur-md border border-border/60 shadow-xl;
+}
+
+.dark .glass {
+  @apply bg-[hsl(207_16%_14%/0.88)] border-border/70;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--secondary));
+}
