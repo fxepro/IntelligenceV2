@@ -19,7 +19,15 @@ const QUICK_LINKS = [
   ...DOMAINS.filter((d) => d.enabled).map((d) => ({
     name: d.label,
     href: d.home,
-    icon: (d.key === "government" ? "building" : "radio") as const,
+    icon: (d.key === "government"
+      ? "building"
+      : d.key === "trademarks"
+        ? "landmark"
+        : d.key === "domain_names"
+          ? "globe"
+          : d.key === "library"
+            ? "library"
+            : "radio") as const,
   })),
   ...intelligenceNav,
   chromeNav.settings,

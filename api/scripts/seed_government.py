@@ -78,7 +78,7 @@ def apply_seed(*, dry_run: bool = False) -> None:
                 priority=_enum(SourcePriority, item.get("priority") or "normal"),
                 platform=_enum(Platform, item.get("platform") or "website"),
                 source_type=_enum(SourceType, item.get("source_type") or "sitemap"),
-                status=_enum(SourceStatus, item.get("status") or "paused"),
+                status=_enum(SourceStatus, item.get("status") or "active"),
                 autorun=bool(item.get("autorun", False)),
                 auto_transcribe=bool(item.get("auto_transcribe", False)),
             )

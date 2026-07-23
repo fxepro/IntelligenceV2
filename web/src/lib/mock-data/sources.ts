@@ -1,4 +1,13 @@
-export type Platform = "youtube" | "facebook" | "x" | "instagram" | "tiktok" | "rss" | "podcast" | "website";
+export type Platform =
+  | "youtube"
+  | "facebook"
+  | "x"
+  | "instagram"
+  | "tiktok"
+  | "rss"
+  | "podcast"
+  | "website"
+  | "government";
 export type SourceType =
   | "facebook_reels"
   | "facebook_videos"
@@ -9,6 +18,7 @@ export type SourceType =
   | "tiktok_videos"
   | "rss_feed"
   | "sitemap"
+  | "website"
   | "channel"
   | "playlist"
   | "profile";
@@ -58,6 +68,8 @@ export interface Source {
   total_views?: number | null;
   joined_at?: string | null;
   description?: string | null;
+  /** Trademark machine-channel readiness: api | bulk | api_bulk (only ~17 sources). */
+  connect_readiness?: "api" | "bulk" | "api_bulk" | null;
 }
 
 export function formatSubscribers(n: number | null | undefined): string {
@@ -226,6 +238,7 @@ export const PLATFORM_LABELS: Record<Platform, string> = {
   rss: "RSS",
   podcast: "Podcast",
   website: "Website",
+  government: "Government",
 };
 
 export const PLATFORM_COLORS: Record<Platform, string> = {
@@ -237,4 +250,5 @@ export const PLATFORM_COLORS: Record<Platform, string> = {
   rss: "bg-orange-500/10 text-orange-400 border-orange-500/20",
   podcast: "bg-purple-500/10 text-purple-400 border-purple-500/20",
   website: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  government: "bg-amber-500/10 text-amber-700 border-amber-500/25",
 };

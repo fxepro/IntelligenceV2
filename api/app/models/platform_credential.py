@@ -22,12 +22,21 @@ class CredentialStatus(str, enum.Enum):
 class PlatformCredential(Base):
     __tablename__ = "platform_credentials"
     __table_args__ = (
-        UniqueConstraint("platform", "username", name="uq_platform_credentials_platform_username"),
+        # site_url distinguishes multiple "website" logins (e.g. academy.scytale.ai).
+        # Empty string for non-website platforms.
+        UniqueConstraint(
+            "platform",
+            "username",
+            "site_url",
+            name="uq_platform_credentials_platform_username_site",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     platform: Mapped[Platform] = mapped_column(Enum(Platform, name="platform"), nullable=False, index=True)
     username: Mapped[str] = mapped_column(String(512), nullable=False)
+    # Which site these credentials are for when platform=website (origin URL).
+    site_url: Mapped[str] = mapped_column(String(2048), nullable=False, default="", server_default="")
     password_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
     session_json: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     status: Mapped[CredentialStatus] = mapped_column(

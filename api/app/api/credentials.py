@@ -4,6 +4,8 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 
+from urllib.parse import urlparse
+
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
@@ -25,21 +27,40 @@ router = APIRouter()
 AUTH_PLATFORMS: list[Platform] = list(Platform)
 
 
+def normalize_site_url(raw: str | None, *, platform: Platform | str) -> str:
+    """Origin URL for website credentials; empty string for other platforms."""
+    p = platform.value if hasattr(platform, "value") else str(platform)
+    if p != "website":
+        return ""
+    text = (raw or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Website URL is required for website credentials.")
+    if "://" not in text:
+        text = f"https://{text}"
+    parsed = urlparse(text)
+    if not parsed.netloc:
+        raise HTTPException(status_code=400, detail="Website URL is invalid.")
+    return f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
+
+
 class CredentialCreate(BaseModel):
     platform: Platform
     username: str = Field(..., min_length=1, max_length=512)
     password: str = Field(..., min_length=1, max_length=512)
+    site_url: str | None = Field(default=None, max_length=2048)
 
 
 class CredentialUpdate(BaseModel):
     username: str | None = Field(default=None, min_length=1, max_length=512)
     password: str | None = Field(default=None, min_length=1, max_length=512)
+    site_url: str | None = Field(default=None, max_length=2048)
 
 
 class CredentialResponse(BaseModel):
     id: uuid.UUID
     platform: str
     username: str
+    site_url: str = ""
     has_password: bool = True
     has_session: bool = False
     status: str
@@ -90,6 +111,7 @@ def _to_response(row: PlatformCredential) -> CredentialResponse:
         id=row.id,
         platform=platform,
         username=row.username,
+        site_url=getattr(row, "site_url", None) or "",
         has_password=bool(row.password_encrypted),
         has_session=has_auth,
         status=status_out,
@@ -190,18 +212,24 @@ async def create_credential(payload: CredentialCreate, db: AsyncSession = Depend
         raise HTTPException(status_code=400, detail="Platform does not use stored credentials.")
 
     username = payload.username.strip()
+    site_url = normalize_site_url(payload.site_url, platform=payload.platform)
     existing = await db.scalar(
         select(PlatformCredential).where(
             PlatformCredential.platform == payload.platform,
             PlatformCredential.username == username,
+            PlatformCredential.site_url == site_url,
         )
     )
     if existing:
-        raise HTTPException(status_code=409, detail="That platform + username already exists.")
+        raise HTTPException(
+            status_code=409,
+            detail="That platform + username + website already exists.",
+        )
 
     row = PlatformCredential(
         platform=payload.platform,
         username=username,
+        site_url=site_url,
         password_encrypted=encrypt_secret(payload.password),
         status=CredentialStatus.saved,
     )
@@ -301,6 +329,25 @@ async def update_credential(
 
     if payload.username is not None:
         row.username = payload.username.strip()
+    if payload.site_url is not None:
+        row.site_url = normalize_site_url(payload.site_url, platform=row.platform)
+    elif payload.username is not None and row.platform == Platform.website and not (row.site_url or "").strip():
+        raise HTTPException(status_code=400, detail="Website / App URL is required for website credentials.")
+
+    # uniqueness after edits
+    clash = await db.scalar(
+        select(PlatformCredential).where(
+            PlatformCredential.platform == row.platform,
+            PlatformCredential.username == row.username,
+            PlatformCredential.site_url == (row.site_url or ""),
+            PlatformCredential.id != row.id,
+        )
+    )
+    if clash:
+        raise HTTPException(
+            status_code=409,
+            detail="That platform + username + website already exists.",
+        )
     if payload.password is not None:
         row.password_encrypted = encrypt_secret(payload.password)
         row.session_json = None

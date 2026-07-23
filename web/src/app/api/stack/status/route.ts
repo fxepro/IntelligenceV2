@@ -137,7 +137,7 @@ export async function GET() {
     },
   ];
 
-  // Domain control planes — order/copy matches docs/domains
+  // Domain control planes — alphabetical by label (matches docs/domains)
   const control_planes = [
     {
       id: "media",
@@ -262,9 +262,25 @@ export async function GET() {
     {
       id: "trademarks",
       label: "Trademarks",
-      status: "planned",
+      status: "active",
       blurb: "Marks, owners, classes, status, prosecution history and related brands",
-      home: null,
+      home: "/trademarks/sources",
+      docs_url: null,
+    },
+    {
+      id: "domain_names",
+      label: "Domains",
+      status: "active",
+      blurb: "www, .net and other TLDs — registries, WHOIS, DNS, availability and ownership",
+      home: "/domain-names/sources",
+      docs_url: null,
+    },
+    {
+      id: "library",
+      label: "Library",
+      status: "active",
+      blurb: "Lessons from courses, books, and videos — text, PDF, and video by topic",
+      home: "/library/lessons",
       docs_url: null,
     },
     {
@@ -315,7 +331,7 @@ export async function GET() {
       home: null,
       docs_url: null,
     },
-  ];
+  ].sort((a, b) => a.label.localeCompare(b.label));
 
   return NextResponse.json({
     processes,

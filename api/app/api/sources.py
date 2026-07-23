@@ -525,6 +525,11 @@ async def _patch_source_impl(
             )
     for k, v in data.items():
         setattr(source, k, v)
+    if "tags" in data:
+        # JSONB assignment can be missed by change tracking without an explicit flag.
+        from sqlalchemy.orm.attributes import flag_modified
+
+        flag_modified(source, "tags")
     if stream_urls is not None:
         streams = (
             await db.scalars(

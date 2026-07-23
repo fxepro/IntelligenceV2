@@ -32,6 +32,8 @@ export const domainNav: Record<DomainKey, NavItem[]> = {
   auctions: [],
   torrents: [],
   trademarks: [],
+  domain_names: [],
+  library: [],
   patents: [],
   songs: [],
   music: [],

@@ -1,5 +1,6 @@
 // Domain registry — source of truth for product copy: docs/domains
 // Drives domain cards, sidebar switcher, and workspace nav.
+// Order is alphabetical by label (see sort on DOMAINS).
 //
 // Intelligence is the platform name. These keys are control planes.
 
@@ -20,6 +21,8 @@ export type DomainKey =
   | "auctions"
   | "torrents"
   | "trademarks"
+  | "domain_names"
+  | "library"
   | "patents"
   | "songs"
   | "music"
@@ -145,8 +148,22 @@ export const DOMAINS: DomainDef[] = [
     key: "trademarks",
     label: "Trademarks",
     blurb: "Marks, owners, classes, status, prosecution history and related brands",
-    home: "#",
-    enabled: false,
+    home: "/trademarks/sources",
+    enabled: true,
+  },
+  {
+    key: "domain_names",
+    label: "Domains",
+    blurb: "www, .net and other TLDs — registries, WHOIS, DNS, availability and ownership",
+    home: "/domain-names/sources",
+    enabled: true,
+  },
+  {
+    key: "library",
+    label: "Library",
+    blurb: "Lessons from courses, books, and videos — text, PDF, and video by topic",
+    home: "/library/lessons",
+    enabled: true,
   },
   {
     key: "patents",
@@ -190,7 +207,7 @@ export const DOMAINS: DomainDef[] = [
     home: "#",
     enabled: false,
   },
-];
+].sort((a, b) => a.label.localeCompare(b.label));
 
 // Which domain a pathname belongs to (for the sidebar).
 export function domainForPath(pathname: string): DomainKey {
@@ -199,6 +216,9 @@ export function domainForPath(pathname: string): DomainKey {
   if (pathname.startsWith("/software")) return "software";
   if (pathname.startsWith("/business")) return "business";
   if (pathname.startsWith("/government")) return "government";
+  if (pathname.startsWith("/trademarks")) return "trademarks";
+  if (pathname.startsWith("/domain-names")) return "domain_names";
+  if (pathname.startsWith("/library")) return "library";
   if (pathname.startsWith("/taxes")) return "taxes";
   if (pathname.startsWith("/healthcare")) return "healthcare";
   if (pathname.startsWith("/people")) return "people";
@@ -215,6 +235,9 @@ export function domainForPath(pathname: string): DomainKey {
 export function workspaceDomainForPath(pathname: string): DomainKey | null {
   if (pathname.startsWith("/media") || pathname.startsWith("/sources")) return "media";
   if (pathname.startsWith("/government")) return "government";
+  if (pathname.startsWith("/trademarks")) return "trademarks";
+  if (pathname.startsWith("/domain-names")) return "domain_names";
+  if (pathname.startsWith("/library")) return "library";
   if (pathname.startsWith("/finance")) return "finance";
   if (pathname.startsWith("/real-estate")) return "real_estate";
   return null;

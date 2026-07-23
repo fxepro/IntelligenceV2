@@ -18,6 +18,8 @@ class Platform(str, enum.Enum):
     rss = "rss"
     podcast = "podcast"
     website = "website"
+    # Offices / public authorities (trademarks, gov intel, etc.)
+    government = "government"
 
 
 class SourceType(str, enum.Enum):
@@ -31,6 +33,8 @@ class SourceType(str, enum.Enum):
     # Feed/site types remain platform-specific enough as-is.
     rss_feed = "rss_feed"
     sitemap = "sitemap"
+    # Generic access surface (portals, registries, marketing sites).
+    website = "website"
     # Legacy values retained so old/imported rows remain readable.
     channel = "channel"
     playlist = "playlist"

@@ -105,7 +105,9 @@ function NavSection({
 
 function workspaceIcon(key: string) {
   if (key === "government" || key === "real_estate") return "building" as const;
-  if (key === "finance") return "landmark" as const;
+  if (key === "trademarks" || key === "finance") return "landmark" as const;
+  if (key === "domain_names") return "globe" as const;
+  if (key === "library") return "library" as const;
   if (key === "media") return "radio" as const;
   return "dashboard" as const;
 }

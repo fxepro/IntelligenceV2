@@ -1,0 +1,27 @@
+column,type,required,notes
+catalog_id,text,yes,TMK-xxxx — FK to sources.catalog_id
+country,text,yes,Country or region display name
+country_code,text,yes,"ISO 3166-1 alpha-2; use EU / WIPO / ARIPO / OAPI / US-ST when regional or state"
+jurisdiction,text,yes,"national | regional | state | court | international"
+office,text,yes,Trademark office or governing body name
+search_url,text,no,Public trademark search UI (prefer over generic homepage)
+status_lookup_url,text,no,Register / status / record lookup UI
+filing_url,text,no,Online filing / e-filing portal
+registry_url,text,no,Official register / record system (may match status_lookup_url)
+gazette_url,text,no,Official gazette or bulletin
+journal_url,text,no,Journal / publication list when distinct from gazette
+api_url,text,no,Base API endpoint when one exists (callable; never include the secret)
+api_docs_url,text,no,API / developer documentation URL
+bulk_download_url,text,no,Bulk data download landing page
+response_format,text,no,"JSON | XML | HTML | CSV | PDF | mixed | notes"
+pagination,text,no,cursor / offset / page / none / unknown / free text
+query_parameters,text,no,Main query knobs (mark owner class dates serial …)
+access_type,text,yes,"search | rest_api | bulk_download | gazette | scraper | portal | public | public_api | public_portal"
+authentication,text,no,"none | api_key | oauth | account | unknown | free text"
+rate_limit,text,no,Published limits or unknown
+supports_nice_classes,boolean,no,true/false/unknown — Nice class search or filter
+supports_image_search,boolean,no,true/false/unknown — mark image / logo search
+update_frequency,text,no,"real-time | near real-time | daily | weekly | batch | unknown"
+status,text,yes,"active | degraded | retired | unverified"
+last_verified,date,no,YYYY-MM-DD last human or job verification
+notes,text,no,Caveats; rare deep links until common

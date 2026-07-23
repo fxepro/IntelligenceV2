@@ -4,6 +4,7 @@ from app.models.source_stream import SourceStream
 from app.models.record import Record, RecordStatus
 from app.models.platform_credential import CredentialStatus, PlatformCredential
 from app.models.app_setting import AppSetting
+from app.models.trademark_source_detail import TrademarkSourceDetail
 
 __all__ = [
     "Job",
@@ -20,4 +21,5 @@ __all__ = [
     "PlatformCredential",
     "CredentialStatus",
     "AppSetting",
+    "TrademarkSourceDetail",
 ]

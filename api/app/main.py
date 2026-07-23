@@ -4,10 +4,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api import health, jobs, records, sources, discover, media, research, credentials, system, app_settings, ask
+from app.api import health, jobs, records, sources, discover, media, research, credentials, system, app_settings, ask, library, trademarks
 from app.config import get_settings
 from app.database import Base, engine
-from app.models import AppSetting, Job, Record, Source, SourceStream, PlatformCredential  # noqa: F401 — register metadata
+from app.models import AppSetting, Job, Record, Source, SourceStream, PlatformCredential, TrademarkSourceDetail  # noqa: F401 — register metadata
 
 
 async def _column_exists(conn, table: str, column: str) -> bool:
@@ -40,7 +40,9 @@ async def _run_dev_migrations() -> None:
 
     patches = [
         "ALTER TYPE platform ADD VALUE IF NOT EXISTS 'x'",
+        "ALTER TYPE platform ADD VALUE IF NOT EXISTS 'government'",
         "ALTER TYPE source_type ADD VALUE IF NOT EXISTS 'x_posts'",
+        "ALTER TYPE source_type ADD VALUE IF NOT EXISTS 'website'",
         """
         DO $$ BEGIN
             CREATE TYPE source_priority AS ENUM ('low', 'normal', 'high', 'urgent');
@@ -126,19 +128,88 @@ async def _run_dev_migrations() -> None:
     except Exception as exc:
         print(f"[lifespan] catalog_id unique skipped: {type(exc).__name__}: {exc}")
 
+    # platform_credentials.site_url for website Access logins
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SET lock_timeout = '3s'"))
+            if not await _column_exists(conn, "platform_credentials", "site_url"):
+                await conn.execute(
+                    text(
+                        "ALTER TABLE platform_credentials "
+                        "ADD COLUMN site_url VARCHAR(2048) NOT NULL DEFAULT ''"
+                    )
+                )
+            await conn.execute(
+                text(
+                    """
+                    DO $$ BEGIN
+                        ALTER TABLE platform_credentials
+                        DROP CONSTRAINT IF EXISTS uq_platform_credentials_platform_username;
+                    EXCEPTION
+                        WHEN undefined_object THEN NULL;
+                    END $$;
+                    """
+                )
+            )
+            await conn.execute(
+                text(
+                    """
+                    DO $$ BEGIN
+                        ALTER TABLE platform_credentials
+                        ADD CONSTRAINT uq_platform_credentials_platform_username_site
+                        UNIQUE (platform, username, site_url);
+                    EXCEPTION
+                        WHEN duplicate_object THEN NULL;
+                    END $$;
+                    """
+                )
+            )
+            await conn.commit()
+    except Exception as exc:
+        print(f"[lifespan] platform_credentials.site_url skipped: {type(exc).__name__}: {exc}")
+
+    # trademark_source_details — standard 26-col enrichment + encrypted API key
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SET lock_timeout = '3s'"))
+            for col, ddl in (
+                ("registry_url", "VARCHAR(2048)"),
+                ("journal_url", "VARCHAR(2048)"),
+                ("response_format", "TEXT"),
+                ("pagination", "TEXT"),
+                ("query_parameters", "TEXT"),
+                ("api_key_encrypted", "TEXT"),
+            ):
+                if not await _column_exists(conn, "trademark_source_details", col):
+                    await conn.execute(
+                        text(f"ALTER TABLE trademark_source_details ADD COLUMN {col} {ddl}")
+                    )
+            await conn.commit()
+    except Exception as exc:
+        print(
+            f"[lifespan] trademark_source_details columns skipped: "
+            f"{type(exc).__name__}: {exc}"
+        )
+
     # Backfill MEDIA-0001… (and any other domain missing ids).
     try:
         from sqlalchemy import create_engine
         from sqlalchemy.orm import Session
 
         from app.services.catalog_ids import backfill_catalog_ids_sync
-        from app.services.category_backfill import backfill_category_from_tags_sync
+        from app.services.category_backfill import (
+            backfill_category_from_tags_sync,
+            restore_media_tags_from_category_sync,
+        )
 
         sync_engine = create_engine(get_settings().database_url_sync)
         with Session(sync_engine) as session:
             n = backfill_catalog_ids_sync(session)
             if n:
                 print(f"[lifespan] catalog_id backfill: assigned {n} source(s)")
+            m = restore_media_tags_from_category_sync(session)
+            if m:
+                print(f"[lifespan] media tags restore: restored {m} source(s) from category")
             c = backfill_category_from_tags_sync(session)
             if c:
                 print(f"[lifespan] category backfill: moved {c} source(s) from tags")
@@ -193,6 +264,8 @@ app.include_router(credentials.router, prefix=f"{prefix}/credentials", tags=["Cr
 app.include_router(system.router, prefix=f"{prefix}/system", tags=["System"])
 app.include_router(app_settings.router, prefix=f"{prefix}/settings", tags=["Settings"])
 app.include_router(ask.router, prefix=f"{prefix}/ask", tags=["Ask"])
+app.include_router(library.router, prefix=f"{prefix}/library", tags=["Library"])
+app.include_router(trademarks.router, prefix=f"{prefix}/trademarks", tags=["Trademarks"])
 
 
 @app.get("/")

@@ -135,7 +135,7 @@ async def system_status():
         ),
     ]
 
-    # Domain control planes — order/copy matches docs/domains
+    # Domain control planes — alphabetical by label (matches docs/domains)
     control_planes = [
         {
             "id": "media",
@@ -244,9 +244,17 @@ async def system_status():
         {
             "id": "trademarks",
             "label": "Trademarks",
-            "status": "planned",
+            "status": "active",
             "blurb": "Marks, owners, classes, status, prosecution history and related brands",
-            "home": None,
+            "home": "/trademarks/sources",
+            "docs_url": None,
+        },
+        {
+            "id": "domain_names",
+            "label": "Domains",
+            "status": "active",
+            "blurb": "www, .net and other TLDs — registries, WHOIS, DNS, availability and ownership",
+            "home": "/domain-names/sources",
             "docs_url": None,
         },
         {
@@ -298,6 +306,7 @@ async def system_status():
             "docs_url": None,
         },
     ]
+    control_planes.sort(key=lambda p: p["label"])
 
     return SystemStatusOut(processes=processes, control_planes=control_planes)
 

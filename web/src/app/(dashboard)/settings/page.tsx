@@ -10,6 +10,7 @@ import {
   Eye,
   EyeOff,
   Trash2,
+  Pencil,
   KeyRound,
   ExternalLink,
   RefreshCw,
@@ -53,6 +54,8 @@ import { Icon } from "@/lib/icons";
 
 import { API_BASE, BACKEND_URL } from "@/lib/api-base";
 const API_DOCS = `${BACKEND_URL}/docs`;
+/** Default Website / App when platform=website (Scytale academy access). */
+const DEFAULT_WEBSITE_APP_URL = "https://academy.scytale.ai";
 const AUTH_PLATFORMS: Platform[] = [
   "facebook",
   "youtube",
@@ -102,6 +105,7 @@ interface CredentialRow {
   id: string;
   platform: Platform;
   username: string;
+  site_url?: string;
   has_password: boolean;
   has_session: boolean;
   status: string;
@@ -215,8 +219,10 @@ export default function SettingsPage() {
   const [items, setItems] = useState<CredentialRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [platform, setPlatform] = useState<Platform>("facebook");
   const [username, setUsername] = useState("");
+  const [siteUrl, setSiteUrl] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -273,7 +279,12 @@ export default function SettingsPage() {
       const res = await fetch(`${API_BASE}/api/v1/credentials`);
       if (!res.ok) throw new Error("Failed to load credentials");
       const data = await res.json();
-      setItems(data.items ?? []);
+      setItems(
+        (data.items ?? []).map((row: CredentialRow) => ({
+          ...row,
+          site_url: row.site_url || "",
+        })),
+      );
     } catch {
       setItems([]);
     } finally {
@@ -357,14 +368,16 @@ export default function SettingsPage() {
         { id: "real_estate", label: "Real Estate", status: "planned", blurb: "Parcels, buildings, owners, liens, zoning, permits and transactions", home: "/real-estate" },
         { id: "auctions", label: "Auctions", status: "planned", blurb: "HOA, tax, foreclosure and public auctions — lots, dates, bidders and jurisdictions", home: "/auctions" },
         { id: "torrents", label: "Torrents", status: "planned", blurb: "Torrent indexes, releases, magnets, swarm activity and distribution signals", home: "/torrents" },
-        { id: "trademarks", label: "Trademarks", status: "planned", blurb: "Marks, owners, classes, status, prosecution history and related brands" },
+        { id: "trademarks", label: "Trademarks", status: "active", blurb: "Marks, owners, classes, status, prosecution history and related brands", home: "/trademarks/sources" },
+        { id: "domain_names", label: "Domains", status: "active", blurb: "www, .net and other TLDs — registries, WHOIS, DNS, availability and ownership", home: "/domain-names/sources" },
+        { id: "library", label: "Library", status: "active", blurb: "Lessons from courses, books, and videos — text, PDF, and video by topic", home: "/library/lessons" },
         { id: "patents", label: "Patents", status: "planned", blurb: "Applications, grants, claims, inventors, assignees, citations and legal status" },
         { id: "songs", label: "Songs", status: "planned", blurb: "Musical compositions and associated writers, publishers and rights" },
         { id: "music", label: "Music", status: "planned", blurb: "Sound recordings, releases, artists, labels and catalogs" },
         { id: "books", label: "Books", status: "planned", blurb: "Published works, editions, authors, publishers, rights and sales signals" },
         { id: "movies", label: "Movies", status: "planned", blurb: "Films, television, video works, production entities and distribution rights" },
         { id: "fiction", label: "Fiction", status: "planned", blurb: "Unpublished or independently created stories, characters, settings and story worlds" },
-      ]);
+      ].sort((a, b) => a.label.localeCompare(b.label)));
     } finally {
       setSysLoading(false);
     }
@@ -428,11 +441,36 @@ export default function SettingsPage() {
   };
 
   const resetAdd = () => {
+    setEditingId(null);
     setPlatform("facebook");
     setUsername("");
+    setSiteUrl("");
     setPassword("");
     setShowPw(false);
     setError(null);
+  };
+
+  const selectPlatform = (next: Platform) => {
+    setPlatform(next);
+    if (next === "website") {
+      setSiteUrl((current) => current.trim() || DEFAULT_WEBSITE_APP_URL);
+    } else {
+      setSiteUrl("");
+    }
+  };
+
+  const openEdit = (row: CredentialRow) => {
+    setEditingId(row.id);
+    setPlatform(row.platform);
+    setUsername(row.username);
+    setSiteUrl(
+      row.site_url?.trim() ||
+        (row.platform === "website" ? DEFAULT_WEBSITE_APP_URL : ""),
+    );
+    setPassword("");
+    setShowPw(false);
+    setError(null);
+    setShowAdd(true);
   };
 
   const openFacebookLogin = () => {
@@ -534,28 +572,87 @@ export default function SettingsPage() {
   };
 
   const handleAdd = async () => {
-    if (!username.trim() || !password) {
+    if (!username.trim()) {
+      setError("Username is required.");
+      return;
+    }
+    if (!editingId && !password) {
       setError("Platform, username, and password are required.");
+      return;
+    }
+    if (platform === "website" && !siteUrl.trim()) {
+      setError("Website / App URL is required for website credentials.");
       return;
     }
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/credentials`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ platform, username: username.trim(), password }),
-      });
+      const res = editingId
+        ? await fetch(`${API_BASE}/api/v1/credentials/${editingId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: username.trim(),
+              site_url:
+                platform === "website"
+                  ? (siteUrl.trim() || DEFAULT_WEBSITE_APP_URL)
+                  : "",
+              ...(password ? { password } : {}),
+            }),
+          })
+        : await fetch(`${API_BASE}/api/v1/credentials`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              platform,
+              username: username.trim(),
+              password,
+              site_url:
+                platform === "website"
+                  ? (siteUrl.trim() || DEFAULT_WEBSITE_APP_URL)
+                  : undefined,
+            }),
+          });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(typeof data.detail === "string" ? data.detail : "Failed to add credential");
+        throw new Error(
+          typeof data.detail === "string"
+            ? data.detail
+            : editingId
+              ? "Failed to update credential"
+              : "Failed to add credential",
+        );
+      }
+      // Keep table in sync immediately (Website / App included).
+      if (data?.id) {
+        const mapped: CredentialRow = {
+          id: String(data.id),
+          platform: data.platform,
+          username: data.username,
+          site_url: data.site_url || (data.platform === "website" ? DEFAULT_WEBSITE_APP_URL : ""),
+          has_password: Boolean(data.has_password),
+          has_session: Boolean(data.has_session),
+          status: data.status,
+          last_error: data.last_error ?? null,
+          last_verified_at: data.last_verified_at ?? null,
+          updated_at: data.updated_at ?? null,
+        };
+        setItems((prev) => {
+          const idx = prev.findIndex((r) => r.id === mapped.id);
+          if (idx >= 0) {
+            const next = [...prev];
+            next[idx] = mapped;
+            return next;
+          }
+          return [mapped, ...prev];
+        });
       }
       setShowAdd(false);
       resetAdd();
-      setFlash("Credential added.");
+      setFlash(editingId ? "Credential updated." : "Credential added.");
       await load();
     } catch (e: any) {
-      setError(e.message ?? "Failed to add");
+      setError(e.message ?? "Failed to save");
     } finally {
       setSaving(false);
     }
@@ -1432,6 +1529,7 @@ export default function SettingsPage() {
                 <TableHeader className="bg-muted/10">
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider w-[72px]">Platform</TableHead>
+                    <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider">Website / App</TableHead>
                     <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider">Username</TableHead>
                     <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider w-[120px]">Session</TableHead>
                     <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider w-[120px]">Status</TableHead>
@@ -1441,24 +1539,36 @@ export default function SettingsPage() {
                 <TableBody>
                   {loading && (
                     <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center text-muted-foreground text-sm">
+                      <TableCell colSpan={6} className="h-24 text-center text-muted-foreground text-sm">
                         <Loader2 className="w-4 h-4 animate-spin inline mr-2" /> Loading…
                       </TableCell>
                     </TableRow>
                   )}
                   {!loading && visibleAccessItems.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center text-sm text-muted-foreground">
+                      <TableCell colSpan={6} className="h-24 text-center text-sm text-muted-foreground">
                         {accessView === "connected" ? "No connected accounts yet." : "No credentials yet."}
                       </TableCell>
                     </TableRow>
                   )}
                   {visibleAccessItems.map((row) => {
                     const busy = busyId === row.id;
+                    const siteDisplay =
+                      row.platform === "website"
+                        ? (row.site_url || DEFAULT_WEBSITE_APP_URL).replace(/\/$/, "")
+                        : (row.site_url || "").replace(/\/$/, "");
                     return (
                       <TableRow key={row.id} className="h-14">
                         <TableCell className="px-5 py-3">
                           <PlatformBadge platform={row.platform} variant="logo" />
+                        </TableCell>
+                        <TableCell
+                          className="px-5 py-3 text-sm text-muted-foreground truncate max-w-[260px]"
+                          title={siteDisplay || undefined}
+                        >
+                          {siteDisplay
+                            ? siteDisplay.replace(/^https?:\/\//, "")
+                            : "—"}
                         </TableCell>
                         <TableCell className="px-5 py-3 text-sm font-medium truncate max-w-[280px]">
                           {row.username}
@@ -1470,15 +1580,28 @@ export default function SettingsPage() {
                           <StatusPill row={row} />
                         </TableCell>
                         <TableCell className="px-5 py-3 text-right">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            disabled={busy}
-                            onClick={() => handleDelete(row.id)}
-                            className="h-8 w-8 text-muted-foreground hover:text-red-500"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
+                          <div className="inline-flex items-center gap-0.5">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              disabled={busy}
+                              onClick={() => openEdit(row)}
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              title="Edit credential"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              disabled={busy}
+                              onClick={() => handleDelete(row.id)}
+                              className="h-8 w-8 text-muted-foreground hover:text-red-500"
+                              title="Delete credential"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -1493,13 +1616,21 @@ export default function SettingsPage() {
       <Dialog open={showAdd} onOpenChange={(open) => { if (!open) { setShowAdd(false); resetAdd(); } }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add credential</DialogTitle>
-            <DialogDescription>Optional for other platforms.</DialogDescription>
+            <DialogTitle>{editingId ? "Edit credential" : "Add credential"}</DialogTitle>
+            <DialogDescription>
+              {editingId
+                ? "Update username, website/app, or password. Leave password blank to keep the current one."
+                : "Store login access for platforms and websites."}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-1">
             <div className="space-y-1.5">
               <label className="text-fine font-bold uppercase tracking-widest text-muted-foreground">Platform</label>
-              <Select value={platform} onValueChange={(v) => setPlatform(v as Platform)}>
+              <Select
+                value={platform}
+                onValueChange={(v) => selectPlatform(v as Platform)}
+                disabled={Boolean(editingId)}
+              >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {AUTH_PLATFORMS.map((p) => (
@@ -1508,12 +1639,31 @@ export default function SettingsPage() {
                 </SelectContent>
               </Select>
             </div>
+            {platform === "website" ? (
+              <div className="space-y-1.5">
+                <label className="text-fine font-bold uppercase tracking-widest text-muted-foreground">
+                  Website / App
+                </label>
+                <Input
+                  type="url"
+                  placeholder={DEFAULT_WEBSITE_APP_URL}
+                  value={siteUrl}
+                  onChange={(e) => setSiteUrl(e.target.value)}
+                  autoComplete="url"
+                />
+                <p className="text-caption text-muted-foreground">
+                  Auto-fills to {DEFAULT_WEBSITE_APP_URL.replace(/^https?:\/\//, "")} for Website platform.
+                </p>
+              </div>
+            ) : null}
             <div className="space-y-1.5">
               <label className="text-fine font-bold uppercase tracking-widest text-muted-foreground">Username / email</label>
               <Input autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-fine font-bold uppercase tracking-widest text-muted-foreground">Password</label>
+              <label className="text-fine font-bold uppercase tracking-widest text-muted-foreground">
+                Password{editingId ? " (optional)" : ""}
+              </label>
               <div className="relative">
                 <Input
                   type={showPw ? "text" : "password"}
@@ -1521,6 +1671,7 @@ export default function SettingsPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pr-10"
+                  placeholder={editingId ? "Leave blank to keep current" : undefined}
                 />
                 <button
                   type="button"
@@ -1535,9 +1686,18 @@ export default function SettingsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setShowAdd(false); resetAdd(); }} disabled={saving}>Cancel</Button>
-            <Button onClick={handleAdd} disabled={saving || !username.trim() || !password} className="gap-1.5">
+            <Button
+              onClick={handleAdd}
+              disabled={
+                saving ||
+                !username.trim() ||
+                (!editingId && !password) ||
+                (platform === "website" && !siteUrl.trim())
+              }
+              className="gap-1.5"
+            >
               {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              Add
+              {editingId ? "Save" : "Add"}
             </Button>
           </DialogFooter>
         </DialogContent>

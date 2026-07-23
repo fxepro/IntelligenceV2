@@ -28,6 +28,7 @@ PLATFORM_DOMAINS = [
     "auctions",
     "torrents",
     "trademarks",
+    "domain_names",
     "patents",
     "songs",
     "music",

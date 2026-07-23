@@ -102,7 +102,7 @@ def row_to_seed(row: dict) -> dict | None:
         "tags": build_secondary_tags(row.get("Secondary Domains") or ""),
         "platform": platform,
         "source_type": source_type,
-        "status": "paused",
+        "status": "active",
         "autorun": False,
         "auto_transcribe": False,
     }

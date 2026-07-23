@@ -27,6 +27,8 @@ const DOMAIN_ICONS: Record<DomainKey, IconName> = {
   auctions: "gavel",
   torrents: "download",
   trademarks: "landmark",
+  domain_names: "globe",
+  library: "library",
   patents: "library",
   songs: "music",
   music: "music",

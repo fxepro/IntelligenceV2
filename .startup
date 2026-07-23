@@ -49,7 +49,7 @@ cd C:\AIProjects\intelligence\v2
 .\.venv\Scripts\Activate.ps1
 cd workers
 $Host.UI.RawUI.WindowTitle = "MI Celery Beat"
-Write-Host "`n=== MI Celery Beat ===`n" -ForegroundColor Yellow
+Write-Host "`n=== MI Celery Beat ===`n" -Foregrouncd dColor Yellow
 $env:PYTHONPATH = "$PWD;$PWD\..\api"
 python -m celery -A celery_app.celery_app beat -l info
 

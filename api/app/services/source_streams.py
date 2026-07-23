@@ -60,6 +60,10 @@ def default_streams_for_platform(
     if p == "website":
         url = normalize_stream_url(source_url)
         return [(SourceType.sitemap, bool(url), url)]
+    if p == "government":
+        url = normalize_stream_url(source_url)
+        stream = primary if primary else SourceType.website
+        return [(stream, bool(url), url)]
     if primary:
         url = normalize_stream_url(source_url)
         return [(primary, bool(url), url)]

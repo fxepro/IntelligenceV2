@@ -76,7 +76,7 @@ function TagsEditor({
       <button
         type="button"
         onClick={() => setEditing(true)}
-        className="inline-flex flex-wrap gap-1 max-w-[200px] justify-center text-center hover:opacity-80"
+        className="inline-flex flex-wrap gap-1 max-w-[200px] justify-start text-left hover:opacity-80"
         title="Click to edit tags"
       >
         {tags.length === 0 ? (
@@ -117,7 +117,7 @@ function TagsEditor({
         }
       }}
       placeholder="tag1, tag2"
-      className="h-8 min-w-[140px] text-xs text-center mx-auto"
+      className="h-8 min-w-[140px] text-xs text-left"
     />
   );
 }
@@ -182,7 +182,9 @@ export function SourcesTable({
               <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider text-muted-foreground text-left">
                 Name
               </TableHead>
-              <TableHead className={`${th} w-[160px]`}>Tags</TableHead>
+              <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-left w-[160px]">
+                Tags
+              </TableHead>
               <TableHead className={`${th} w-[56px]`} title="1 = highest, 5 = lowest">
                 Priority
               </TableHead>
@@ -290,13 +292,11 @@ export function SourcesTable({
                     </div>
                   </TableCell>
 
-                  <TableCell className={tdCenterFlex}>
-                    <div className={centerInner}>
-                      <TagsEditor
-                        tags={tags}
-                        onSave={(next) => onTagsChange(source.id, next)}
-                      />
-                    </div>
+                  <TableCell className="px-3 py-3 text-left">
+                    <TagsEditor
+                      tags={tags}
+                      onSave={(next) => onTagsChange(source.id, next)}
+                    />
                   </TableCell>
 
                   <TableCell className={tdCenterFlex}>

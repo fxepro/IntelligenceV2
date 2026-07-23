@@ -138,6 +138,7 @@ export function mapSource(s: any): Source {
     joined_at: s.joined_at,
     description: s.description,
     created_at: s.created_at,
+    connect_readiness: s.connect_readiness ?? null,
   };
 }
 

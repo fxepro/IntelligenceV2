@@ -1,0 +1,9 @@
+﻿metric,value
+trademark_rows,266
+distinct_source_url,266
+duplicate_url_groups,0
+catalog_ids_expected,320
+gap_vs_320,54
+export_rows,266
+,
+note,search_url prefilled from sources.source_url (cleared when access_type is api/bulk/gazette)

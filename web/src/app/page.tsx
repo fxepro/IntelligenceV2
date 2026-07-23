@@ -1,29 +1,78 @@
-
 "use client";
 
 import Link from "next/link";
-import {
-  Zap,
-  Search,
-  Youtube,
-  ShieldCheck,
-  Sparkles,
-  ArrowRight,
-  PlayCircle,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Icon } from "@/lib/icons";
 import { site } from "@/config/site";
 import { marketingNav } from "@/config/navigation";
 import { ctas } from "@/config/ctas";
+import { DOMAINS } from "@/lib/domains";
+
+/** Unsplash — Pinterest-home mix: travel, city, nature, food, culture, space. */
+const COLLAGE = [
+  {
+    src: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=640&q=70",
+    alt: "Open road through desert mountains",
+    className: "row-span-2 rotate-[-2deg]",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=640&q=70",
+    alt: "Mountain peaks above clouds",
+    className: "rotate-[1.5deg]",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=640&q=70",
+    alt: "Prepared meal on a table",
+    className: "rotate-[3deg]",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1481627834876-b7833e8f5040?auto=format&fit=crop&w=640&q=70",
+    alt: "Library shelves of books",
+    className: "row-span-2 rotate-[-1.5deg]",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=640&q=70",
+    alt: "City street at night",
+    className: "rotate-[2deg]",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=640&q=70",
+    alt: "Earth from space",
+    className: "row-span-2 rotate-[-3deg]",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=640&q=70",
+    alt: "Restaurant interior",
+    className: "rotate-[1deg]",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=640&q=70",
+    alt: "Fog over forest hills",
+    className: "rotate-[-2.5deg]",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=640&q=70",
+    alt: "Live music performance",
+    className: "row-span-2 rotate-[2.5deg]",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&w=640&q=70",
+    alt: "Abstract painted canvas",
+    className: "rotate-[-1deg]",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=640&q=70",
+    alt: "City skyline",
+    className: "rotate-[3deg]",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=640&q=70",
+    alt: "Lake and mountains",
+    className: "rotate-[-2deg]",
+  },
+] as const;
 
 export default function LandingPage() {
-  const heroImage = PlaceHolderImages.find((img) => img.id === "landing-hero");
-  const featureImage1 = PlaceHolderImages.find((img) => img.id === "feature-transcribe");
-  const featureImage2 = PlaceHolderImages.find((img) => img.id === "feature-ai");
-
   return (
     <div className="flex flex-col min-h-screen page-main bg-background text-foreground">
       <header className="fixed top-0 w-full z-50 glass border-b border-border/40 px-6 h-16 flex items-center justify-between">
@@ -31,7 +80,9 @@ export default function LandingPage() {
           <div className="p-1.5 bg-primary rounded-lg">
             <Icon name="chart" className="w-5 h-5 text-primary-foreground" />
           </div>
-          <span className="font-display font-bold text-body-lg tracking-tight">{site.shortName}</span>
+          <span className="font-display font-bold text-body-lg tracking-tight">
+            {site.shortName}
+          </span>
         </div>
         <nav className="hidden md:flex items-center gap-8" aria-label="Marketing">
           {marketingNav.map((item) => (
@@ -52,140 +103,84 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1 pt-16">
-        {/* Hero Section */}
-        <section className="relative py-20 lg:py-32 overflow-hidden">
+        {/* Hero — ~2× prior padding */}
+        <section className="relative py-48 lg:py-64 overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/10 blur-[120px] rounded-full -z-10" />
-          <div className="container px-6 mx-auto grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8 animate-in slide-in-from-left duration-700">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
-                <Sparkles className="w-3 h-3" />
-                Intelligence Platform
-              </div>
-              <h1 className="text-5xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
-                Uncover the <span className="text-primary italic">DNA</span> of Viral Content.
-              </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
-                {site.name} automates discovery and ingestion across platforms, extracts high-fidelity
-                transcripts, and turns video into searchable intelligence.
+          <div className="container px-6 mx-auto max-w-4xl space-y-10 animate-in fade-in duration-700">
+            <div className="space-y-6">
+              <p className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight">
+                {site.name}
               </p>
-              <div className="flex flex-wrap gap-4">
-                <Link href="/dashboard">
-                  <Button size="lg" className="rounded-full px-8 h-14 text-base font-bold gap-2">
-                    Enter Dashboard <ArrowRight className="w-5 h-5" />
-                  </Button>
-                </Link>
-                <Button variant="outline" size="lg" className="rounded-full px-8 h-14 text-base font-bold gap-2">
-                  <PlayCircle className="w-5 h-5" /> Watch Demo
+              <p className="text-xl sm:text-2xl text-muted-foreground leading-relaxed max-w-2xl">
+                A worldwide intelligence platform covering all topics.
+              </p>
+            </div>
+            <div>
+              <Link href={ctas.launchDashboard.href}>
+                <Button size="lg" className="rounded-full px-8 h-12 text-base font-bold">
+                  {ctas.launchDashboard.label}
                 </Button>
-              </div>
-              <div className="flex items-center gap-8 pt-4">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-muted flex items-center justify-center text-[10px] font-bold">
-                      OP{i}
-                    </div>
-                  ))}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  <span className="font-bold text-foreground">500+</span> teams analyzing intelligence
-                </div>
-              </div>
-            </div>
-
-            <div className="relative animate-in slide-in-from-right duration-700">
-              <div className="glass rounded-3xl overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-500">
-                <img 
-                  src={heroImage?.imageUrl} 
-                  alt={heroImage?.description} 
-                  data-ai-hint={heroImage?.imageHint}
-                  className="w-full h-auto aspect-[4/3] object-cover" 
-                />
-              </div>
-              <div className="absolute -bottom-6 -left-6 glass p-6 rounded-2xl shadow-xl animate-bounce">
-                <Zap className="w-8 h-8 text-yellow-400 fill-current mb-2" />
-                <div className="text-xs font-bold uppercase text-muted-foreground">Ingestion Speed</div>
-                <div className="text-2xl font-bold">0.42s / video</div>
-              </div>
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section id="features" className="py-24 bg-muted/30">
-          <div className="container px-6 mx-auto">
-            <div className="text-center space-y-4 mb-16">
-              <h2 className="text-3xl font-bold">Comprehensive Toolset</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto italic">Everything you need to gather, process, and analyze video intelligence at scale.</p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              <Card className="border-none shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="pt-8 space-y-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Youtube className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-bold">Bulk YouTube Ingest</h3>
-                  <p className="text-muted-foreground text-sm">Submit channels, playlists, or search terms. We'll handle the scraping and queueing automatically.</p>
-                </CardContent>
-              </Card>
-              <Card className="border-none shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="pt-8 space-y-4">
-                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                    <Search className="w-6 h-6 text-accent-foreground" />
-                  </div>
-                  <h3 className="text-xl font-bold">Full-Text Search</h3>
-                  <p className="text-muted-foreground text-sm">Index every word spoken in thousands of videos. Find exact mentions and patterns in seconds.</p>
-                </CardContent>
-              </Card>
-              <Card className="border-none shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="pt-8 space-y-4">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                    <ShieldCheck className="w-6 h-6 text-emerald-600" />
-                  </div>
-                  <h3 className="text-xl font-bold">Secure Exports</h3>
-                  <p className="text-muted-foreground text-sm">Download processed data as CSV or JSON. Integrate {site.name} into your own local pipelines.</p>
-                </CardContent>
-              </Card>
+        {/* Collage — ~half page+, Pinterest-style masonry */}
+        <section
+          id="features"
+          className="relative min-h-[100vh] py-24 lg:py-32 border-y border-border/40 bg-muted/25 overflow-hidden"
+          aria-label="Topics worldwide"
+        >
+          <div className="container px-4 sm:px-6 mx-auto max-w-6xl">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-[140px] sm:auto-rows-[180px] lg:auto-rows-[200px] gap-4 sm:gap-5">
+              {COLLAGE.map((item) => (
+                <figure
+                  key={item.src}
+                  className={`relative overflow-hidden rounded-2xl shadow-md bg-muted ${item.className}`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.src}
+                    alt={item.alt}
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </figure>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Feature Highlight */}
-        <section className="py-24">
-          <div className="container px-6 mx-auto grid lg:grid-cols-2 gap-20 items-center">
-            <div className="order-2 lg:order-1">
-              <img 
-                src={featureImage1?.imageUrl} 
-                alt={featureImage1?.description}
-                data-ai-hint={featureImage1?.imageHint}
-                className="rounded-3xl shadow-xl w-full h-auto" 
-              />
-            </div>
-            <div className="space-y-6 order-1 lg:order-2">
-              <h2 className="text-4xl font-bold leading-tight">AI-Powered Extraction</h2>
-              <p className="text-lg text-muted-foreground italic">"The most accurate transcription engine I've used for short-form content."</p>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="mt-1 w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                    <div className="w-2 h-2 rounded-full bg-primary" />
-                  </div>
-                  <p className="text-sm">High-fidelity transcription for 20+ languages.</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="mt-1 w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                    <div className="w-2 h-2 rounded-full bg-primary" />
-                  </div>
-                  <p className="text-sm">Automatic key topic and category tagging.</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="mt-1 w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                    <div className="w-2 h-2 rounded-full bg-primary" />
-                  </div>
-                  <p className="text-sm">Context-aware executive summaries.</p>
-                </div>
-              </div>
-              <Button size="lg" variant="secondary" className="rounded-full">Learn More about Gemini Integration</Button>
-            </div>
+        {/* Domains — 2× vertical space */}
+        <section id="domains" className="py-48 lg:py-64">
+          <div className="container px-6 mx-auto max-w-4xl space-y-10">
+            <h2 className="text-fine font-bold uppercase tracking-wider text-muted-foreground">
+              Domains
+            </h2>
+            <ul className="flex flex-wrap gap-x-6 gap-y-4">
+              {DOMAINS.map((d) => (
+                <li key={d.key}>
+                  <span
+                    className={
+                      d.enabled
+                        ? "text-base font-medium text-foreground"
+                        : "text-base text-muted-foreground/55"
+                    }
+                  >
+                    {d.label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section id="how-it-works" className="pb-48 lg:pb-64">
+          <div className="container px-6 mx-auto max-w-4xl">
+            <p className="text-[48px] leading-tight text-muted-foreground max-w-3xl tracking-tight">
+              One platform. Topics worldwide. Sources in, intelligence out.
+            </p>
           </div>
         </section>
       </main>
@@ -194,12 +189,9 @@ export default function LandingPage() {
         <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-2 grayscale opacity-50">
             <Icon name="chart" className="w-5 h-5" />
-            <span className="font-display font-bold text-body-sm tracking-tight">{site.shortName}</span>
-          </div>
-          <div className="flex gap-8 text-body-sm text-muted-foreground">
-            <Link href="#">Privacy Policy</Link>
-            <Link href="#">Terms of Service</Link>
-            <Link href="#">API Docs</Link>
+            <span className="font-display font-bold text-body-sm tracking-tight">
+              {site.shortName}
+            </span>
           </div>
           <p className="text-fine text-muted-foreground uppercase tracking-widest font-bold">
             © {new Date().getFullYear()} {site.shortName}

@@ -7,6 +7,8 @@ export { ContentTypePill } from "./ContentTypePill";
 export { AddSourceDialog } from "./AddSourceDialog";
 export { PlatformFilterPills } from "./PlatformFilterPills";
 export { SourcesTable } from "./SourcesTable";
+export { GovernmentSourcesTable } from "./GovernmentSourcesTable";
+export { TrademarkSourcesTable } from "./TrademarkSourcesTable";
 export { DiscoveryResultsDialog } from "./DiscoveryResultsDialog";
 export { IntelligenceFilters } from "./IntelligenceFilters";
 export type { ReadFilter } from "./IntelligenceFilters";

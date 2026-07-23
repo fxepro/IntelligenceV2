@@ -1,0 +1,267 @@
+﻿catalog_id,country,country_code,jurisdiction,office,search_url,status_lookup_url,filing_url,gazette_url,api_url,api_docs_url,bulk_download_url,access_type,authentication,rate_limit,supports_nice_classes,supports_image_search,update_frequency,status,last_verified,notes
+TMK-0001,,US,national,USPTO Trademark Search,https://tmsearch.uspto.gov,,,,,,,search,,,,,,active,,Official United States federal trademark search portal.
+TMK-0002,,US,national,USPTO TSDR API,,,,,https://developer.uspto.gov/api-catalog/tsdr-data-api,,,rest_api,,,,,,active,,"Programmatic access to USPTO trademark status, prosecution documents, and images."
+TMK-0003,,US,national,USPTO Open Data Portal APIs,,,,,https://data.uspto.gov/apis,,,rest_api,,,,,,active,,USPTO API catalog covering trademark and other intellectual-property datasets.
+TMK-0004,,US,national,USPTO Open Data Bulk Data Search API,,,,,https://data.uspto.gov/apis/bulk-data/search,,,rest_api,,,,,,active,,"API for searching USPTO public bulk-data products, including trademark datasets."
+TMK-0005,,US,national,USPTO Trademark Bulk Data,,,,,,,https://www.uspto.gov/trademarks/apply/check-status-view-documents/trademark-bulk-data,bulk_download,,,,,,active,,"Official USPTO trademark application, registration, assignment, and proceeding bulk datasets."
+TMK-0006,,US,national,USPTO Trademark Official Gazette,,,,https://tmog.uspto.gov,,,,gazette,,,,,,active,,Weekly publication of marks approved for publication and opposition.
+TMK-0007,,US,national,USPTO Trademark Assignment Search,https://assignment.uspto.gov,,,,,,,search,,,,,,active,,Search recorded trademark assignments and ownership transfers.
+TMK-0008,,US,national,USPTO TTABVUE,https://ttabvue.uspto.gov/ttabvue,,,,,,,portal,,,,,,active,,Trademark Trial and Appeal Board proceeding records and filings.
+TMK-0009,,US,national,USPTO Trademark ID Manual,https://idm-tmng.uspto.gov/id-master-list-public.html,,,,,,,portal,,,,,,active,,USPTO acceptable identification of goods and services manual.
+TMK-0010,,US,national,USPTO Nice Classification,https://www.uspto.gov/trademarks/guides-and-manuals/nice-agreement-current-edition-version-general-remarks-class-headings,,,,,,,portal,,,,,,active,,Current Nice Classification guidance and class headings used by USPTO.
+TMK-0011,,WIPO,international,WIPO Global Brand Database,https://branddb.wipo.int,,,,,,,search,,,,,,active,,Search international and participating national trademark collections.
+TMK-0012,,WIPO,international,WIPO Madrid Monitor,https://www3.wipo.int/madrid/monitor,,,,,,,portal,,,,,,active,,Track international trademark applications and registrations under the Madrid System.
+TMK-0013,,WIPO,international,WIPO Madrid System Gazette,,,,https://www.wipo.int/en/web/madrid-system/gazette,,,,gazette,,,,,,active,,Official publication of international trademark registrations and changes.
+TMK-0014,,WIPO,international,WIPO Madrid Goods and Services Manager,https://www.wipo.int/mgs,,,,,,,portal,,,,,,active,,Multilingual classification tool for Madrid System goods and services.
+TMK-0015,,WIPO,international,WIPO Trademark Database Portal,https://www.wipo.int/amc/en/trademark,,,,,,,portal,,,,,,active,,Directory of national and regional online trademark databases.
+TMK-0016,,WIPO,international,WIPO IP Office Directory,https://www.wipo.int/en/web/country-profiles/directory-ip-offices,,,,,,,portal,,,,,,active,,Official directory of national and regional intellectual-property offices.
+TMK-0017,,EU,regional,EUIPO Trademark Search API,,,,,https://dev.euipo.europa.eu/product/trademark-search_100,,,rest_api,,,,,,active,,Official EUIPO REST API for searching EU trademark records.
+TMK-0018,,EU,regional,EUIPO API Portal,,,,,https://dev.euipo.europa.eu,,,rest_api,,,,,,active,,EUIPO developer portal for trademark and intellectual-property APIs.
+TMK-0019,,EU,regional,EUIPO Search IP,https://www.euipo.europa.eu/en/search-ip,,,,,,,search,,,,,,active,,Official EUIPO search entry point for EU trade marks and designs.
+TMK-0020,,EU,regional,TMview,https://www.tmdn.org/tmview,,,,,,,search,,,,,,active,,Multi-office trademark search service operated through the EU Intellectual Property Network.
+TMK-0021,,BX,regional,BOIP Trademarks Register,https://www.boip.int/en/trademarks-register,,,,,,,search,,,,,,active,,Official Benelux trademark register.
+TMK-0022,,OAPI,regional,OAPI Trademark Services,,,,,https://oapi.int/en,,,rest_api,,,,,,active,,Regional intellectual-property office serving member states in Africa.
+TMK-0023,,ARIPO,regional,ARIPO Marks Services,https://www.aripo.org,,,,,,,search,,,,,,active,,Regional intellectual-property organization providing trademark services under the Banjul Protocol.
+TMK-0024,,,regional,GCC Patent Office and Trademark Information,https://www.gccpo.org,,,,,,,search,,,,,,active,,Official Gulf Cooperation Council intellectual-property portal.
+TMK-0025,,GB,national,UK IPO Trademark Search,https://trademarks.ipo.gov.uk/ipo-tmtext,,,,,,,search,,,,,,active,,Official United Kingdom trademark search service.
+TMK-0026,,GB,national,UK Trade Marks Journal,,,,https://www.gov.uk/government/collections/trade-marks-journal,,,,gazette,,,,,,active,,Official weekly journal of UK trademark applications and notices.
+TMK-0027,,CA,national,CIPO Trademark Database,https://ised-isde.canada.ca/cipo/trademark-search,,,,,,,search,,,,,,active,,Official Canadian trademark search database.
+TMK-0028,,CA,national,Canadian Trademarks Journal,,,,https://ised-isde.canada.ca/site/canadian-intellectual-property-office/en/trademarks/trademarks-journal,,,,gazette,,,,,,active,,Official publication of Canadian trademark applications and notices.
+TMK-0029,,AU,national,IP Australia Trade Mark Search,https://search.ipaustralia.gov.au/trademarks/search/quick,,,,,,,search,,,,,,active,,Official Australian trademark search service.
+TMK-0030,,AU,national,Australian Official Journal of Trade Marks,,,,https://pericles.ipaustralia.gov.au/ols/epublish/content/olsTrademarkPDFs.jsp,,,,gazette,,,,,,active,,Official Australian trademark journal publications.
+TMK-0031,,,national,IPONZ Trade Mark Search,https://app.iponz.govt.nz/app/Extra/IP/TM/Qbe.aspx?sid=638497103860530638,,,,,,,search,,,,,,active,,Official New Zealand trademark search service.
+TMK-0032,,JP,national,J-PlatPat,https://www.j-platpat.inpit.go.jp,,,,,,,search,,,,,,active,,"Official Japanese platform for trademark, patent, and design searches."
+TMK-0033,,KR,national,KIPRIS,https://eng.kipris.or.kr,,,,,,,search,,,,,,active,,Official Korean intellectual-property search service.
+TMK-0034,,CN,national,CNIPA,https://english.cnipa.gov.cn,,,,,,,search,,,,,,active,,Official China National Intellectual Property Administration portal.
+TMK-0035,,IN,national,IP India Public Search,https://tmrsearch.ipindia.gov.in/tmrpublicsearch,,,,,,,search,,,,,,active,,Official Indian public trademark search service.
+TMK-0036,,SG,national,IPOS Digital Hub,https://digitalhub.ipos.gov.sg,,,,,,,search,,,,,,active,,Official Singapore intellectual-property search and transaction portal.
+TMK-0037,,MY,national,MyIPO IP Online,https://iponline2u.myipo.gov.my,,,,,,,search,,,,,,active,,Official Malaysian intellectual-property search and filing portal.
+TMK-0038,,TH,national,DIP Thailand Trademark Search,https://www.ipthailand.go.th/en,,,,,,,search,,,,,,active,,Official Thailand Department of Intellectual Property portal.
+TMK-0039,,ID,national,DGIP Indonesia,https://www.dgip.go.id,,,,,,,search,,,,,,active,,Official Indonesian Directorate General of Intellectual Property portal.
+TMK-0040,,VN,national,IP Viet Nam,https://ipvietnam.gov.vn,,,,,,,search,,,,,,active,,Official Intellectual Property Office of Viet Nam portal.
+TMK-0041,,,national,DIP Cambodia,https://www.cambodiaip.gov.kh,,,,,,,search,,,,,,active,,Official Cambodian intellectual-property information portal.
+TMK-0042,,PH,national,DIP Philippines Trademark Search,https://www.ipophil.gov.ph,,,,,,,search,,,,,,active,,Official Intellectual Property Office of the Philippines portal.
+TMK-0043,,,national,Brunei Intellectual Property Office,https://www.bruipo.gov.bn,,,,,,,search,,,,,,active,,Official Brunei intellectual-property office portal.
+TMK-0044,,DE,national,DPMAregister,https://register.dpma.de/DPMAregister/Uebersicht,,,,,,,search,,,,,,active,,Official German trademark and intellectual-property register.
+TMK-0045,,FR,national,INPI France Data,https://data.inpi.fr,,,,,,,search,,,,,,active,,Official French industrial-property search and data portal.
+TMK-0046,,CH,national,Swissreg,https://www.swissreg.ch,,,,,,,search,,,,,,active,,"Official Swiss trademark, patent, and design register."
+TMK-0047,,,national,Austrian Patent Office SeeIP,https://seeip.patentamt.at,,,,,,,search,,,,,,active,,Official Austrian intellectual-property search portal.
+TMK-0048,,ES,national,OEPM Spain,https://consultas2.oepm.es/LocalizadorWeb,,,,,,,search,,,,,,active,,Official Spanish trademark and industrial-property search service.
+TMK-0049,,IT,national,UIBM Italy,https://uibm.mise.gov.it/index.php/en,,,,,,,search,,,,,,active,,Official Italian Patent and Trademark Office portal.
+TMK-0050,,PT,national,Portugal INPI,https://inpi.justica.gov.pt,,,,,,,search,,,,,,active,,Official Portuguese industrial-property office portal.
+TMK-0051,,,national,Netherlands Enterprise Agency Trademark Information,https://business.gov.nl/regulation/trademark-registration,,,,,,,search,,,,,,active,,Official Netherlands government guidance and access for trademark registration.
+TMK-0052,,,national,Danish Patent and Trademark Office,https://www.dkpto.org,,,,,,,search,,,,,,active,,Official Danish trademark and patent office portal.
+TMK-0053,,SE,national,PRV Sweden,https://www.prv.se/en,,,,,,,search,,,,,,active,,Official Swedish Intellectual Property Office portal.
+TMK-0054,,,national,Norwegian Industrial Property Office,https://www.patentstyret.no/en,,,,,,,search,,,,,,active,,Official Norwegian trademark and patent office portal.
+TMK-0055,,,national,Finnish Patent and Registration Office,https://www.prh.fi/en.html,,,,,,,search,,,,,,active,,Official Finnish trademark and business registration portal.
+TMK-0056,,,national,Icelandic Intellectual Property Office,https://www.hugverk.is/en,,,,,,,search,,,,,,active,,Official Icelandic intellectual-property office portal.
+TMK-0057,,PL,national,Patent Office of Poland,https://uprp.gov.pl/en,,,,,,,search,,,,,,active,,Official Polish Patent Office portal for trademarks and other rights.
+TMK-0058,,CZ,national,Czech Industrial Property Office,https://upv.gov.cz/en,,,,,,,search,,,,,,active,,Official Czech intellectual-property office portal.
+TMK-0059,,SK,national,Industrial Property Office Slovakia,https://www.indprop.gov.sk/?lang=en,,,,,,,search,,,,,,active,,Official Slovak intellectual-property office portal.
+TMK-0060,,,national,Hungarian Intellectual Property Office,https://www.hipo.gov.hu/en,,,,,,,search,,,,,,active,,Official Hungarian intellectual-property office portal.
+TMK-0061,,RO,national,Romanian State Office for Inventions and Trademarks,https://osim.ro/en,,,,,,,search,,,,,,active,,Official Romanian trademark and patent office portal.
+TMK-0062,,,national,Bulgarian Patent Office,https://www.bpo.bg/en,,,,,,,search,,,,,,active,,Official Bulgarian Patent Office portal.
+TMK-0063,,HR,national,Croatian State Intellectual Property Office,https://www.dziv.hr/en,,,,,,,search,,,,,,active,,Official Croatian intellectual-property office portal.
+TMK-0064,,SI,national,Slovenian Intellectual Property Office,https://www.uil-sipo.si,,,,,,,search,,,,,,active,,Official Slovenian intellectual-property office portal.
+TMK-0065,,,national,Irish Patents Office,https://www.ipoi.gov.ie/en,,,,,,,search,,,,,,active,,Official Intellectual Property Office of Ireland portal.
+TMK-0066,,,national,Greek Industrial Property Organisation,https://www.obi.gr/en,,,,,,,search,,,,,,active,,Official Greek industrial-property organization portal.
+TMK-0067,,TR,national,Turkish Patent and Trademark Office,https://www.turkpatent.gov.tr/en,,,,,,,search,,,,,,active,,Official Turkish trademark and patent office portal.
+TMK-0068,,,national,Ukrainian National Office for Intellectual Property and Innovations,https://nipo.gov.ua/en,,,,,,,search,,,,,,active,,Official Ukrainian intellectual-property office portal.
+TMK-0069,,,national,Rospatent,https://rospatent.gov.ru/en,,,,,,,search,,,,,,active,,Official Russian intellectual-property office portal.
+TMK-0070,,GE,national,Sakpatenti Georgia,https://www.sakpatenti.gov.ge/en,,,,,,,search,,,,,,active,,Official National Intellectual Property Center of Georgia portal.
+TMK-0071,,BR,national,INPI Brazil Trademark Search,https://busca.inpi.gov.br/pePI,,,,,,,search,,,,,,active,,Official Brazilian industrial-property search portal.
+TMK-0072,,MX,national,IMPI Mexico MARCANET,https://marcanet.impi.gob.mx/marcanet/vistas/common/datos/bsqDenominacionCompleto.pgi,,,,,,,search,,,,,,active,,Official Mexican trademark search system.
+TMK-0073,,,national,INPI Argentina,https://portaltramites.inpi.gob.ar,,,,,,,search,,,,,,active,,Official Argentine industrial-property search and services portal.
+TMK-0074,,,national,INAPI Chile,,,,,https://www.inapi.cl,,,rest_api,,,,,,active,,Official Chilean industrial-property office portal.
+TMK-0075,,,national,SIC Colombia Trademark Search,https://sipi.sic.gov.co/sipi/Extra/Default.aspx?sid=638497083547792258,,,,,,,search,,,,,,active,,Official Colombian industrial-property search system.
+TMK-0076,,,national,INDECOPI Peru,https://www.indecopi.gob.pe,,,,,,,search,,,,,,active,,Official Peruvian intellectual-property and competition authority portal.
+TMK-0077,,,national,SENADI Ecuador,https://www.derechosintelectuales.gob.ec,,,,,,,search,,,,,,active,,Official Ecuadorian intellectual-property service portal.
+TMK-0078,,,national,DNPI Uruguay,https://www.gub.uy/ministerio-industria-energia-mineria/marcas,,,,,,,search,,,,,,active,,Official Uruguay government trademark services portal.
+TMK-0079,,,national,DINAPI Paraguay,,,,,https://www.dinapi.gov.py,,,rest_api,,,,,,active,,Official Paraguayan intellectual-property office portal.
+TMK-0080,,,national,SENAPI Bolivia,,,,,https://www.senapi.gob.bo,,,rest_api,,,,,,active,,Official Bolivian intellectual-property office portal.
+TMK-0081,,,national,CNR El Salvador Intellectual Property Registry,https://www.cnr.gob.sv,,,,,,,search,,,,,,active,,Official El Salvador registration authority for intellectual property.
+TMK-0082,,,national,RPI Guatemala,https://rpi.gob.gt,,,,,,,search,,,,,,active,,Official Guatemalan Intellectual Property Registry portal.
+TMK-0083,,,national,RN Costa Rica Industrial Property Registry,https://www.rnpdigital.com,,,,,,,search,,,,,,active,,Official Costa Rican registry portal covering industrial property.
+TMK-0084,,,national,DIGERPI Panama,https://mici.gob.pa/digerpi,,,,,,,search,,,,,,active,,Official Panamanian industrial-property directorate portal.
+TMK-0085,,,national,ONAPI Dominican Republic,,,,,https://www.onapi.gov.do,,,rest_api,,,,,,active,,Official Dominican Republic industrial-property office portal.
+TMK-0086,,,national,Jamaica Intellectual Property Office,https://www.jipo.gov.jm,,,,,,,search,,,,,,active,,Official Jamaican intellectual-property office portal.
+TMK-0087,,CA,national,CIPO Trinidad and Tobago,https://www.cipo.gov.tt,,,,,,,search,,,,,,active,,Official Trinidad and Tobago intellectual-property office portal.
+TMK-0088,,ZA,national,CIPC South Africa,https://www.cipc.co.za,,,,,,,search,,,,,,active,,Official South African company and intellectual-property registration portal.
+TMK-0089,,KE,national,Kenya Industrial Property Institute,https://www.kipi.go.ke,,,,,,,search,,,,,,active,,Official Kenyan industrial-property office portal.
+TMK-0090,,NG,national,Nigeria Trademarks Registry,https://www.iponigeria.com,,,,,,,search,,,,,,active,,Official Nigerian industrial-property registration portal.
+TMK-0091,,GH,national,Ghana Registrar-General Intellectual Property,https://rgd.gov.gh,,,,,,,search,,,,,,active,,Official Ghanaian registry portal covering trademarks and businesses.
+TMK-0092,,EG,national,Egyptian Trademarks and Industrial Designs Office,https://www.itda.gov.eg,,,,,,,search,,,,,,active,,Official Egyptian trademark and industrial-design authority portal.
+TMK-0093,,,national,Moroccan Office of Industrial and Commercial Property,https://www.ompic.ma/en,,,,,,,search,,,,,,active,,Official Moroccan industrial and commercial property office portal.
+TMK-0094,,TN,national,Tunisian National Institute for Standardization and Industrial Property,https://www.innorpi.tn,,,,,,,search,,,,,,active,,Official Tunisian industrial-property office portal.
+TMK-0095,,IL,national,Israel Patent Office Trademarks,https://www.gov.il/en/departments/topics/trademarks/govil-landing-page,,,,,,,search,,,,,,active,,Official Israeli government trademark services portal.
+TMK-0096,,SA,national,Saudi Authority for Intellectual Property,https://www.saip.gov.sa/en,,,,,,,search,,,,,,active,,Official Saudi intellectual-property authority portal.
+TMK-0097,,AE,national,UAE Ministry of Economy Trademarks,https://www.moec.gov.ae/en/trademarks,,,,,,,search,,,,,,active,,Official United Arab Emirates trademark services portal.
+TMK-0098,,QA,national,Qatar Ministry of Commerce and Industry IP Rights,https://www.moci.gov.qa/en,,,,,,,search,,,,,,active,,Official Qatar government portal for intellectual-property services.
+TMK-0099,,BH,national,Bahrain Ministry of Industry and Commerce IP,https://www.moic.gov.bh/en,,,,,,,search,,,,,,active,,Official Bahrain government industrial-property portal.
+TMK-0100,,,national,Oman Ministry of Commerce Trademark Services,https://www.tejarah.gov.om,,,,,,,search,,,,,,active,,Official Oman government commerce and trademark services portal.
+TMK-0101,,US-ST,state,Alabama State Trademark Registry,https://www.sos.alabama.gov,,,,,,,search,,,,,,active,,Official Alabama state trademark registration and business filing authority.
+TMK-0102,,US-ST,state,Alaska State Trademark Registry,https://www.commerce.alaska.gov,,,,,,,search,,,,,,active,,Official Alaska state trademark registration and business filing authority.
+TMK-0103,,US-ST,state,Arizona State Trademark Registry,https://azsos.gov,,,,,,,search,,,,,,active,,Official Arizona state trademark registration and business filing authority.
+TMK-0104,,US-ST,state,Arkansas State Trademark Registry,https://www.sos.arkansas.gov,,,,,,,search,,,,,,active,,Official Arkansas state trademark registration and business filing authority.
+TMK-0105,,US-ST,state,California State Trademark Registry,https://bizfileonline.sos.ca.gov,,,,,,,search,,,,,,active,,Official California state trademark registration and business filing authority.
+TMK-0106,,US-ST,state,Colorado State Trademark Registry,https://www.sos.state.co.us,,,,,,,search,,,,,,active,,Official Colorado state trademark registration and business filing authority.
+TMK-0107,,US-ST,state,Connecticut State Trademark Registry,https://portal.ct.gov/sots,,,,,,,search,,,,,,active,,Official Connecticut state trademark registration and business filing authority.
+TMK-0108,,US-ST,state,Delaware State Trademark Registry,https://corp.delaware.gov,,,,,,,search,,,,,,active,,Official Delaware state trademark registration and business filing authority.
+TMK-0109,,US-ST,state,Florida State Trademark Registry,https://dos.fl.gov,,,,,,,search,,,,,,active,,Official Florida state trademark registration and business filing authority.
+TMK-0110,,GE,state,Georgia State Trademark Registry,https://sos.ga.gov,,,,,,,search,,,,,,active,,Official Georgia state trademark registration and business filing authority.
+TMK-0111,,US-ST,state,Hawaii State Trademark Registry,https://cca.hawaii.gov/breg,,,,,,,search,,,,,,active,,Official Hawaii state trademark registration and business filing authority.
+TMK-0112,,US-ST,state,Idaho State Trademark Registry,https://sos.idaho.gov,,,,,,,search,,,,,,active,,Official Idaho state trademark registration and business filing authority.
+TMK-0113,,US-ST,state,Illinois State Trademark Registry,https://www.ilsos.gov,,,,,,,search,,,,,,active,,Official Illinois state trademark registration and business filing authority.
+TMK-0114,,IN,state,Indiana State Trademark Registry,https://www.in.gov/sos,,,,,,,search,,,,,,active,,Official Indiana state trademark registration and business filing authority.
+TMK-0115,,US-ST,state,Iowa State Trademark Registry,https://sos.iowa.gov,,,,,,,search,,,,,,active,,Official Iowa state trademark registration and business filing authority.
+TMK-0116,,US-ST,state,Kansas State Trademark Registry,https://sos.ks.gov,,,,,,,search,,,,,,active,,Official Kansas state trademark registration and business filing authority.
+TMK-0117,,US-ST,state,Kentucky State Trademark Registry,https://www.sos.ky.gov,,,,,,,search,,,,,,active,,Official Kentucky state trademark registration and business filing authority.
+TMK-0118,,US-ST,state,Louisiana State Trademark Registry,https://www.sos.la.gov,,,,,,,search,,,,,,active,,Official Louisiana state trademark registration and business filing authority.
+TMK-0119,,US-ST,state,Maine State Trademark Registry,https://www.maine.gov/sos,,,,,,,search,,,,,,active,,Official Maine state trademark registration and business filing authority.
+TMK-0120,,US-ST,state,Maryland State Trademark Registry,https://egov.maryland.gov/businessexpress,,,,,,,search,,,,,,active,,Official Maryland state trademark registration and business filing authority.
+TMK-0121,,US-ST,state,Massachusetts State Trademark Registry,https://www.sec.state.ma.us,,,,,,,search,,,,,,active,,Official Massachusetts state trademark registration and business filing authority.
+TMK-0122,,US-ST,state,Michigan State Trademark Registry,https://www.michigan.gov/lara,,,,,,,search,,,,,,active,,Official Michigan state trademark registration and business filing authority.
+TMK-0123,,US-ST,state,Minnesota State Trademark Registry,https://www.sos.state.mn.us,,,,,,,search,,,,,,active,,Official Minnesota state trademark registration and business filing authority.
+TMK-0124,,US-ST,state,Mississippi State Trademark Registry,https://www.sos.ms.gov,,,,,,,search,,,,,,active,,Official Mississippi state trademark registration and business filing authority.
+TMK-0125,,US-ST,state,Missouri State Trademark Registry,https://www.sos.mo.gov,,,,,,,search,,,,,,active,,Official Missouri state trademark registration and business filing authority.
+TMK-0126,,US-ST,state,Montana State Trademark Registry,https://biz.sosmt.gov,,,,,,,search,,,,,,active,,Official Montana state trademark registration and business filing authority.
+TMK-0127,,US-ST,state,Nebraska State Trademark Registry,https://sos.nebraska.gov,,,,,,,search,,,,,,active,,Official Nebraska state trademark registration and business filing authority.
+TMK-0128,,US-ST,state,Nevada State Trademark Registry,https://www.nvsos.gov,,,,,,,search,,,,,,active,,Official Nevada state trademark registration and business filing authority.
+TMK-0129,,US-ST,state,New Hampshire State Trademark Registry,https://www.sos.nh.gov,,,,,,,search,,,,,,active,,Official New Hampshire state trademark registration and business filing authority.
+TMK-0130,,US-ST,state,New Jersey State Trademark Registry,https://www.njportal.com/DOR/BusinessFormation,,,,,,,search,,,,,,active,,Official New Jersey state trademark registration and business filing authority.
+TMK-0131,,MX,state,New Mexico State Trademark Registry,https://www.sos.nm.gov,,,,,,,search,,,,,,active,,Official New Mexico state trademark registration and business filing authority.
+TMK-0132,,US-ST,state,New York State Trademark Registry,https://dos.ny.gov,,,,,,,search,,,,,,active,,Official New York state trademark registration and business filing authority.
+TMK-0133,,US-ST,state,North Carolina State Trademark Registry,https://www.sosnc.gov,,,,,,,search,,,,,,active,,Official North Carolina state trademark registration and business filing authority.
+TMK-0134,,US-ST,state,North Dakota State Trademark Registry,https://firststop.sos.nd.gov,,,,,,,search,,,,,,active,,Official North Dakota state trademark registration and business filing authority.
+TMK-0135,,US-ST,state,Ohio State Trademark Registry,https://www.ohiosos.gov,,,,,,,search,,,,,,active,,Official Ohio state trademark registration and business filing authority.
+TMK-0136,,US-ST,state,Oklahoma State Trademark Registry,https://www.sos.ok.gov,,,,,,,search,,,,,,active,,Official Oklahoma state trademark registration and business filing authority.
+TMK-0137,,US-ST,state,Oregon State Trademark Registry,https://sos.oregon.gov,,,,,,,search,,,,,,active,,Official Oregon state trademark registration and business filing authority.
+TMK-0138,,US-ST,state,Pennsylvania State Trademark Registry,https://www.dos.pa.gov,,,,,,,search,,,,,,active,,Official Pennsylvania state trademark registration and business filing authority.
+TMK-0139,,US-ST,state,Rhode Island State Trademark Registry,https://business.sos.ri.gov,,,,,,,search,,,,,,active,,Official Rhode Island state trademark registration and business filing authority.
+TMK-0140,,US-ST,state,South Carolina State Trademark Registry,https://sos.sc.gov,,,,,,,search,,,,,,active,,Official South Carolina state trademark registration and business filing authority.
+TMK-0141,,US-ST,state,South Dakota State Trademark Registry,https://sdsos.gov,,,,,,,search,,,,,,active,,Official South Dakota state trademark registration and business filing authority.
+TMK-0142,,US-ST,state,Tennessee State Trademark Registry,https://sos.tn.gov,,,,,,,search,,,,,,active,,Official Tennessee state trademark registration and business filing authority.
+TMK-0143,,US-ST,state,Texas State Trademark Registry,https://www.sos.state.tx.us,,,,,,,search,,,,,,active,,Official Texas state trademark registration and business filing authority.
+TMK-0144,,US-ST,state,Utah State Trademark Registry,https://corporations.utah.gov,,,,,,,search,,,,,,active,,Official Utah state trademark registration and business filing authority.
+TMK-0145,,US-ST,state,Vermont State Trademark Registry,https://sos.vermont.gov,,,,,,,search,,,,,,active,,Official Vermont state trademark registration and business filing authority.
+TMK-0146,,US-ST,state,Virginia State Trademark Registry,https://www.scc.virginia.gov,,,,,,,search,,,,,,active,,Official Virginia state trademark registration and business filing authority.
+TMK-0147,,US-ST,state,Washington State Trademark Registry,https://www.sos.wa.gov,,,,,,,search,,,,,,active,,Official Washington state trademark registration and business filing authority.
+TMK-0148,,US-ST,state,West Virginia State Trademark Registry,https://sos.wv.gov,,,,,,,search,,,,,,active,,Official West Virginia state trademark registration and business filing authority.
+TMK-0149,,US-ST,state,Wisconsin State Trademark Registry,https://www.wdfi.org,,,,,,,search,,,,,,active,,Official Wisconsin state trademark registration and business filing authority.
+TMK-0150,,US-ST,state,Wyoming State Trademark Registry,https://sos.wyo.gov,,,,,,,search,,,,,,active,,Official Wyoming state trademark registration and business filing authority.
+TMK-0151,,US-ST,state,District of Columbia Trademark Registry,https://corponline.dcra.dc.gov,,,,,,,search,,,,,,active,,Official territorial trademark/business registry.
+TMK-0152,,US-ST,state,Puerto Rico Trademark Registry,https://prcorpfiling.f1hst.com,,,,,,,search,,,,,,active,,Official territorial trademark/business registry.
+TMK-0153,,US-ST,state,Guam Department of Revenue & Taxation,https://www.guamtax.com,,,,,,,search,,,,,,active,,Official territorial trademark/business registry.
+TMK-0154,,US-ST,state,U.S. Virgin Islands Trademark Registration,https://ltg.gov.vi,,,,,,,search,,,,,,active,,Official territorial trademark/business registry.
+TMK-0155,,US-ST,state,Northern Mariana Islands Registrar,https://commerce.gov.mp,,,,,,,search,,,,,,active,,Official territorial trademark/business registry.
+TMK-0156,,US-ST,state,American Samoa Commerce,https://www.americansamoa.gov,,,,,,,search,,,,,,active,,Official territorial trademark/business registry.
+TMK-0157,,WIPO,international,WIPO Global Brand Database,https://www.wipo.int/en/web/global-brand-database,,,,,,,portal,,,,,,active,,"Searches international and participating national or regional trademark collections, including text and image-based brand records."
+TMK-0158,,WIPO,international,WIPO Madrid Monitor,https://www3.wipo.int/madrid/monitor/en,,,,,,,search,,,,,,active,,Official search and status-monitoring service for international trademark registrations under the Madrid System.
+TMK-0159,,EU,regional,TMview,https://www.tmdn.org/tmview/welcome,,,,,,,portal,,,,,,active,,"Free multi-office trademark search covering participating national, regional, and international intellectual property offices."
+TMK-0160,,EU,regional,EUIPO eSearch Plus,https://euipo.europa.eu/eSearch,,,,,,,search,,,,,,active,,"Official European Union Intellectual Property Office database for EU trademarks, designs, owners, representatives, and bulletins."
+TMK-0161,,GB,national,UK IPO Trade Mark Search,https://www.gov.uk/search-for-trademark,,,,,,,search,,,,,,active,,"Official United Kingdom search service for registered and pending trade marks by number, owner, keyword, phrase, or image."
+TMK-0162,,GB,national,UK Trade Marks Journal,,,,https://www.gov.uk/check-trade-marks-journal,,,,gazette,,,,,,active,,"Official weekly journal of UK trade mark applications, amendments, and opposition-relevant publications."
+TMK-0163,,CA,national,Canadian Trademarks Database,https://ised-isde.canada.ca/cipo/trademark-search/srch,,,,,,,search,,,,,,active,,Official Canadian Intellectual Property Office database for Canadian trademarks and application records.
+TMK-0164,,CA,national,Canadian Trademarks Journal,,,,https://ised-isde.canada.ca/site/canadian-intellectual-property-office/en/trademarks/canadian-trademarks-journal,,,,gazette,,,,,,active,,"Official CIPO journal publishing advertised trademark applications, registrations, renewals, and related notices."
+TMK-0166,,,national,IPONZ Trade Mark Search,https://www.iponz.govt.nz/get-ip/trade-marks/search,,,,,,,search,,,,,,active,,"Official New Zealand tools for checking and searching trade mark cases, owners, images, and status information."
+TMK-0167,,JP,national,J-PlatPat Trademark Search,https://www.j-platpat.inpit.go.jp/?uri=/s0000/en,,,,,,,search,,,,,,active,,"Official Japanese platform for searching trademark applications, registrations, classifications, and legal status."
+TMK-0169,,CN,national,CNIPA Trademark Search,https://wcjs.sbj.cnipa.gov.cn,,,,,,,search,,,,,,active,,Official China National Intellectual Property Administration portal for Chinese trademark searches and status checks.
+TMK-0172,,MY,national,MyIPO Trademark Search,https://www.myipo.gov.my/search-trademark,,,,,,,search,,,,,,active,,Official Malaysian Intellectual Property Corporation access point for online trademark search services.
+TMK-0173,,ID,national,Indonesia PDKI,https://pdki-indonesia.dgip.go.id,,,,,,,search,,,,,,active,,"Official Indonesian intellectual property database for trademarks, patents, designs, copyrights, and geographical indications."
+TMK-0176,,VN,national,Vietnam IP Library,https://iplib.noip.gov.vn/WebUI/WSearch.php,,,,,,,search,,,,,,active,,Official Vietnam intellectual property library for searching trademark and other industrial property records.
+TMK-0179,,MX,national,Mexico MARCia Trademark Search,https://marcia.impi.gob.mx/marcas/search/quick,,,,,,,search,,,,,,active,,Official Mexican Institute of Industrial Property platform for searching trademark applications and registrations.
+TMK-0180,,,national,Argentina INPI Trademark Search,https://portaltramites.inpi.gob.ar/MarcasConsultas/BusquedaParametros,,,,,,,search,,,,,,active,,Official Argentine National Institute of Industrial Property search for trademark applications and registrations.
+TMK-0181,,,national,Chile INAPI Trademark Search,https://ion.inapi.cl/Marca/BuscarMarca.aspx,,,,,,,search,,,,,,active,,Official Chilean National Institute of Industrial Property search for trademark records and status.
+TMK-0182,,,national,Colombia SIC SIPI,https://sipi.sic.gov.co/sipi/Extra/Default.aspx?sid=638,,,,,,,search,,,,,,active,,Official Colombian Superintendence of Industry and Commerce industrial property search and filing platform.
+TMK-0183,,,national,Peru INDECOPI Trademark Search,https://servicio.indecopi.gob.pe/portalSAE,,,,,,,search,,,,,,active,,"Official Peruvian INDECOPI portal for searching trademark files, signs, owners, and administrative records."
+TMK-0184,,DE,national,DPMAregister Trademarks,https://register.dpma.de/DPMAregister/marke/einsteiger,,,,,,,search,,,,,,active,,Official German Patent and Trade Mark Office register for German trademarks and related legal-status information.
+TMK-0185,,FR,national,France DATA INPI Trademarks,https://data.inpi.fr/marques,,,,,,,search,,,,,,active,,"Official French INPI search platform for French, EU, and international trademark information relevant to France."
+TMK-0188,,IT,national,Italy UIBM Trademark Database,https://www.uibm.gov.it/bancadati,,,,,,,search,,,,,,active,,"Official Italian Patent and Trademark Office database for trademark applications, registrations, owners, and status."
+TMK-0189,,PT,national,Portugal INPI Trademark Search,https://servicosonline.inpi.justica.gov.pt/pesquisas/main/marcas.jsp,,,,,,,search,,,,,,active,,Official Portuguese Institute of Industrial Property search for national trademark applications and registrations.
+TMK-0190,,IE,national,Ireland IPOI Trade Mark Search,https://eregister.ipoi.gov.ie/query/TMQuery.aspx,,,,,,,search,,,,,,active,,Official Intellectual Property Office of Ireland eRegister search for Irish trade marks and application status.
+TMK-0191,,CH,national,Swissreg Trademark Database,https://www.swissreg.ch/srclient/faces/jsp/start.jsp,,,,,,,search,,,,,,active,,Official Swiss Federal Institute of Intellectual Property database for Swiss trademarks and protected signs.
+TMK-0192,,TR,national,TÜRKPATENT Trademark Research,https://www.turkpatent.gov.tr/arastirma-yap?form=trademark,,,,,,,search,,,,,,active,,Official Turkish Patent and Trademark Office research portal for trademark applications and registrations.
+TMK-0193,,RU,national,FIPS Open Trademark Registers,https://new.fips.ru/registers-web,,,,,,,search,,,,,,active,,Official Russian Federal Institute of Industrial Property open registers for trademarks and service marks.
+TMK-0194,,UA,national,Ukraine Special Information System,https://sis.nipo.gov.ua/en/search/simple,,,,,,,search,,,,,,active,,Official Ukrainian IP Office search system for trademarks and other intellectual property records.
+TMK-0195,,IL,national,Israel Trademark Database,https://trademarks.justice.gov.il/TradeMarksWebSiteUI/TrademarksSearch/TrademarksSearch.aspx,,,,,,,search,,,,,,active,,"Official Israel Patent Office search for trademark applications, registrations, owners, and legal status."
+TMK-0196,,SA,national,Saudi Authority for Intellectual Property Search,https://ipsearch.saip.gov.sa,,,,,,,search,,,,,,active,,Official Saudi Authority for Intellectual Property search platform for trademarks and other IP rights.
+TMK-0197,,AE,national,UAE Trademark Inquiry,https://services.economy.ae/m/Pages/CategoryServices.aspx?CategoryID=3,,,,,,,search,,,,,,active,,"Official UAE Ministry of Economy services for trademark inquiry, registration, renewal, and related records."
+TMK-0198,,ARIPO,regional,ARIPO Marks Search,https://eservice.aripo.org/pdl/pah/advancedSearchScreen.do,,,,,,,search,,,,,,active,,Official African Regional Intellectual Property Organization search covering Banjul Protocol trademark records.
+TMK-0199,,OAPI,regional,OAPI Trademark Database,,,,,https://e-services.oapi.int,,,rest_api,,,,,,active,,Official African Intellectual Property Organization e-services portal for regional trademark searches and filings.
+TMK-0200,,ZA,national,South Africa CIPC IP Online,https://iponline.cipc.co.za,,,,,,,search,,,,,,active,,Official Companies and Intellectual Property Commission portal for South African trademark searches and IP services.
+TMK-0201,,EU,regional,EUIPO eSearch Plus,https://euipo.europa.eu/ohimportal/en/search-availability,,,,,,,search,,,,,,active,,Official EU trademark search.
+TMK-0207,,,national,Italian UIBM,https://uibm.mimit.gov.it,,,,,,,search,,,,,,active,,Italy trademark office.
+TMK-0209,,,national,Irish IPOI,https://www.ipoi.gov.ie,,,,,,,search,,,,,,active,,Ireland trademark office.
+TMK-0216,,,national,Slovak IPO,https://www.indprop.gov.sk/en,,,,,,,search,,,,,,active,,Slovakia trademark office.
+TMK-0220,,SI,national,Slovenian IPO,https://www.uil-sipo.si/en,,,,,,,search,,,,,,active,,Slovenia trademark office.
+TMK-0223,,BX,regional,Belgium BOIP,https://www.boip.int/en,,,,,,,search,,,,,,active,,Benelux IP office.
+TMK-0228,,IL,national,Israel Trademark Department,https://www.gov.il/en/departments/topics/trademarks,,,,,,,search,,,,,,active,,Israel trademark services.
+TMK-0231,,SG,national,IPOS Digital Hub Basic Search,https://digitalhub.ipos.gov.sg/FAMN/eservice/IP4SG/MN_BasicSearch,,,,,,,search,,,,,,active,,"Official Singapore intellectual-property search by number, owner, representative, or mark description."
+TMK-0232,,SG,national,IPOS Trade Mark Similar Mark Search,https://digitalhub.ipos.gov.sg/FAMN/eservice/IP4SG/MN_TmSimilarMarkSearch,,,,,,,search,,,,,,active,,Official Singapore search for visually and textually similar trade marks.
+TMK-0233,,SG,national,IPOS Trade Mark Goods and Services Search,https://digitalhub.ipos.gov.sg/FAMN/eservice/IP4SG/MN_TmIcgsSearch,,,,,,,search,,,,,,active,,Official Singapore goods and services classification search.
+TMK-0234,,SG,national,IPOS Trade Marks Journal Search,,,,https://digitalhub.ipos.gov.sg/FAMN/eservice/IP4SG/MN_JournalSearch,,,,gazette,,,,,,active,,Search Singapore trade mark journal publications.
+TMK-0235,,SG,national,IPOS Trade Marks Journals,,,,https://digitalhub.ipos.gov.sg/FAMN/eservice/IP4SG/MN_Journals?journalType=Trade+Marks,,,,gazette,,,,,,active,,Official Singapore trade mark journal archive.
+TMK-0236,,PH,national,IPOPHL Trademark Search,https://onlineservices.ipophil.gov.ph,,,,,,,search,,,,,,active,,Official Philippines searchable trademark database.
+TMK-0237,,PH,national,IPOPHL Trademark Online Tools,https://www.ipophil.gov.ph/trademark/trademark-online-tools,,,,,,,portal,,,,,,active,,Official Philippines collection of trademark search and monitoring tools.
+TMK-0238,,PH,national,IPOPHL Trademark Services,https://www.ipophil.gov.ph/trademark,,,,,,,portal,,,,,,active,,Official Philippines trademark registration and lifecycle information.
+TMK-0240,,TH,national,Thailand Trademark Search,https://search.ipthailand.go.th,,,,,,,search,,,,,,active,,Official Thailand trademark search system.
+TMK-0242,,ID,national,Indonesia Trademark Services,https://www.dgip.go.id/menu-utama/merek/pengenalan,,,,,,,portal,,,,,,active,,Official Indonesian trademark information and services.
+TMK-0243,,ID,national,Indonesia New Trademark Registration Procedure,https://www.dgip.go.id/menu-utama/merek/syarat-prosedur,,,,,,,portal,,,,,,active,,Official Indonesian requirements and procedure for new trademark applications.
+TMK-0244,,VN,national,Intellectual Property Office of Viet Nam Trademarks,https://www.ipvietnam.gov.vn/en_US/web/english/trademarks,,,,,,,search,,,,,,active,,Official Viet Nam trademark information portal.
+TMK-0245,,VN,national,IP Viet Nam Trademark Examination Procedure,https://www.ipvietnam.gov.vn/web/english/trademark-examination-procedure,,,,,,,portal,,,,,,active,,Official Viet Nam trademark examination procedures.
+TMK-0246,,VN,national,IP Viet Nam Trademark Search Request,https://www.ipvietnam.gov.vn/web/english/statistic/-/asset_publisher/lkBHulAdnfEF/content/request-for-trademark-search,,,,,,,search,,,,,,active,,Official Viet Nam trademark search request information.
+TMK-0247,,VN,national,IP Viet Nam Well-Known Trademarks,https://ipvietnam.gov.vn/web/english/well-known-trademarks,,,,,,,portal,,,,,,active,,Official Viet Nam information concerning well-known trademark protection.
+TMK-0248,,ASEAN,regional,ASEAN IP Portal,https://www.aseanip.org,,,,,,,search,,,,,,active,,"Regional ASEAN portal for trademark, patent, and design information."
+TMK-0249,,ASEAN,regional,ASEAN IP Office Directory,https://www.aseanip.org/resources/asean-ip-offices-details,,,,,,,portal,,,,,,active,,Directory of official intellectual-property offices across ASEAN member states.
+TMK-0252,,,national,Lao Department of Intellectual Property,https://dip.gov.la,,,,,,,search,,,,,,active,,Official Lao intellectual-property office portal.
+TMK-0253,,,national,Myanmar Intellectual Property Department,https://www.ipd.gov.mm,,,,,,,search,,,,,,active,,Official Myanmar intellectual-property department portal.
+TMK-0254,,MY,national,Intellectual Property Corporation of Malaysia,https://www.myipo.gov.my,,,,,,,search,,,,,,active,,Official Malaysian intellectual-property office portal.
+TMK-0256,,KR,national,Korea KIPRIS Trademark Search,https://eng.kipris.or.kr/enghome/main.jsp,,,,,,,search,,,,,,active,,Official Korean intellectual-property search service including trademarks.
+TMK-0257,,KR,national,Korean Intellectual Property Office,https://www.kipo.go.kr/en,,,,,,,search,,,,,,active,,Official Korean intellectual-property office portal.
+TMK-0259,,JP,national,Japan Patent Office Trademarks,https://www.jpo.go.jp/e/system/trademark/index.html,,,,,,,search,,,,,,active,,Official Japan Patent Office trademark information and procedures.
+TMK-0260,,TW,national,Taiwan TIPO Trademark Search,https://cloud.tipo.gov.tw/S282/S282WV1,,,,,,,search,,,,,,active,,Official Taiwan trademark search system.
+TMK-0262,,CN,national,CNIPA Trademark Online Services,https://sbj.cnipa.gov.cn,,,,,,,portal,,,,,,active,,Official CNIPA trademark filing and services.
+TMK-0264,,HK,national,Hong Kong IPD e-Search,https://esearch.ipd.gov.hk,,,,,,,search,,,,,,active,,Official Hong Kong trademark search.
+TMK-0265,,HK,national,Hong Kong Intellectual Property Department,https://www.ipd.gov.hk,,,,,,,search,,,,,,active,,Official Hong Kong IP office.
+TMK-0266,,,national,Macao Economic and Technological Development Bureau IP,https://www.dsedt.gov.mo,,,,,,,search,,,,,,active,,Official Macao trademark authority.
+TMK-0268,,IN,national,IP India e-Register,https://ipindiaonline.gov.in/eregister/eregister.aspx,,,,,,,portal,,,,,,active,,Official Indian trademark register.
+TMK-0269,,IN,national,IP India Journal,,,,https://search.ipindia.gov.in/IPOJournal/Journal/Trademark,,,,gazette,,,,,,active,,Official Indian trademark journal.
+TMK-0270,,IN,national,IP India,https://ipindia.gov.in,,,,,,,search,,,,,,active,,"Official Controller General of Patents, Designs & Trade Marks."
+TMK-0271,,,national,IPO Pakistan,https://ipo.gov.pk,,,,,,,search,,,,,,active,,Official Pakistan IP Organization.
+TMK-0272,,,national,IPO Pakistan Trademark Search,https://ipo.gov.pk/trademark,,,,,,,search,,,,,,active,,Pakistan trademark services.
+TMK-0273,,,national,DPDT Bangladesh,https://dpdt.gov.bd,,,,,,,search,,,,,,active,,"Bangladesh Department of Patents, Designs and Trademarks."
+TMK-0274,,,national,NIPO Sri Lanka,https://www.nipo.gov.lk,,,,,,,search,,,,,,active,,Sri Lanka National Intellectual Property Office.
+TMK-0275,,,national,Department of Industry Nepal IP,https://doind.gov.np,,,,,,,search,,,,,,active,,Nepal trademark administration.
+TMK-0276,,,national,Bhutan Intellectual Property Division,https://www.moice.gov.bt,,,,,,,search,,,,,,active,,Bhutan IP services.
+TMK-0277,,,national,Maldives Ministry of Economic Development IP,https://trade.gov.mv,,,,,,,search,,,,,,active,,Maldives trademark services.
+TMK-0278,,,national,Kazakhstan National Institute of Intellectual Property,https://kazpatent.kz,,,,,,,search,,,,,,active,,Kazakhstan IP office.
+TMK-0279,,,national,Kyrgyzpatent,https://patent.kg,,,,,,,search,,,,,,active,,Kyrgyz Republic IP office.
+TMK-0280,,,national,Uzbek Intellectual Property Agency,https://ima.uz,,,,,,,search,,,,,,active,,Uzbekistan IP authority.
+TMK-0281,,,national,Tajikistan National Patent Information Center,https://ncpi.tj,,,,,,,search,,,,,,active,,Tajikistan IP office.
+TMK-0282,,,national,Turkmenpatent,https://turkmenpatent.gov.tm,,,,,,,search,,,,,,active,,Turkmenistan IP office.
+TMK-0283,,,national,Azerbaijan Intellectual Property Agency,https://copat.gov.az,,,,,,,search,,,,,,active,,Azerbaijan IP office.
+TMK-0284,,,national,Armenian Intellectual Property Office,https://www.aipa.am,,,,,,,search,,,,,,active,,Armenia IP office.
+TMK-0286,,,national,Mongolian Intellectual Property Office,https://www.ipom.mn,,,,,,,search,,,,,,active,,Mongolia IP office.
+TMK-0287,,TW,national,Taiwan TIPO,https://www.tipo.gov.tw/en,,,,,,,search,,,,,,active,,Taiwan Intellectual Property Office.
+TMK-0288,,TW,national,Taiwan TIPO Trademark Search,https://twtmsearch.tipo.gov.tw,,,,,,,search,,,,,,active,,Taiwan trademark database.
+TMK-0289,,EU,regional,ASEAN TMview,https://www.asean-tmview.org,,,,,,,search,,,,,,active,,ASEAN trademark search portal.
+TMK-0292,,ARIPO,regional,ARIPO e-Services,https://eservice.aripo.org,,,,,,,portal,,,,,,active,,Official ARIPO electronic filing and services.
+TMK-0298,,EG,national,Egypt Intellectual Property,https://www.itida.gov.eg,,,,,,,search,,,,,,active,,Official Egyptian IP services portal.
+TMK-0301,,,national,Algeria INAPI,,,,,https://www.inapi.org,,,rest_api,,,,,,active,,Official Algerian IP office.
+TMK-0302,,,national,Ethiopian Intellectual Property Authority,https://www.eipa.gov.et,,,,,,,search,,,,,,active,,Official Ethiopian IP office.
+TMK-0303,,,national,Rwanda Development Board IP,https://rdb.rw,,,,,,,search,,,,,,active,,Official Rwanda IP services.
+TMK-0304,,,national,Uganda Registration Services Bureau,https://ursb.go.ug,,,,,,,search,,,,,,active,,Official Uganda trademark registry.
+TMK-0305,,,national,Tanzania BRELA,https://www.brela.go.tz,,,,,,,search,,,,,,active,,Official Tanzania business and trademark registry.
+TMK-0306,,,national,Zambia PACRA,https://www.pacra.org.zm,,,,,,,search,,,,,,active,,Official Zambia registry.
+TMK-0307,,,national,Zimbabwe Companies and IP Office,https://www.cipa.co.zw,,,,,,,search,,,,,,active,,Official Zimbabwe IP office.
+TMK-0308,,,national,Botswana CIPA,https://www.cipa.co.bw,,,,,,,search,,,,,,active,,Official Botswana IP office.
+TMK-0309,,,national,Namibia BIPA,https://www.bipa.na,,,,,,,search,,,,,,active,,Official Namibia IP office.
+TMK-0310,,,national,Mauritius Industrial Property Office,https://foreign.govmu.org,,,,,,,search,,,,,,active,,Official Mauritius industrial property services.
+TMK-0311,,,national,Seychelles IP Office,https://www.egov.sc,,,,,,,search,,,,,,active,,Official Seychelles IP services.
+TMK-0312,,,national,Mozambique IPI,https://www.ipi.gov.mz,,,,,,,search,,,,,,active,,Official Mozambique IP institute.
+TMK-0313,,,national,Angola IAPI,,,,,https://www.iapi.ao,,,rest_api,,,,,,active,,Official Angola industrial property institute.
+TMK-0314,,,national,Malawi Registrar General,https://www.registrargeneral.gov.mw,,,,,,,search,,,,,,active,,Official Malawi trademark services.
+TMK-0315,,,national,Lesotho Registrar General,https://www.gov.ls,,,,,,,search,,,,,,active,,Official Lesotho registry.
+TMK-0316,,,national,Eswatini Registrar General,https://www.gov.sz,,,,,,,search,,,,,,active,,Official Eswatini trademark services.
+TMK-0317,,,national,Madagascar OMAPI,,,,,https://www.omapi.mg,,,rest_api,,,,,,active,,Official Madagascar IP office.
+TMK-0318,,,national,Sudan IP Office,https://moj.gov.sd,,,,,,,search,,,,,,active,,Official Sudan trademark authority.

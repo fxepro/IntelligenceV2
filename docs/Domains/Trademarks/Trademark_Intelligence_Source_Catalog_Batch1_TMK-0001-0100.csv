@@ -1,0 +1,101 @@
+﻿Catalog ID,Domain,Name,Source URL,Category,Description,Priority,Platform,Source Type
+TMK-0001,trademarks,USPTO Trademark Search,https://tmsearch.uspto.gov/,search,Official United States federal trademark search portal.,urgent,government,website
+TMK-0002,trademarks,USPTO TSDR API,https://developer.uspto.gov/api-catalog/tsdr-data-api,status,"Programmatic access to USPTO trademark status, prosecution documents, and images.",urgent,government,rest_api
+TMK-0003,trademarks,USPTO Open Data Portal APIs,https://data.uspto.gov/apis,api,USPTO API catalog covering trademark and other intellectual-property datasets.,urgent,government,rest_api
+TMK-0004,trademarks,USPTO Open Data Bulk Data Search API,https://data.uspto.gov/apis/bulk-data/search,bulk_data,"API for searching USPTO public bulk-data products, including trademark datasets.",high,government,rest_api
+TMK-0005,trademarks,USPTO Trademark Bulk Data,https://www.uspto.gov/trademarks/apply/check-status-view-documents/trademark-bulk-data,bulk_data,"Official USPTO trademark application, registration, assignment, and proceeding bulk datasets.",high,government,bulk_download
+TMK-0006,trademarks,USPTO Trademark Official Gazette,https://tmog.uspto.gov/,gazette,Weekly publication of marks approved for publication and opposition.,high,government,website
+TMK-0007,trademarks,USPTO Trademark Assignment Search,https://assignment.uspto.gov/,assignments,Search recorded trademark assignments and ownership transfers.,high,government,website
+TMK-0008,trademarks,USPTO TTABVUE,https://ttabvue.uspto.gov/ttabvue/,litigation,Trademark Trial and Appeal Board proceeding records and filings.,high,government,website
+TMK-0009,trademarks,USPTO Trademark ID Manual,https://idm-tmng.uspto.gov/id-master-list-public.html,classification,USPTO acceptable identification of goods and services manual.,normal,government,website
+TMK-0010,trademarks,USPTO Nice Classification,https://www.uspto.gov/trademarks/guides-and-manuals/nice-agreement-current-edition-version-general-remarks-class-headings,classification,Current Nice Classification guidance and class headings used by USPTO.,normal,government,website
+TMK-0011,trademarks,WIPO Global Brand Database,https://branddb.wipo.int/,international_search,Search international and participating national trademark collections.,urgent,government,website
+TMK-0012,trademarks,WIPO Madrid Monitor,https://www3.wipo.int/madrid/monitor/,international_registration,Track international trademark applications and registrations under the Madrid System.,urgent,government,website
+TMK-0013,trademarks,WIPO Madrid System Gazette,https://www.wipo.int/en/web/madrid-system/gazette,gazette,Official publication of international trademark registrations and changes.,high,government,website
+TMK-0014,trademarks,WIPO Madrid Goods and Services Manager,https://www.wipo.int/mgs/,classification,Multilingual classification tool for Madrid System goods and services.,normal,government,website
+TMK-0015,trademarks,WIPO Trademark Database Portal,https://www.wipo.int/amc/en/trademark/,directory,Directory of national and regional online trademark databases.,high,government,website
+TMK-0016,trademarks,WIPO IP Office Directory,https://www.wipo.int/en/web/country-profiles/directory-ip-offices,directory,Official directory of national and regional intellectual-property offices.,high,government,website
+TMK-0017,trademarks,EUIPO Trademark Search API,https://dev.euipo.europa.eu/product/trademark-search_100,api,Official EUIPO REST API for searching EU trademark records.,urgent,government,rest_api
+TMK-0018,trademarks,EUIPO API Portal,https://dev.euipo.europa.eu/,api,EUIPO developer portal for trademark and intellectual-property APIs.,high,government,website
+TMK-0019,trademarks,EUIPO Search IP,https://www.euipo.europa.eu/en/search-ip,search,Official EUIPO search entry point for EU trade marks and designs.,urgent,government,website
+TMK-0020,trademarks,TMview,https://www.tmdn.org/tmview/,international_search,Multi-office trademark search service operated through the EU Intellectual Property Network.,urgent,government,website
+TMK-0021,trademarks,BOIP Trademarks Register,https://www.boip.int/en/trademarks-register,regional_registry,Official Benelux trademark register.,high,government,website
+TMK-0022,trademarks,OAPI Trademark Services,https://oapi.int/en/,regional_registry,Regional intellectual-property office serving member states in Africa.,high,government,website
+TMK-0023,trademarks,ARIPO Marks Services,https://www.aripo.org/,regional_registry,Regional intellectual-property organization providing trademark services under the Banjul Protocol.,high,government,website
+TMK-0024,trademarks,GCC Patent Office and Trademark Information,https://www.gccpo.org/,regional_registry,Official Gulf Cooperation Council intellectual-property portal.,normal,government,website
+TMK-0025,trademarks,UK IPO Trademark Search,https://trademarks.ipo.gov.uk/ipo-tmtext,national_registry,Official United Kingdom trademark search service.,high,government,website
+TMK-0026,trademarks,UK Trade Marks Journal,https://www.gov.uk/government/collections/trade-marks-journal,gazette,Official weekly journal of UK trademark applications and notices.,normal,government,website
+TMK-0027,trademarks,CIPO Trademark Database,https://ised-isde.canada.ca/cipo/trademark-search,national_registry,Official Canadian trademark search database.,high,government,website
+TMK-0028,trademarks,Canadian Trademarks Journal,https://ised-isde.canada.ca/site/canadian-intellectual-property-office/en/trademarks/trademarks-journal,gazette,Official publication of Canadian trademark applications and notices.,normal,government,website
+TMK-0029,trademarks,IP Australia Trade Mark Search,https://search.ipaustralia.gov.au/trademarks/search/quick,national_registry,Official Australian trademark search service.,high,government,website
+TMK-0030,trademarks,Australian Official Journal of Trade Marks,https://pericles.ipaustralia.gov.au/ols/epublish/content/olsTrademarkPDFs.jsp,gazette,Official Australian trademark journal publications.,normal,government,website
+TMK-0031,trademarks,IPONZ Trade Mark Search,https://app.iponz.govt.nz/app/Extra/IP/TM/Qbe.aspx?sid=638497103860530638,national_registry,Official New Zealand trademark search service.,normal,government,website
+TMK-0032,trademarks,J-PlatPat,https://www.j-platpat.inpit.go.jp/,national_registry,"Official Japanese platform for trademark, patent, and design searches.",high,government,website
+TMK-0033,trademarks,KIPRIS,https://eng.kipris.or.kr/,national_registry,Official Korean intellectual-property search service.,high,government,website
+TMK-0034,trademarks,CNIPA,https://english.cnipa.gov.cn/,national_registry,Official China National Intellectual Property Administration portal.,high,government,website
+TMK-0035,trademarks,IP India Public Search,https://tmrsearch.ipindia.gov.in/tmrpublicsearch/,national_registry,Official Indian public trademark search service.,high,government,website
+TMK-0036,trademarks,IPOS Digital Hub,https://digitalhub.ipos.gov.sg/,national_registry,Official Singapore intellectual-property search and transaction portal.,normal,government,website
+TMK-0037,trademarks,MyIPO IP Online,https://iponline2u.myipo.gov.my/,national_registry,Official Malaysian intellectual-property search and filing portal.,normal,government,website
+TMK-0038,trademarks,DIP Thailand Trademark Search,https://www.ipthailand.go.th/en/,national_registry,Official Thailand Department of Intellectual Property portal.,normal,government,website
+TMK-0039,trademarks,DGIP Indonesia,https://www.dgip.go.id/,national_registry,Official Indonesian Directorate General of Intellectual Property portal.,normal,government,website
+TMK-0040,trademarks,IP Viet Nam,https://ipvietnam.gov.vn/,national_registry,Official Intellectual Property Office of Viet Nam portal.,normal,government,website
+TMK-0041,trademarks,DIP Cambodia,https://www.cambodiaip.gov.kh/,national_registry,Official Cambodian intellectual-property information portal.,low,government,website
+TMK-0042,trademarks,DIP Philippines Trademark Search,https://www.ipophil.gov.ph/,national_registry,Official Intellectual Property Office of the Philippines portal.,normal,government,website
+TMK-0043,trademarks,Brunei Intellectual Property Office,https://www.bruipo.gov.bn/,national_registry,Official Brunei intellectual-property office portal.,low,government,website
+TMK-0044,trademarks,DPMAregister,https://register.dpma.de/DPMAregister/Uebersicht,national_registry,Official German trademark and intellectual-property register.,high,government,website
+TMK-0045,trademarks,INPI France Data,https://data.inpi.fr/,national_registry,Official French industrial-property search and data portal.,high,government,website
+TMK-0046,trademarks,Swissreg,https://www.swissreg.ch/,national_registry,"Official Swiss trademark, patent, and design register.",normal,government,website
+TMK-0047,trademarks,Austrian Patent Office SeeIP,https://seeip.patentamt.at/,national_registry,Official Austrian intellectual-property search portal.,normal,government,website
+TMK-0048,trademarks,OEPM Spain,https://consultas2.oepm.es/LocalizadorWeb/,national_registry,Official Spanish trademark and industrial-property search service.,normal,government,website
+TMK-0049,trademarks,UIBM Italy,https://uibm.mise.gov.it/index.php/en/,national_registry,Official Italian Patent and Trademark Office portal.,normal,government,website
+TMK-0050,trademarks,Portugal INPI,https://inpi.justica.gov.pt/,national_registry,Official Portuguese industrial-property office portal.,normal,government,website
+TMK-0051,trademarks,Netherlands Enterprise Agency Trademark Information,https://business.gov.nl/regulation/trademark-registration/,national_registry,Official Netherlands government guidance and access for trademark registration.,low,government,website
+TMK-0052,trademarks,Danish Patent and Trademark Office,https://www.dkpto.org/,national_registry,Official Danish trademark and patent office portal.,normal,government,website
+TMK-0053,trademarks,PRV Sweden,https://www.prv.se/en/,national_registry,Official Swedish Intellectual Property Office portal.,normal,government,website
+TMK-0054,trademarks,Norwegian Industrial Property Office,https://www.patentstyret.no/en/,national_registry,Official Norwegian trademark and patent office portal.,normal,government,website
+TMK-0055,trademarks,Finnish Patent and Registration Office,https://www.prh.fi/en.html,national_registry,Official Finnish trademark and business registration portal.,normal,government,website
+TMK-0056,trademarks,Icelandic Intellectual Property Office,https://www.hugverk.is/en,national_registry,Official Icelandic intellectual-property office portal.,low,government,website
+TMK-0057,trademarks,Patent Office of Poland,https://uprp.gov.pl/en,national_registry,Official Polish Patent Office portal for trademarks and other rights.,normal,government,website
+TMK-0058,trademarks,Czech Industrial Property Office,https://upv.gov.cz/en,national_registry,Official Czech intellectual-property office portal.,normal,government,website
+TMK-0059,trademarks,Industrial Property Office Slovakia,https://www.indprop.gov.sk/?lang=en,national_registry,Official Slovak intellectual-property office portal.,low,government,website
+TMK-0060,trademarks,Hungarian Intellectual Property Office,https://www.hipo.gov.hu/en,national_registry,Official Hungarian intellectual-property office portal.,normal,government,website
+TMK-0061,trademarks,Romanian State Office for Inventions and Trademarks,https://osim.ro/en/,national_registry,Official Romanian trademark and patent office portal.,normal,government,website
+TMK-0062,trademarks,Bulgarian Patent Office,https://www.bpo.bg/en,national_registry,Official Bulgarian Patent Office portal.,low,government,website
+TMK-0063,trademarks,Croatian State Intellectual Property Office,https://www.dziv.hr/en/,national_registry,Official Croatian intellectual-property office portal.,low,government,website
+TMK-0064,trademarks,Slovenian Intellectual Property Office,https://www.uil-sipo.si/,national_registry,Official Slovenian intellectual-property office portal.,low,government,website
+TMK-0065,trademarks,Irish Patents Office,https://www.ipoi.gov.ie/en/,national_registry,Official Intellectual Property Office of Ireland portal.,normal,government,website
+TMK-0066,trademarks,Greek Industrial Property Organisation,https://www.obi.gr/en/,national_registry,Official Greek industrial-property organization portal.,low,government,website
+TMK-0067,trademarks,Turkish Patent and Trademark Office,https://www.turkpatent.gov.tr/en,national_registry,Official Turkish trademark and patent office portal.,high,government,website
+TMK-0068,trademarks,Ukrainian National Office for Intellectual Property and Innovations,https://nipo.gov.ua/en/,national_registry,Official Ukrainian intellectual-property office portal.,normal,government,website
+TMK-0069,trademarks,Rospatent,https://rospatent.gov.ru/en,national_registry,Official Russian intellectual-property office portal.,normal,government,website
+TMK-0070,trademarks,Sakpatenti Georgia,https://www.sakpatenti.gov.ge/en/,national_registry,Official National Intellectual Property Center of Georgia portal.,low,government,website
+TMK-0071,trademarks,INPI Brazil Trademark Search,https://busca.inpi.gov.br/pePI/,national_registry,Official Brazilian industrial-property search portal.,high,government,website
+TMK-0072,trademarks,IMPI Mexico MARCANET,https://marcanet.impi.gob.mx/marcanet/vistas/common/datos/bsqDenominacionCompleto.pgi,national_registry,Official Mexican trademark search system.,high,government,website
+TMK-0073,trademarks,INPI Argentina,https://portaltramites.inpi.gob.ar/,national_registry,Official Argentine industrial-property search and services portal.,normal,government,website
+TMK-0074,trademarks,INAPI Chile,https://www.inapi.cl/,national_registry,Official Chilean industrial-property office portal.,normal,government,website
+TMK-0075,trademarks,SIC Colombia Trademark Search,https://sipi.sic.gov.co/sipi/Extra/Default.aspx?sid=638497083547792258,national_registry,Official Colombian industrial-property search system.,normal,government,website
+TMK-0076,trademarks,INDECOPI Peru,https://www.indecopi.gob.pe/,national_registry,Official Peruvian intellectual-property and competition authority portal.,normal,government,website
+TMK-0077,trademarks,SENADI Ecuador,https://www.derechosintelectuales.gob.ec/,national_registry,Official Ecuadorian intellectual-property service portal.,low,government,website
+TMK-0078,trademarks,DNPI Uruguay,https://www.gub.uy/ministerio-industria-energia-mineria/marcas,national_registry,Official Uruguay government trademark services portal.,low,government,website
+TMK-0079,trademarks,DINAPI Paraguay,https://www.dinapi.gov.py/,national_registry,Official Paraguayan intellectual-property office portal.,low,government,website
+TMK-0080,trademarks,SENAPI Bolivia,https://www.senapi.gob.bo/,national_registry,Official Bolivian intellectual-property office portal.,low,government,website
+TMK-0081,trademarks,CNR El Salvador Intellectual Property Registry,https://www.cnr.gob.sv/,national_registry,Official El Salvador registration authority for intellectual property.,low,government,website
+TMK-0082,trademarks,RPI Guatemala,https://rpi.gob.gt/,national_registry,Official Guatemalan Intellectual Property Registry portal.,low,government,website
+TMK-0083,trademarks,RN Costa Rica Industrial Property Registry,https://www.rnpdigital.com/,national_registry,Official Costa Rican registry portal covering industrial property.,low,government,website
+TMK-0084,trademarks,DIGERPI Panama,https://mici.gob.pa/digerpi/,national_registry,Official Panamanian industrial-property directorate portal.,low,government,website
+TMK-0085,trademarks,ONAPI Dominican Republic,https://www.onapi.gov.do/,national_registry,Official Dominican Republic industrial-property office portal.,low,government,website
+TMK-0086,trademarks,Jamaica Intellectual Property Office,https://www.jipo.gov.jm/,national_registry,Official Jamaican intellectual-property office portal.,low,government,website
+TMK-0087,trademarks,CIPO Trinidad and Tobago,https://www.cipo.gov.tt/,national_registry,Official Trinidad and Tobago intellectual-property office portal.,low,government,website
+TMK-0088,trademarks,CIPC South Africa,https://www.cipc.co.za/,national_registry,Official South African company and intellectual-property registration portal.,high,government,website
+TMK-0089,trademarks,Kenya Industrial Property Institute,https://www.kipi.go.ke/,national_registry,Official Kenyan industrial-property office portal.,normal,government,website
+TMK-0090,trademarks,Nigeria Trademarks Registry,https://www.iponigeria.com/,national_registry,Official Nigerian industrial-property registration portal.,normal,government,website
+TMK-0091,trademarks,Ghana Registrar-General Intellectual Property,https://rgd.gov.gh/,national_registry,Official Ghanaian registry portal covering trademarks and businesses.,low,government,website
+TMK-0092,trademarks,Egyptian Trademarks and Industrial Designs Office,https://www.itda.gov.eg/,national_registry,Official Egyptian trademark and industrial-design authority portal.,normal,government,website
+TMK-0093,trademarks,Moroccan Office of Industrial and Commercial Property,https://www.ompic.ma/en,national_registry,Official Moroccan industrial and commercial property office portal.,normal,government,website
+TMK-0094,trademarks,Tunisian National Institute for Standardization and Industrial Property,https://www.innorpi.tn/,national_registry,Official Tunisian industrial-property office portal.,low,government,website
+TMK-0095,trademarks,Israel Patent Office Trademarks,https://www.gov.il/en/departments/topics/trademarks/govil-landing-page,national_registry,Official Israeli government trademark services portal.,normal,government,website
+TMK-0096,trademarks,Saudi Authority for Intellectual Property,https://www.saip.gov.sa/en/,national_registry,Official Saudi intellectual-property authority portal.,high,government,website
+TMK-0097,trademarks,UAE Ministry of Economy Trademarks,https://www.moec.gov.ae/en/trademarks,national_registry,Official United Arab Emirates trademark services portal.,high,government,website
+TMK-0098,trademarks,Qatar Ministry of Commerce and Industry IP Rights,https://www.moci.gov.qa/en/,national_registry,Official Qatar government portal for intellectual-property services.,normal,government,website
+TMK-0099,trademarks,Bahrain Ministry of Industry and Commerce IP,https://www.moic.gov.bh/en,national_registry,Official Bahrain government industrial-property portal.,low,government,website
+TMK-0100,trademarks,Oman Ministry of Commerce Trademark Services,https://www.tejarah.gov.om/,national_registry,Official Oman government commerce and trademark services portal.,low,government,website
