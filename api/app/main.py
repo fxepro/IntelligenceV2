@@ -4,10 +4,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api import health, jobs, records, sources, discover, media, research, credentials, system, app_settings, ask, library, trademarks
+from app.api import health, jobs, records, sources, discover, media, research, credentials, system, app_settings, ask, library, trademarks, domain_names
 from app.config import get_settings
 from app.database import Base, engine
-from app.models import AppSetting, Job, Record, Source, SourceStream, PlatformCredential, TrademarkSourceDetail  # noqa: F401 — register metadata
+from app.models import (  # noqa: F401 — register metadata
+    AppSetting,
+    DomainDetail,
+    Job,
+    Record,
+    Source,
+    SourceStream,
+    PlatformCredential,
+    TrademarkSourceDetail,
+)
 
 
 async def _column_exists(conn, table: str, column: str) -> bool:
@@ -266,6 +275,7 @@ app.include_router(app_settings.router, prefix=f"{prefix}/settings", tags=["Sett
 app.include_router(ask.router, prefix=f"{prefix}/ask", tags=["Ask"])
 app.include_router(library.router, prefix=f"{prefix}/library", tags=["Library"])
 app.include_router(trademarks.router, prefix=f"{prefix}/trademarks", tags=["Trademarks"])
+app.include_router(domain_names.router, prefix=f"{prefix}/domain-names", tags=["Domains"])
 
 
 @app.get("/")

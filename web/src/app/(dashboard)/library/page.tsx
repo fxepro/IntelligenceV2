@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function LibraryPage() {
-  redirect("/library/lessons");
+  redirect("/library/sources");
 }

@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowUpRight, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { AppPageHeader } from "@/components/sections/AppPageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { LessonBody } from "@/components/library/LessonBody";
+import { LessonTextEditor } from "@/components/library/LessonTextEditor";
+import { LibraryBreadcrumb } from "@/components/library/LibraryBreadcrumb";
 import { Icon } from "@/lib/icons";
 import { API_BASE } from "@/lib/api-base";
 
@@ -26,10 +27,15 @@ interface LessonDetail {
   has_video: boolean;
   has_pdf: boolean;
   content_status?: string;
+  published?: boolean;
   body: string;
   assets: { kind: string; url?: string | null; file?: string | null }[];
   fetched_at?: string | null;
   lock_reason?: string | null;
+  prev_id?: string | null;
+  prev_title?: string | null;
+  next_id?: string | null;
+  next_title?: string | null;
 }
 
 const KIND_LABEL: Record<string, string> = {
@@ -39,77 +45,115 @@ const KIND_LABEL: Record<string, string> = {
   quiz: "Quiz",
 };
 
+
 export default function LibraryLessonDetailPage() {
   const params = useParams();
   const id = decodeURIComponent(String(params?.id || ""));
   const [lesson, setLesson] = useState<LessonDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [flash, setFlash] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadLesson = useCallback(async () => {
     if (!id) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/v1/library/lessons/${encodeURIComponent(id)}`);
-        if (!res.ok) throw new Error(`Failed to load lesson (${res.status})`);
-        const data = await res.json();
-        if (!cancelled) setLesson(data);
-      } catch (err: unknown) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load lesson");
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/library/lessons/${encodeURIComponent(id)}`);
+      if (!res.ok) throw new Error(`Failed to load lesson (${res.status})`);
+      setLesson(await res.json());
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load lesson");
+      setLesson(null);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    void loadLesson();
+  }, [loadLesson]);
 
   const courseHref = lesson?.course_id
     ? `/library/lessons?course=${encodeURIComponent(lesson.course_id)}`
-    : "/library/lessons";
-  const locked = lesson?.content_status === "locked";
-  const body = (lesson?.body || "").trim();
-  const showVideo = !locked && (lesson?.kind === "video" || Boolean(lesson?.has_video));
-  const showText = !locked && (Boolean(body) || lesson?.kind === "text" || lesson?.kind === "quiz" || lesson?.kind === "pdf");
+    : "/library/sources";
 
+  // No auto-skip: unpublished lessons stay open so you can edit or review them.
+  // Next/Prev and DOCX already skip Publish Off rows.
+
+  const locked = lesson?.content_status === "locked";
+  const body = lesson?.body || "";
+  const showText =
+    !locked
+    && (
+      Boolean(body.trim())
+      || lesson?.kind === "text"
+      || lesson?.kind === "quiz"
+      || lesson?.kind === "pdf"
+      || Boolean(lesson?.has_text)
+      || lesson?.kind === "video"
+    );
+
+  const onBodySaved = (next: { body: string; title: string; course: string }) => {
+    setLesson((prev) =>
+      prev
+        ? {
+            ...prev,
+            body: next.body,
+            title: next.title,
+            course: next.course,
+            chars: next.body.length,
+            has_text: Boolean(next.body.trim()),
+            content_status: next.body.trim() ? "ready" : "empty",
+          }
+        : prev,
+    );
+  };
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <AppPageHeader
-        title={lesson?.title || "Lesson"}
-        description={
-          lesson
-            ? [lesson.course, lesson.category].filter(Boolean).join(" · ")
-            : "Library"
-        }
-        icon={<Icon name="library" className="h-5 w-5 text-primary" />}
-        actions={
-          <div className="flex items-center gap-3 text-xs font-medium">
-            <Link href="/library/lessons" className="text-muted-foreground hover:text-foreground">
-              Courses
-            </Link>
-            {lesson?.course_id ? (
-              <Link href={courseHref} className="text-muted-foreground hover:text-foreground">
-                {lesson.course}
-              </Link>
-            ) : null}
-          </div>
-        }
-      />
+      <div className="space-y-3">
+        <LibraryBreadcrumb
+          items={[
+            { label: "Sources", href: "/library/sources" },
+            ...(lesson?.course_id
+              ? [{ label: lesson.course || lesson.course_id, href: courseHref }]
+              : []),
+            { label: lesson?.title || (loading ? "…" : "Lesson") },
+          ]}
+        />
+        <AppPageHeader
+          title={lesson?.title || "Lesson"}
+          description={
+            lesson
+              ? [KIND_LABEL[lesson.kind] || lesson.kind, lesson.category].filter(Boolean).join(" · ")
+              : "Course lesson"
+          }
+          icon={<Icon name="library" className="h-5 w-5 text-primary" />}
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <Button asChild variant="outline" size="sm" className="gap-1.5">
+                <Link href={courseHref}>
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to course
+                </Link>
+              </Button>
+            </div>
+          }
+        />
+      </div>
 
       {loading ? (
         <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Loading…
         </p>
       ) : null}
       {error ? <p className="text-sm text-red-500">{error}</p> : null}
+      {flash ? <p className="text-sm text-muted-foreground">{flash}</p> : null}
 
       {lesson ? (
         <div className="space-y-4">
-          <Card className="rounded-2xl border-border/50 p-5 space-y-3">
+          <Card className="rounded-2xl border-border/50 p-5">
             <div className="flex flex-wrap items-center gap-2">
               <Badge className="border-transparent bg-secondary text-secondary-foreground text-fine font-medium normal-case tracking-normal">
                 {KIND_LABEL[lesson.kind] || lesson.kind}
@@ -119,25 +163,17 @@ export default function LibraryLessonDetailPage() {
                   Locked
                 </Badge>
               ) : null}
-              <span className="text-xs text-muted-foreground">{lesson.course}</span>
-              <span className="text-xs text-muted-foreground">·</span>
+              {lesson.published === false ? (
+                <Badge className="border-transparent bg-muted text-muted-foreground text-fine font-medium normal-case tracking-normal">
+                  Unpublished
+                </Badge>
+              ) : null}
               <span className="text-xs text-muted-foreground">{lesson.category}</span>
             </div>
-
-            {lesson.source_url ? (
-              <div>
-                <Button asChild variant="outline" size="sm" className="gap-2">
-                  <a href={lesson.source_url} target="_blank" rel="noopener noreferrer">
-                    Open on source site
-                    <ArrowUpRight className="h-3.5 w-3.5" />
-                  </a>
-                </Button>
-              </div>
-            ) : null}
           </Card>
 
           {locked ? (
-            <Card className="rounded-2xl border-border/50 p-5 space-y-2">
+            <Card className="rounded-2xl border-border/50 p-5 space-y-3">
               <p className="text-fine font-bold uppercase tracking-wider text-muted-foreground">
                 Content not captured
               </p>
@@ -145,53 +181,54 @@ export default function LibraryLessonDetailPage() {
                 {lesson.lock_reason ||
                   "This page was locked by course prerequisites when it was downloaded. The prerequisite dialog is not lesson content."}
               </p>
-              <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
-                Re-run the Scytale download after Module 1 is completed on the source site (or use the
-                updated downloader, which marks lessons complete in order and retries locked pages).
-              </p>
-            </Card>
-          ) : null}
-
-          {showVideo ? (
-            <Card className="rounded-2xl border-border/50 p-5 space-y-3">
-              <p className="text-fine font-bold uppercase tracking-wider text-muted-foreground">
-                Video
-              </p>
-              {lesson.source_url ? (
-                <div className="overflow-hidden rounded-xl border border-border/60 bg-black/90 aspect-video">
-                  <iframe
-                    title={lesson.title}
-                    src={lesson.source_url}
-                    className="h-full w-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No video URL on this lesson.</p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                If the player is blank (login wall), use Open on source site.
-              </p>
             </Card>
           ) : null}
 
           {showText ? (
             <Card className="rounded-2xl border-border/50 p-5">
-              <p className="text-fine font-bold uppercase tracking-wider text-muted-foreground mb-3">
-                {lesson.kind === "quiz" ? "Quiz" : "Text"}
-              </p>
-              {body ? (
-                <LessonBody body={body} />
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No text captured for this lesson yet.
-                  {lesson.source_url ? " Open the source site for the full content." : null}
-                </p>
-              )}
+              <LessonTextEditor
+                lessonId={lesson.id}
+                title={lesson.title}
+                course={lesson.course}
+                body={body}
+                kindLabel={lesson.kind === "quiz" ? "Quiz" : "Text"}
+                onSaved={onBodySaved}
+              />
             </Card>
           ) : null}
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-border/40">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button asChild variant="outline" className="gap-2">
+                <Link href={courseHref}>
+                  <ArrowLeft className="h-4 w-4 shrink-0" />
+                  Course
+                </Link>
+              </Button>
+              {lesson.prev_id ? (
+                <Button asChild variant="ghost" className="gap-2 max-w-[14rem]">
+                  <Link href={`/library/lessons/${encodeURIComponent(lesson.prev_id)}`}>
+                    <ArrowLeft className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{lesson.prev_title || "Previous"}</span>
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
+            {lesson.next_id ? (
+              <Button asChild className="gap-2 max-w-[48%]">
+                <Link href={`/library/lessons/${encodeURIComponent(lesson.next_id)}`}>
+                  <span className="truncate">
+                    Next{lesson.next_title ? `: ${lesson.next_title}` : ""}
+                  </span>
+                  <ArrowRight className="h-4 w-4 shrink-0" />
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild variant="outline" className="gap-2">
+                <Link href={courseHref}>Back to course</Link>
+              </Button>
+            )}
+          </div>
         </div>
       ) : null}
     </div>

@@ -155,14 +155,14 @@ export const DOMAINS: DomainDef[] = [
     key: "domain_names",
     label: "Domains",
     blurb: "www, .net and other TLDs — registries, WHOIS, DNS, availability and ownership",
-    home: "/domain-names/sources",
+    home: "/domain-names/portfolio",
     enabled: true,
   },
   {
     key: "library",
-    label: "Library",
+    label: "Courses",
     blurb: "Lessons from courses, books, and videos — text, PDF, and video by topic",
-    home: "/library/lessons",
+    home: "/library/sources",
     enabled: true,
   },
   {

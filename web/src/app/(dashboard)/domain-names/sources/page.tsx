@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppPageHeader } from "@/components/sections/AppPageHeader";
 import { GovernmentSourcesTable } from "@/components/sections/GovernmentSourcesTable";
 import { Icon } from "@/lib/icons";
@@ -119,10 +121,25 @@ export default function DomainNamesSourcesPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <AppPageHeader
-        title="Domain sources"
-        description="Registries, WHOIS, DNS and availability feeds for www, .net and other TLDs. Catalog first — connectors come later."
+        title="Domains"
+        description="Registrar and aftermarket sources for the Domains plane."
         icon={<Icon name="globe" className="h-5 w-5 text-primary" />}
       />
+
+      <Tabs value="sources">
+        <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-xl border border-border/60 bg-secondary/40 p-1">
+          <TabsTrigger value="portfolio" asChild>
+            <Link href="/domain-names/portfolio" className="rounded-lg px-4 py-2">
+              My domains
+            </Link>
+          </TabsTrigger>
+          <TabsTrigger value="sources" asChild>
+            <Link href="/domain-names/sources" className="rounded-lg px-4 py-2">
+              Sources
+            </Link>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {loadError ? (
         <p className="text-sm text-red-500">{loadError}</p>

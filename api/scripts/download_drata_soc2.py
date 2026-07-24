@@ -131,13 +131,54 @@ def _extract_article(page) -> tuple[str, str, list[dict]]:
             if (parts.length && parts[parts.length - 1] !== '') parts.push('');
           }
 
+          function cellText(node) {
+            return (node.innerText || node.textContent || '').replace(/\\s+/g, ' ').trim();
+          }
+
+          function absUrl(src) {
+            if (!src) return '';
+            try { return new URL(src, location.href).href; } catch (e) { return src; }
+          }
+
+          function pushImage(img) {
+            let src = img.getAttribute('src') || img.getAttribute('data-src') || '';
+            if (!src) {
+              const srcset = img.getAttribute('srcset') || '';
+              if (srcset) src = srcset.split(',')[0].trim().split(/\\s+/)[0] || '';
+            }
+            src = absUrl(src);
+            if (!src || /^data:image\\/svg/i.test(src)) return;
+            const alt = (img.getAttribute('alt') || '').replace(/[\\[\\]]/g, '').trim();
+            pushBlank();
+            parts.push('![' + alt + '](' + src + ')');
+            parts.push('');
+          }
+
+          function tableToMd(table) {
+            const rows = [];
+            for (const tr of table.querySelectorAll('tr')) {
+              const cells = Array.from(tr.querySelectorAll('th,td')).map((td) =>
+                cellText(td).replace(/\\|/g, '\\\\|')
+              );
+              if (!cells.length) continue;
+              rows.push('| ' + cells.join(' | ') + ' |');
+            }
+            if (!rows.length) return;
+            const colCount = Math.max(...rows.map((r) => (r.match(/\\|/g) || []).length - 1), 1);
+            const sep = '| ' + Array.from({ length: colCount }, () => '---').join(' | ') + ' |';
+            pushBlank();
+            parts.push(rows[0]);
+            parts.push(sep);
+            for (const row of rows.slice(1)) parts.push(row);
+            parts.push('');
+          }
+
           function walk(node) {
             if (!node) return;
             if (node.nodeType === 3) return;
             if (node.nodeType !== 1) return;
             const tag = node.tagName.toLowerCase();
             if (skipTags.has(tag)) return;
-            // Skip known chrome widgets
             const cls = (node.className && typeof node.className === 'string') ? node.className.toLowerCase() : '';
             const txQuick = (node.innerText || '').trim();
             if (/summarize with|copy prompt/i.test(txQuick) && txQuick.length < 120) return;
@@ -153,11 +194,36 @@ def _extract_article(page) -> tuple[str, str, list[dict]]:
               return;
             }
             if (tag === 'p') {
-              const tx = (node.innerText || '').trim();
+              for (const img of node.querySelectorAll('img')) pushImage(img);
+              const clone = node.cloneNode(true);
+              clone.querySelectorAll('img').forEach((n) => n.remove());
+              const tx = (clone.innerText || '').trim();
               if (tx) {
                 parts.push(tx);
                 parts.push('');
               }
+              return;
+            }
+            if (tag === 'figure') {
+              const img = node.querySelector('img');
+              if (img) pushImage(img);
+              const cap = node.querySelector('figcaption');
+              if (cap) {
+                const tx = cellText(cap);
+                if (tx) {
+                  parts.push('*' + tx + '*');
+                  parts.push('');
+                }
+              }
+              return;
+            }
+            if (tag === 'img') {
+              if (node.closest('p, figure, table, li')) return;
+              pushImage(node);
+              return;
+            }
+            if (tag === 'table') {
+              tableToMd(node);
               return;
             }
             if (tag === 'ul' || tag === 'ol') {
@@ -188,7 +254,6 @@ def _extract_article(page) -> tuple[str, str, list[dict]]:
               }
               return;
             }
-            // Descend into containers
             for (const child of node.childNodes) walk(child);
           }
 
@@ -209,7 +274,21 @@ def _extract_article(page) -> tuple[str, str, list[dict]]:
     return title, body, links
 
 
-def main() -> None:
+def _localize_body_images(page, body: str, slug: str) -> str:
+    from app.services.library_media import localize_markdown_images
+
+    def request_get(url: str):
+        return page.context.request.get(url, timeout=60000)
+
+    return localize_markdown_images(
+        body,
+        disk_dir=OUT_DIR / "assets" / slug,
+        files_prefix=f"drata-soc-2/assets/{slug}",
+        request_get=request_get,
+    )
+
+
+def run() -> dict:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "pages").mkdir(exist_ok=True)
 
@@ -258,6 +337,8 @@ def main() -> None:
                     page.wait_for_timeout(2500)
                     title, body, links = _extract_article(page)
                 title = title or label or _title_from_slug(url)
+                if body:
+                    body = _localize_body_images(page, body, slug)
                 # Enqueue in-article SOC 2 learn links
                 for link in links:
                     nu = _norm_url(link.get("href") or "")
@@ -321,7 +402,24 @@ def main() -> None:
     (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     ok = sum(1 for m in manifest if m.get("ok"))
     featured = sum(1 for m in manifest if m.get("featured") and m.get("ok"))
+    failed = sum(1 for m in manifest if not m.get("ok"))
     print(f"done — {ok}/{len(manifest)} saved ({featured} featured) -> {OUT_DIR}")
+    return {
+        "course_id": "drata-soc-2",
+        "ok": ok,
+        "locked": 0,
+        "failed": failed,
+        "total": len(manifest),
+        "featured": featured,
+        "out_dir": str(OUT_DIR),
+    }
+
+
+def main() -> None:
+    try:
+        run()
+    except Exception as exc:
+        raise SystemExit(str(exc)) from exc
 
 
 if __name__ == "__main__":

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { DOMAINS, DomainKey } from "@/lib/domains";
+import { DOMAINS, DomainKey, type DomainDef } from "@/lib/domains";
 import { AppPageHeader } from "@/components/sections/AppPageHeader";
 import { Icon, type IconName } from "@/lib/icons";
 import { site } from "@/config/site";
@@ -37,6 +37,75 @@ const DOMAIN_ICONS: Record<DomainKey, IconName> = {
   fiction: "library",
 };
 
+function sortByLabel(list: DomainDef[]): DomainDef[] {
+  return [...list].sort((a, b) =>
+    a.label.localeCompare(b.label, undefined, { sensitivity: "base" }),
+  );
+}
+
+function DomainCardGrid({
+  domains,
+  counts,
+}: {
+  domains: DomainDef[];
+  counts: Record<string, number>;
+}) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {domains.map((d) => {
+        const count = counts[d.key];
+        const card = (
+          <Card
+            className={`relative p-4 rounded-2xl border-border/50 transition-all h-full ${
+              d.enabled
+                ? "hover:border-primary/40 hover:shadow-md cursor-pointer"
+                : "opacity-60"
+            }`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-primary/10 shrink-0">
+                  <Icon name={DOMAIN_ICONS[d.key]} className="w-4 h-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="font-display text-sm font-semibold tracking-tight">{d.label}</h2>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{d.blurb}</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-2 shrink-0 text-right">
+                <p className="text-fine tabular-nums text-muted-foreground whitespace-nowrap">
+                  {typeof count === "number" ? (
+                    <>
+                      <span className="font-semibold text-foreground">{count.toLocaleString()}</span>
+                      {" "}rec
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </p>
+                {d.enabled ? (
+                  <Icon name="arrowRight" className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-fine font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50">
+                    <Icon name="lock" className="w-3 h-3" /> Soon
+                  </span>
+                )}
+              </div>
+            </div>
+          </Card>
+        );
+        return d.enabled ? (
+          <Link key={d.key} href={d.home}>
+            {card}
+          </Link>
+        ) : (
+          <div key={d.key}>{card}</div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function DomainsPage() {
   const [counts, setCounts] = useState<Record<string, number>>({});
 
@@ -52,6 +121,15 @@ export default function DomainsPage() {
         /* ignore */
       }
     })();
+  }, []);
+
+  const { active, inactive } = useMemo(() => {
+    const enabled = DOMAINS.filter((d) => d.enabled);
+    const disabled = DOMAINS.filter((d) => !d.enabled);
+    return {
+      active: sortByLabel(enabled),
+      inactive: sortByLabel(disabled),
+    };
   }, []);
 
   return (
@@ -79,58 +157,25 @@ export default function DomainsPage() {
         </div>
       </Link>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {DOMAINS.map((d) => {
-          const count = counts[d.key];
-          const card = (
-            <Card
-              className={`relative p-4 rounded-2xl border-border/50 transition-all h-full ${
-                d.enabled
-                  ? "hover:border-primary/40 hover:shadow-md cursor-pointer"
-                  : "opacity-60"
-              }`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3 min-w-0">
-                  <div className="p-2 rounded-xl bg-primary/10 shrink-0">
-                    <Icon name={DOMAIN_ICONS[d.key]} className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <h2 className="font-display text-sm font-semibold tracking-tight">{d.label}</h2>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{d.blurb}</p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end gap-2 shrink-0 text-right">
-                  <p className="text-fine tabular-nums text-muted-foreground whitespace-nowrap">
-                    {typeof count === "number" ? (
-                      <>
-                        <span className="font-semibold text-foreground">{count.toLocaleString()}</span>
-                        {" "}rec
-                      </>
-                    ) : (
-                      "—"
-                    )}
-                  </p>
-                  {d.enabled ? (
-                    <Icon name="arrowRight" className="w-4 h-4 text-muted-foreground" />
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-fine font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50">
-                      <Icon name="lock" className="w-3 h-3" /> Soon
-                    </span>
-                  )}
-                </div>
-              </div>
-            </Card>
-          );
-          return d.enabled ? (
-            <Link key={d.key} href={d.home}>
-              {card}
-            </Link>
-          ) : (
-            <div key={d.key}>{card}</div>
-          );
-        })}
-      </div>
+      <section className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-sm font-medium">Active</h2>
+          <span className="text-fine bg-secondary text-secondary-foreground px-3 py-1 rounded-full font-bold">
+            {active.length}
+          </span>
+        </div>
+        <DomainCardGrid domains={active} counts={counts} />
+      </section>
+
+      <section className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-sm font-medium">Inactive</h2>
+          <span className="text-fine bg-secondary text-secondary-foreground px-3 py-1 rounded-full font-bold">
+            {inactive.length}
+          </span>
+        </div>
+        <DomainCardGrid domains={inactive} counts={counts} />
+      </section>
     </div>
   );
 }

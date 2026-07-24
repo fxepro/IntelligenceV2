@@ -254,7 +254,7 @@ async def system_status():
             "label": "Domains",
             "status": "active",
             "blurb": "www, .net and other TLDs — registries, WHOIS, DNS, availability and ownership",
-            "home": "/domain-names/sources",
+            "home": "/domain-names/portfolio",
             "docs_url": None,
         },
         {

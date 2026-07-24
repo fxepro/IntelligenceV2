@@ -13,6 +13,7 @@ DATA_ROOT = ROOT / "data"
 SCYTALE_DIR = DATA_ROOT / "scytale-soc2"
 DRATA_DIR = DATA_ROOT / "drata-soc2"
 PARSED_DIR = DATA_ROOT / "library" / "parsed"
+MANUAL_DIR = DATA_ROOT / "library" / "manual"
 MANIFEST = SCYTALE_DIR / "manifest.json"
 DRATA_MANIFEST = DRATA_DIR / "manifest.json"
 
@@ -46,6 +47,8 @@ class LessonSummary(BaseModel):
     has_pdf: bool = False
     # ready = real content captured; locked = Thinkific prerequisite gate scraped instead
     content_status: str = "ready"
+    # Per-lesson publish (videos default off). Off = hidden from read/nav/export.
+    published: bool = True
 
 
 class LessonDetail(LessonSummary):
@@ -53,6 +56,10 @@ class LessonDetail(LessonSummary):
     assets: list[LessonAsset] = Field(default_factory=list)
     fetched_at: str | None = None
     lock_reason: str | None = None
+    prev_id: str | None = None
+    prev_title: str | None = None
+    next_id: str | None = None
+    next_title: str | None = None
 
 
 class CourseSummary(BaseModel):
@@ -61,6 +68,8 @@ class CourseSummary(BaseModel):
     lesson_count: int = 0
     kinds: dict[str, int] = Field(default_factory=dict)
     modules: list[str] = Field(default_factory=list)
+    published: bool = True
+    unpublished_count: int = 0
 
 
 def _is_prerequisite_gate(body: str) -> bool:
@@ -335,10 +344,18 @@ def _load_scytale() -> list[LessonDetail]:
         kind = _KIND_MAP.get(raw_kind, raw_kind if raw_kind in ("text", "video", "pdf", "quiz") else "text")
         label = row.get("label") or ""
         url = row.get("url") or meta.get("url") or ""
-        title = _clean_title(label, url=url, fallback=Path(file_rel).stem)
+        title = (
+            meta.get("title")
+            or _clean_title(label, url=url, fallback=Path(file_rel).stem)
+        )
         # Category from raw label + URL (outline numbers) so Module N stays correct.
-        category = _category_from_label(label, title, url=url)
+        category = meta.get("category") or _category_from_label(label, title, url=url)
         course_id, course_name = _course_from_source(url=url, page_title=_doc_title or row.get("title") or "")
+        if meta.get("course"):
+            course_name = meta["course"].strip() or course_name
+            # Keep course_id aligned when frontmatter sets the SOC 2 course name.
+            if "soc 2" in course_name.lower():
+                course_id = "soc-2-compliance"
         body = _strip_course_chrome(raw_body, title=title)
         locked = _is_prerequisite_gate(body) or _is_prerequisite_gate(raw_body)
         lock_reason = _lock_reason(body) or _lock_reason(raw_body) if locked else None
@@ -362,7 +379,11 @@ def _load_scytale() -> list[LessonDetail]:
                 has_text=bool(body) and not locked,
                 has_video=kind == "video",
                 has_pdf=kind == "pdf",
-                content_status="locked" if locked else ("empty" if not body and kind != "video" else "ready"),
+                content_status=(
+                    "skipped"
+                    if kind == "video"
+                    else ("locked" if locked else ("empty" if not body else "ready"))
+                ),
                 body=body,
                 assets=assets,
                 fetched_at=meta.get("fetched_at"),
@@ -455,8 +476,107 @@ def _load_parsed() -> list[LessonDetail]:
     return out
 
 
+def _load_manual() -> list[LessonDetail]:
+    """Hand-authored lessons under data/library/manual/{course_id}/ — survive Refresh."""
+    if not MANUAL_DIR.is_dir():
+        return []
+    out: list[LessonDetail] = []
+    for course_dir in sorted(MANUAL_DIR.iterdir()):
+        if not course_dir.is_dir():
+            continue
+        course_id = course_dir.name
+        pages = course_dir / "pages"
+        scan = pages if pages.is_dir() else course_dir
+        for path in sorted(scan.glob("*.md")):
+            _doc_title, body, meta = _read_markdown(path)
+            title = meta.get("title") or _doc_title or path.stem.replace("-", " ")
+            category = meta.get("category") or "Manual"
+            kind = (meta.get("kind") or "text").lower()
+            if kind not in ("text", "video", "pdf", "quiz"):
+                kind = "text"
+            course_name = meta.get("course") or course_id.replace("-", " ").title()
+            # Prefer explicit order; else parse leading NNN from filename
+            order_raw = meta.get("order") or ""
+            try:
+                order = int(str(order_raw).strip())
+            except ValueError:
+                m = re.match(r"^(\d+)", path.stem)
+                order = int(m.group(1)) if m else 9_000
+            rel = str(path.relative_to(ROOT)).replace("\\", "/")
+            stem = path.stem[:80]
+            lid = f"man-{course_id}-{stem}"[:140]
+            out.append(
+                LessonDetail(
+                    id=lid,
+                    title=title,
+                    course_id=course_id,
+                    course=course_name,
+                    category=category,
+                    kind=kind,
+                    label=meta.get("label") or title,
+                    source_url=meta.get("url") or None,
+                    chars=len(body),
+                    has_text=bool(body),
+                    has_video=kind == "video",
+                    has_pdf=kind == "pdf",
+                    content_status="ready" if body else "empty",
+                    body=body,
+                    assets=[LessonAsset(kind=kind, file=rel)],
+                    fetched_at=meta.get("fetched_at"),
+                )
+            )
+            # stash order on object for sort (dynamic attr ok for in-process)
+            setattr(out[-1], "_manual_order", order)
+    return out
+
+
 def _all_lessons() -> list[LessonDetail]:
-    return _load_scytale() + _load_drata() + _load_parsed()
+    return _load_scytale() + _load_drata() + _load_parsed() + _load_manual()
+
+
+def _lesson_published_flag(item: LessonSummary | LessonDetail) -> bool:
+    from app.services.library_publish import is_lesson_published
+
+    return is_lesson_published(item.id, item.kind)
+
+
+def _is_publishable(item: LessonSummary | LessonDetail) -> bool:
+    """Included in read / next-prev / DOCX when per-lesson Publish is On."""
+    return _lesson_published_flag(item)
+
+
+def _module_sort_key(category: str) -> tuple:
+    """Natural module order: Overview → Module 1…N → Glossary → Final Exam → other."""
+    raw = (category or "").strip()
+    low = raw.lower()
+    if low == "overview":
+        return (0, 0, raw.lower())
+    m = re.match(r"^module\s+(\d+)\b", low)
+    if m:
+        return (1, int(m.group(1)), raw.lower())
+    if low == "glossary":
+        return (2, 0, raw.lower())
+    if low == "final exam":
+        return (3, 0, raw.lower())
+    if low in ("manual", "table of contents", "toc"):
+        return (-1, 0, raw.lower())  # before Overview
+    if low in ("general", ""):
+        return (5, 0, raw.lower())
+    return (4, 0, raw.lower())
+
+
+def _lesson_sort_key(item: LessonSummary | LessonDetail) -> tuple:
+    manual_order = getattr(item, "_manual_order", None)
+    if manual_order is not None:
+        idx = int(manual_order)
+    else:
+        m = re.match(r"^(?:scy|dra)-(\d+)", item.id or "")
+        if m:
+            idx = int(m.group(1))
+        else:
+            m2 = re.search(r"-(\d{3})-", item.id or "")
+            idx = int(m2.group(1)) if m2 else 10_000
+    return (_module_sort_key(item.category), idx, (item.title or "").lower())
 
 
 def list_lessons(
@@ -465,7 +585,14 @@ def list_lessons(
     kind: str | None = None,
     category: str | None = None,
     q: str | None = None,
+    published_only: bool = False,
 ) -> tuple[list[LessonSummary], dict[str, int], list[str]]:
+    """
+    List lessons for the Library UI.
+
+    By default includes unpublished rows (so Publish can be toggled on the lessons page).
+    Pass published_only=True for export / public reading sets.
+    """
     items = _all_lessons()
 
     course_key = (course or "").strip().lower()
@@ -476,6 +603,8 @@ def list_lessons(
     scoped: list[LessonDetail] = []
     for item in items:
         if course_key and item.course_id.lower() != course_key and item.course.lower() != course_key:
+            continue
+        if published_only and not _is_publishable(item):
             continue
         scoped.append(item)
 
@@ -512,33 +641,321 @@ def list_lessons(
             has_video=i.has_video,
             has_pdf=i.has_pdf,
             content_status=i.content_status,
+            published=_lesson_published_flag(i),
         )
         for i in filtered
     ]
-    return summaries, kinds, sorted(categories)
+    summaries.sort(key=_lesson_sort_key)
+    return summaries, kinds, sorted(categories, key=_module_sort_key)
 
 
 def list_courses() -> list[CourseSummary]:
+    """All Library courses (Scytale, Drata, parsed, …) with publish settings."""
+    from app.services.library_publish import get_course_publish_settings
+
     by_id: dict[str, CourseSummary] = {}
     for item in _all_lessons():
         row = by_id.get(item.course_id)
         if not row:
-            row = CourseSummary(id=item.course_id, name=item.course)
+            settings = get_course_publish_settings(item.course_id)
+            row = CourseSummary(
+                id=item.course_id,
+                name=item.course,
+                published=settings.published,
+            )
             by_id[item.course_id] = row
+        if not _is_publishable(item):
+            row.unpublished_count += 1
+            continue
         row.lesson_count += 1
         row.kinds[item.kind] = row.kinds.get(item.kind, 0) + 1
         if item.category and item.category not in row.modules:
             row.modules.append(item.category)
     for row in by_id.values():
-        row.modules = sorted(row.modules)
+        row.modules = sorted(row.modules, key=_module_sort_key)
     return sorted(by_id.values(), key=lambda c: c.name.lower())
 
 
 def get_lesson(lesson_id: str) -> LessonDetail | None:
+    items = _all_lessons()
+    by_id = {item.id: item for item in items}
+    lesson = by_id.get(lesson_id)
+    if not lesson:
+        return None
+
+    lesson.published = _lesson_published_flag(lesson)
+
+    # Next/Prev only among publishable lessons (skip unpublished, e.g. videos off).
+    course_items = sorted(
+        [i for i in items if i.course_id == lesson.course_id and _is_publishable(i)],
+        key=_lesson_sort_key,
+    )
+    # If current lesson is unpublished, still allow opening it, but nav skips to neighbors.
+    nav_items = course_items
+    if not _is_publishable(lesson):
+        # Place in sort order among all lessons to find nearest publishable neighbors.
+        all_course = sorted(
+            [i for i in items if i.course_id == lesson.course_id],
+            key=_lesson_sort_key,
+        )
+        idx_all = next((i for i, row in enumerate(all_course) if row.id == lesson.id), -1)
+        prev = next(
+            (all_course[j] for j in range(idx_all - 1, -1, -1) if _is_publishable(all_course[j])),
+            None,
+        )
+        nxt = next(
+            (all_course[j] for j in range(idx_all + 1, len(all_course)) if _is_publishable(all_course[j])),
+            None,
+        )
+        if prev:
+            lesson.prev_id = prev.id
+            lesson.prev_title = prev.title
+        if nxt:
+            lesson.next_id = nxt.id
+            lesson.next_title = nxt.title
+        return lesson
+
+    idx = next((i for i, row in enumerate(nav_items) if row.id == lesson.id), -1)
+    if idx >= 0:
+        if idx > 0:
+            prev = nav_items[idx - 1]
+            lesson.prev_id = prev.id
+            lesson.prev_title = prev.title
+        if idx + 1 < len(nav_items):
+            nxt = nav_items[idx + 1]
+            lesson.next_id = nxt.id
+            lesson.next_title = nxt.title
+    return lesson
+
+
+def _upsert_frontmatter_key(header: str, key: str, value: str) -> str:
+    """Set `- key: value` in the markdown header block; replace existing key if present."""
+    lines = header.replace("\r\n", "\n").split("\n")
+    prefix = f"- {key}:"
+    replaced = False
+    out: list[str] = []
+    for line in lines:
+        if line.strip().startswith(prefix):
+            if not replaced:
+                out.append(f"- {key}: {value}")
+                replaced = True
+            continue
+        out.append(line)
+    if not replaced:
+        # Insert after first heading line when present, else at end.
+        insert_at = 0
+        for i, line in enumerate(out):
+            if line.startswith("# "):
+                insert_at = i + 1
+                break
+        # Skip a blank line after the heading when inserting.
+        while insert_at < len(out) and not out[insert_at].strip():
+            insert_at += 1
+        out.insert(insert_at, f"- {key}: {value}")
+    return "\n".join(out).rstrip()
+
+
+def _write_lesson_markdown(
+    path: Path,
+    *,
+    body: str | None = None,
+    course: str | None = None,
+    title: str | None = None,
+) -> None:
+    raw = path.read_text(encoding="utf-8", errors="replace")
+    if "\n---\n" in raw:
+        header, old_body = raw.split("\n---\n", 1)
+        current_body = old_body
+    elif raw.startswith("#"):
+        header, current_body = raw, ""
+    else:
+        header, current_body = "", raw
+
+    if course is not None:
+        header = _upsert_frontmatter_key(header or "# Lesson", "course", course.strip())
+    if title is not None:
+        t = title.strip()
+        header = _upsert_frontmatter_key(header or "# Lesson", "title", t)
+        # Keep the H1 in sync when present.
+        lines = header.split("\n")
+        if lines and lines[0].startswith("# "):
+            lines[0] = f"# {t}"
+            header = "\n".join(lines)
+
+    new_body = current_body if body is None else (body or "").replace("\r\n", "\n").strip()
+    if header.strip():
+        updated = f"{header.rstrip()}\n\n---\n\n{new_body.strip()}\n"
+    else:
+        updated = f"{new_body.strip()}\n"
+    path.write_text(updated, encoding="utf-8")
+
+
+def create_lesson(
+    course_id: str,
+    *,
+    title: str,
+    category: str = "Overview",
+    kind: str = "text",
+    body: str = "",
+    place: str = "end",
+) -> LessonDetail:
+    """
+    Create a hand-authored lesson for any Library course.
+
+    Stored under data/library/manual/{course_id}/pages/ so Refresh scrape
+    does not wipe it.
+    """
+    cid = (course_id or "").strip()
+    if not cid:
+        raise ValueError("course_id is required")
+    title_name = (title or "").strip()
+    if not title_name:
+        raise ValueError("title is required")
+    cat = (category or "Overview").strip() or "Overview"
+    kind_key = (kind or "text").strip().lower()
+    if kind_key not in ("text", "video", "pdf", "quiz"):
+        kind_key = "text"
+    place_key = (place or "end").strip().lower()
+    if place_key not in ("start", "end"):
+        place_key = "end"
+
+    # Display name from existing course lessons when possible
+    course_name = cid.replace("-", " ").title()
     for item in _all_lessons():
-        if item.id == lesson_id:
-            return item
-    return None
+        if item.course_id == cid:
+            course_name = item.course or course_name
+            break
+
+    pages_dir = MANUAL_DIR / cid / "pages"
+    pages_dir.mkdir(parents=True, exist_ok=True)
+
+    existing_orders: list[int] = []
+    for path in pages_dir.glob("*.md"):
+        _d, _b, meta = _read_markdown(path)
+        try:
+            existing_orders.append(int(str(meta.get("order") or "").strip()))
+            continue
+        except ValueError:
+            pass
+        m = re.match(r"^(\d+)", path.stem)
+        if m:
+            existing_orders.append(int(m.group(1)))
+
+    if place_key == "start":
+        order = (min(existing_orders) - 1) if existing_orders else 0
+        if order < 0:
+            order = 0
+            # Shift: still ok — same order sorts by title
+    else:
+        order = (max(existing_orders) + 1) if existing_orders else 9000
+
+    stem = re.sub(r"[^\w\-]+", "-", title_name.lower()).strip("-")[:60] or "lesson"
+    filename = f"{order:03d}-{stem}.md"
+    # Avoid collisions
+    out_path = pages_dir / filename
+    n = 2
+    while out_path.exists():
+        out_path = pages_dir / f"{order:03d}-{stem}-{n}.md"
+        n += 1
+
+    fetched = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    body_text = (body or "").replace("\r\n", "\n").strip()
+    if not body_text:
+        body_text = f"# {title_name}\n\n(Add content here.)"
+    md = (
+        f"# {title_name}\n\n"
+        f"- kind: {kind_key}\n"
+        f"- title: {title_name}\n"
+        f"- category: {cat}\n"
+        f"- course: {course_name}\n"
+        f"- order: {order}\n"
+        f"- manual: true\n"
+        f"- fetched_at: {fetched}\n\n"
+        f"---\n\n{body_text}\n"
+    )
+    out_path.write_text(md, encoding="utf-8")
+
+    expected_id = f"man-{cid}-{out_path.stem[:80]}"[:140]
+    lesson = get_lesson(expected_id)
+    if not lesson:
+        for item in _load_manual():
+            if item.course_id == cid and any(
+                (a.file or "").endswith(out_path.name) for a in item.assets
+            ):
+                return item
+        raise RuntimeError("Created lesson but could not reload it")
+    return lesson
+
+
+def update_lesson(
+    lesson_id: str,
+    *,
+    body: str | None = None,
+    course: str | None = None,
+    title: str | None = None,
+) -> LessonDetail:
+    """
+    Update lesson markdown on disk.
+
+    - body / title: this lesson file only
+    - course: written to every lesson file in the same course_id (display name override)
+    """
+    lesson = get_lesson(lesson_id)
+    if not lesson:
+        raise FileNotFoundError(f"Lesson not found: {lesson_id}")
+
+    rel = next((a.file for a in lesson.assets if a.file), None)
+    if not rel:
+        raise ValueError("Lesson has no markdown file to update")
+
+    path = (ROOT / rel).resolve()
+    try:
+        path.relative_to(DATA_ROOT.resolve())
+    except ValueError as exc:
+        raise ValueError("Lesson file path is outside v2/data/") from exc
+    if not path.is_file():
+        raise FileNotFoundError(f"Lesson file missing: {rel}")
+
+    course_name = course.strip() if isinstance(course, str) else None
+    title_name = title.strip() if isinstance(title, str) else None
+    if course_name == "":
+        raise ValueError("Course name cannot be empty")
+    if title_name == "":
+        raise ValueError("Lesson title cannot be empty")
+
+    # Only rewrite siblings when the display name actually changes.
+    rename_course = (
+        course_name is not None
+        and course_name != (lesson.course or "").strip()
+    )
+
+    _write_lesson_markdown(path, body=body, course=course_name, title=title_name)
+
+    if rename_course and course_name is not None:
+        siblings = [i for i in _all_lessons() if i.course_id == lesson.course_id]
+        for sib in siblings:
+            if sib.id == lesson.id:
+                continue
+            sib_rel = next((a.file for a in sib.assets if a.file), None)
+            if not sib_rel:
+                continue
+            sib_path = (ROOT / sib_rel).resolve()
+            try:
+                sib_path.relative_to(DATA_ROOT.resolve())
+            except ValueError:
+                continue
+            if sib_path.is_file():
+                _write_lesson_markdown(sib_path, course=course_name)
+
+    refreshed = get_lesson(lesson_id)
+    if not refreshed:
+        raise RuntimeError("Lesson disappeared after write")
+    return refreshed
+
+
+def update_lesson_body(lesson_id: str, body: str) -> LessonDetail:
+    """Backward-compatible body-only update."""
+    return update_lesson(lesson_id, body=body)
 
 
 def parse_document_to_lesson(

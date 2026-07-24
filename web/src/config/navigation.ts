@@ -8,8 +8,8 @@ export type NavItem = {
 };
 
 /**
- * Per-domain secondary nav (usually empty — Sources is the workspace home).
- * Media/Government sources are reached via Workspace → domain home.
+ * Per-domain secondary nav (usually empty — Sources is the domain home).
+ * Domain homes are reached via Domains.
  */
 export const domainNav: Record<DomainKey, NavItem[]> = {
   media: [],

@@ -4,7 +4,6 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { DOMAINS, workspaceDomainForPath } from "@/lib/domains";
 import { Icon } from "@/lib/icons";
 import { site } from "@/config/site";
 import { chromeNav, intelligenceNav } from "@/config/navigation";
@@ -24,15 +23,25 @@ function StackStatus() {
     let active = true;
     const load = async () => {
       try {
-        const response = await fetch("/api/stack/status", { cache: "no-store" });
-        const data = await response.json();
+        const response = await fetch("/api/stack/status", {
+          cache: "no-store",
+          signal: AbortSignal.timeout(12_000),
+        });
+        if (!response.ok) {
+          if (active) setProcesses([]);
+          return;
+        }
+        const data = (await response.json()) as { processes?: StackProcess[] };
         if (active) setProcesses(data.processes ?? []);
       } catch {
-        if (active) setProcesses([]);
+        // Ignore: Next/web restart, or browser extensions that wrap window.fetch
+        // (e.g. injectScriptAdjust) and surface "Failed to fetch" in the overlay.
       }
     };
     void load();
-    const timer = window.setInterval(load, 30_000);
+    const timer = window.setInterval(() => {
+      void load();
+    }, 30_000);
     return () => {
       active = false;
       window.clearInterval(timer);
@@ -103,15 +112,6 @@ function NavSection({
   );
 }
 
-function workspaceIcon(key: string) {
-  if (key === "government" || key === "real_estate") return "building" as const;
-  if (key === "trademarks" || key === "finance") return "landmark" as const;
-  if (key === "domain_names") return "globe" as const;
-  if (key === "library") return "library" as const;
-  if (key === "media") return "radio" as const;
-  return "dashboard" as const;
-}
-
 export function AppSidebar({
   className,
   onNavigate,
@@ -121,7 +121,6 @@ export function AppSidebar({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const activeWorkspace = workspaceDomainForPath(pathname);
   const linkProps = { onClick: onNavigate };
 
   return (
@@ -173,26 +172,7 @@ export function AppSidebar({
           </div>
 
           <NavSection label="Workspace" labelId="workspace-label">
-            {DOMAINS.filter((d) => d.enabled).map((d) => {
-              const active = activeWorkspace === d.key;
-              return (
-                <Link
-                  key={d.key}
-                  href={d.home}
-                  {...linkProps}
-                  className={cn(
-                    "flex items-center gap-2.5 px-3 py-2 rounded-lg text-body-sm font-semibold transition-all min-h-10",
-                    active
-                      ? "bg-accent text-accent-foreground shadow-sm"
-                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground border border-sidebar-border/60",
-                  )}
-                  aria-current={active ? "page" : undefined}
-                >
-                  <Icon name={workspaceIcon(d.key)} className="w-3.5 h-3.5 shrink-0" />
-                  {d.label}
-                </Link>
-              );
-            })}
+            {null}
           </NavSection>
 
           <NavSection label="Intelligence" labelId="intelligence-label">

@@ -70,7 +70,7 @@ export default function DashboardPage() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <AppPageHeader
         title="Dashboard"
-        description={`Welcome to ${site.name}. Jump into a workspace or open Domains to pick a control plane.`}
+        description={`Welcome to ${site.name}. Open Domains to pick a control plane.`}
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

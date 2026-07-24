@@ -1,0 +1,103 @@
+SOC 2 Academy
+100% complete
+
+Overview
+Preface Text
+Meet Your Instructor- Kyle Morris Video
+Meet Your Instructor- Wesley Van Zyl Video
+Module 1: Introduction to SOC 2
+1. Introduction to SOC 2 VIDEO · 4 MIN
+1.1 What is SOC 2 Compliance? TEXT
+1.2 AICPA COSO Framework TEXT
+1.3 Trust Service Criteria ('TSC') and Point of Focus TEXT
+1.4 Audit Timeline & period TEXT
+1.5 Certification bodies TEXT
+Module 1 Quiz QUIZ · 5 QUESTIONS · PREREQUISITE
+Module 2: The Planning Phase
+2. The Planning Phase Video
+2.1 Defining the Scope Text
+2.2 Creation of 'System Description' Text
+2.3 Types of Controls Text
+2.4 Gap Analysis Text
+2.5 Identifying Gaps and Remediation Text
+2.6 Creation and Mapping of Controls Text
+2.7 Choosing the Auditing Firm Text
+Module 2 Quiz Quiz · PREREQUISITE
+Module 3: Framework Subject Matters
+Framework Subject Matters Text
+3. Framework Subject Matters Video
+3.1 Control Environment Text
+3.2 Communication and Information Text
+3.3 Risk Assessment Text
+3.4 Monitoring Activities Text
+3.5 Control Activities Text
+3.6 Logical and Physical Access Controls Text
+3.7 System Operations Text
+3.8 Change Management Text
+3.9 Risk Mitigation Text
+3.10 Additional Criteria for Availability Text
+3.11 Additional Criteria for Confidentiality Text
+3.12 Additional Criteria for Processing Integrity Text
+3.13 Additional Criteria for Privacy Text
+Module 3 Quiz Quiz · PREREQUISITE
+Module 4: Prepare For Implementation
+4.1 Shared Responsibility Model Text
+4.2 Key Stakeholder Identification Text
+4.3 Technical, Procedural, and Administrative Controls Implementation Text
+4.4 Prioritization Text
+Module 4 Quiz Quiz · PREREQUISITE
+Module 5: Security Management Procedures
+5. Security Management Procedures Video
+5.1 Policies and Procedures Text
+5.2 Passwords and MFA Text
+5.3 Risk Assessment Text
+5.4 Risk Mitigation Text
+5.5 User Access Review Text
+5.6 Security Awareness Training Text
+5.7 Security Risk Vs Security Vulnerabilities Text
+5.8 Endpoint Management and Anti-Malware Text
+5.9 Assets Mapping and Classification Text
+5.10 Human Resources Text
+5.11 Maintenance, Monitoring, and Analysis of Audit Logs Text
+5.12 Data Breaches and Disclosures Text
+5.13 Crisis Management Text
+5.14 Segregation of Duties and Least Privilege Text
+5.15 Change Management Text
+5.16 Internal Audit Text
+Module 5 Quiz Quiz · PREREQUISITE
+Module 6: Initiating a SOC 2 Audit
+6. Initiating a SOC 2 Audit Video
+6.1 Audit Principles and Concepts Text
+6.2 Preparation of Audit Text
+6.3 Trust but Verify Approach - Audit Evidence Text
+6.4 Types of Audit Procedures Performed Text
+6.5 Documentation Text
+Module 6 Quiz Quiz · PREREQUISITE
+Module 7: Monitoring, Control, and Completing SOC 2 Project Plan
+7. Monitoring, Control, and Completing SOC 2 Project Plan Video
+7.1 Automation of Controls Text
+7.2 Real-time Identification of Non-Compliance Issues Text
+7.3 Response and Records of Non-Compliance Issues Text
+Module 7 Quiz Quiz · PREREQUISITE
+Module 8: Conducting a SOC 2 Audit
+8. Conducting a SOC 2 Audit Video
+8.1 Communication During An Audit Text
+8.2 Audit Procedures and Evaluation of Evidence - Auditors' Point of View Text
+8.3 Drafting Audit Plans Text
+8.4 Audit Findings and Deviations Text
+Module 8 Quiz Quiz · PREREQUISITE
+Module 9: Closing the Audit and Follow-Up
+9. Closing the Audit and Follow-Up Video
+9.1 Audit Closing Procedure Text
+9.2 Organizing a Closing Meeting and Stating The Conclusion of The Audit Text
+9.3 Auditors Opinion Results Text
+9.4 Deviations and Management's Response Text
+9.5 Complementary User Entity Controls (CUECs) Text
+9.6 Sub Service Organizations Carved Out Controls Text
+9.7 Corrective Action Plans For The Following Audit Cycle Text
+9.8 Marketing Aspects and Logo Use Text
+Module 9 Quiz Quiz · PREREQUISITE
+Glossary
+Glossary Text
+Final Exam
+SOC 2 Academy Final Exam Quiz · PREREQUISITE

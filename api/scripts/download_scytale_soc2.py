@@ -64,23 +64,139 @@ def _is_curriculum_url(href: str) -> bool:
 
 def _extract_page_text(page) -> tuple[str, str]:
     title = (page.title() or "").strip()
-    # Prefer main content regions used by Thinkific course player
+    # Prefer structured markdown from Thinkific / Froala content (keeps headings, lists, tables, images).
     text = page.evaluate(
         """() => {
           const picks = [
-            '[data-testid="course-player"]',
-            '.course-player',
             '.fr-view',
             '.lecture-content',
+            '[data-testid="course-player"] .fr-view',
+            '.course-player__content',
+            '.course-player',
             'article',
             'main',
             '#main-content',
           ];
+
+          function cellText(node) {
+            return (node.innerText || node.textContent || '').replace(/\\s+/g, ' ').trim();
+          }
+
+          function absUrl(src) {
+            if (!src) return '';
+            try { return new URL(src, location.href).href; } catch (e) { return src; }
+          }
+
+          function imgSrc(img) {
+            let src = img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || '';
+            if (!src) {
+              const srcset = img.getAttribute('srcset') || img.getAttribute('data-srcset') || '';
+              if (srcset) src = srcset.split(',')[0].trim().split(/\\s+/)[0] || '';
+            }
+            return absUrl(src);
+          }
+
+          function pushImage(parts, img) {
+            const src = imgSrc(img);
+            if (!src) return;
+            if (/^data:image\\/svg/i.test(src)) return;
+            const alt = (img.getAttribute('alt') || '').replace(/[\\[\\]]/g, '').trim();
+            parts.push('![' + alt + '](' + src + ')');
+          }
+
+          function tableToMd(table) {
+            const rows = [];
+            for (const tr of table.querySelectorAll('tr')) {
+              const cells = Array.from(tr.querySelectorAll('th,td')).map((td) =>
+                cellText(td).replace(/\\|/g, '\\\\|')
+              );
+              if (!cells.length) continue;
+              rows.push('| ' + cells.join(' | ') + ' |');
+            }
+            if (!rows.length) return '';
+            const colCount = Math.max(...rows.map((r) => (r.match(/\\|/g) || []).length - 1), 1);
+            const sep = '| ' + Array.from({ length: colCount }, () => '---').join(' | ') + ' |';
+            return [rows[0], sep, ...rows.slice(1)].join('\\n');
+          }
+
+          function toMd(root) {
+            const parts = [];
+            const blocks = root.querySelectorAll(
+              'h1,h2,h3,h4,h5,h6,p,ul,ol,blockquote,pre,table,figure,img'
+            );
+            if (!blocks.length) {
+              return (root.innerText || '').trim();
+            }
+            for (const el of blocks) {
+              if (el.closest('li') && (el.tagName === 'P' || el.tagName === 'UL' || el.tagName === 'OL')) {
+                continue;
+              }
+              const tag = el.tagName.toLowerCase();
+              if (tag.match(/^h[1-6]$/)) {
+                const level = Math.min(4, parseInt(tag[1], 10) || 2);
+                const t = cellText(el);
+                if (t) parts.push('#'.repeat(level) + ' ' + t);
+                continue;
+              }
+              if (tag === 'p') {
+                for (const img of el.querySelectorAll('img')) pushImage(parts, img);
+                const clone = el.cloneNode(true);
+                clone.querySelectorAll('img').forEach((n) => n.remove());
+                const t = cellText(clone);
+                if (t) parts.push(t);
+                continue;
+              }
+              if (tag === 'figure') {
+                const img = el.querySelector('img');
+                if (img) pushImage(parts, img);
+                const cap = el.querySelector('figcaption');
+                if (cap) {
+                  const t = cellText(cap);
+                  if (t) parts.push('*' + t + '*');
+                }
+                continue;
+              }
+              if (tag === 'img') {
+                if (el.closest('p, figure, table, li')) continue;
+                pushImage(parts, el);
+                continue;
+              }
+              if (tag === 'ul' || tag === 'ol') {
+                if (el.parentElement && el.parentElement.closest('li')) continue;
+                const items = [];
+                for (const li of el.querySelectorAll(':scope > li')) {
+                  for (const img of li.querySelectorAll('img')) pushImage(parts, img);
+                  const t = cellText(li);
+                  if (!t) continue;
+                  items.push((tag === 'ol' ? '1. ' : '- ') + t);
+                }
+                if (items.length) parts.push(items.join('\\n'));
+                continue;
+              }
+              if (tag === 'blockquote') {
+                const t = cellText(el);
+                if (t) parts.push('> ' + t);
+                continue;
+              }
+              if (tag === 'pre') {
+                const t = (el.innerText || '').trim();
+                if (t) parts.push('```\\n' + t + '\\n```');
+                continue;
+              }
+              if (tag === 'table') {
+                if (el.closest('table') !== el) continue;
+                const md = tableToMd(el);
+                if (md) parts.push(md);
+              }
+            }
+            return parts.join('\\n\\n').trim();
+          }
+
           for (const sel of picks) {
             const el = document.querySelector(sel);
-            if (el && (el.innerText || '').trim().length > 80) {
-              return (el.innerText || '').trim();
-            }
+            if (!el) continue;
+            const md = toMd(el);
+            if (md && md.length > 40) return md;
           }
           const body = document.body ? document.body.innerText : '';
           return (body || '').trim();
@@ -88,10 +204,27 @@ def _extract_page_text(page) -> tuple[str, str]:
     )
     text = re.sub(r"\n{3,}", "\n\n", (text or "").strip())
     # Drop noisy chrome tails
-    for marker in ("Â© 2026 Scytale", "Teach online with Thinkific"):
+    for marker in ("Â© 2026 Scytale", "Teach online with Thinkific", "© 2026 Scytale"):
         if marker in text:
             text = text.split(marker)[0].strip()
     return title, text
+
+
+def _localize_body_images(page, body: str, slug: str) -> str:
+    from app.services.library_media import localize_markdown_images
+
+    asset_dir = OUT_DIR / "assets" / slug
+    prefix = f"scytale-soc2/assets/{slug}"
+
+    def request_get(url: str):
+        return page.context.request.get(url, timeout=60000)
+
+    return localize_markdown_images(
+        body,
+        disk_dir=asset_dir,
+        files_prefix=prefix,
+        request_get=request_get,
+    )
 
 
 def _is_locked_text(text: str) -> bool:
@@ -187,14 +320,14 @@ def _capture_item(page, label: str, url: str, kind: str) -> tuple[str, str, bool
     return title, body, False
 
 
-def main() -> None:
+def run() -> dict:
+    """Re-scrape Scytale SOC 2 curriculum. Returns summary stats for jobs/CLI."""
     username, password = _load_website_login()
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "pages").mkdir(exist_ok=True)
 
     from playwright.sync_api import sync_playwright
 
-    manifest: list[dict] = []
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
@@ -205,7 +338,7 @@ def main() -> None:
         )
         page = context.new_page()
 
-        print("signing inâ€¦")
+        print("signing in…")
         page.goto(SIGN_IN, wait_until="domcontentloaded", timeout=60000)
         page.wait_for_timeout(1200)
         page.locator('input[type="email"], input[name="user[email]"], #user_email').first.fill(username)
@@ -213,10 +346,10 @@ def main() -> None:
         page.locator('button[type="submit"], input[type="submit"]').first.click()
         page.wait_for_timeout(4000)
         if "/users/sign_in" in page.url:
-            raise SystemExit(f"Login failed â€” still on {page.url}")
+            raise RuntimeError(f"Login failed — still on {page.url}")
         print("signed in ->", page.url)
 
-        print("loading course outlineâ€¦")
+        print("loading course outline…")
         page.goto(COURSE_HOME, wait_until="domcontentloaded", timeout=60000)
         page.wait_for_timeout(3500)
 
@@ -257,7 +390,7 @@ def main() -> None:
             targets = list(range(len(urls))) if pass_no == 1 else list(locked_idxs)
             if pass_no == 2 and not targets:
                 break
-            print(f"pass {pass_no} â€” {len(targets)} items")
+            print(f"pass {pass_no} — {len(targets)} items")
             locked_idxs = []
             for i in targets:
                 label, url = urls[i]
@@ -273,8 +406,10 @@ def main() -> None:
                 try:
                     title, body, locked = _capture_item(page, label, url, kind)
                     if locked:
-                        print("  LOCKED (prerequisites) â€” will retry after unlock pass")
+                        print("  LOCKED (prerequisites) — will retry after unlock pass")
                         locked_idxs.append(i)
+                    elif body:
+                        body = _localize_body_images(page, body, slug)
                     md = (
                         f"# {title or label}\n\n"
                         f"- kind: {kind}\n"
@@ -314,7 +449,23 @@ def main() -> None:
     (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     ok = sum(1 for m in manifest if m.get("ok"))
     locked = sum(1 for m in manifest if m.get("locked"))
-    print(f"done â€” {ok}/{len(manifest)} saved, {locked} still locked -> {OUT_DIR}")
+    failed = sum(1 for m in manifest if not m.get("ok"))
+    print(f"done — {ok}/{len(manifest)} saved, {locked} still locked -> {OUT_DIR}")
+    return {
+        "course_id": "soc-2-compliance",
+        "ok": ok,
+        "locked": locked,
+        "failed": failed,
+        "total": len(manifest),
+        "out_dir": str(OUT_DIR),
+    }
+
+
+def main() -> None:
+    try:
+        run()
+    except Exception as exc:
+        raise SystemExit(str(exc)) from exc
 
 
 if __name__ == "__main__":

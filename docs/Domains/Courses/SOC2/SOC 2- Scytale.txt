@@ -1,0 +1,1442 @@
+Table of Contents
+Module 1	2
+Module 2	4
+Module 3	6
+Module 5	10
+Module 6	12
+Module 7	14
+Module 8	16
+Module 9	19
+Final Exam	21
+
+Module 1
+Question 1 of 5
+What does 'SOC' stand for?
+
+Choose only ONE best answer.
+
+A
+Security Objective Criteria
+
+B
+Service Organization Controls
+
+C
+Service Oriented Controls
+
+D
+Standardised Objective Criteria
+
+Question 2 of 5
+Which of the below is not an internal objective of the COSO framework?
+
+Choose only ONE best answer.
+
+A
+Operations Objectives
+
+B
+Server Objectives
+
+C
+Reporting Objectives
+
+D
+Compliance Objectives
+
+Question 3 of 5
+The method to ensure appropriate control design and implementation is achieved by adhering to which of the below, relevant to the organization?
+
+Choose only ONE best answer.
+
+A
+Project Path
+
+B
+Points of Focus
+
+C
+Priority Preposition
+
+D
+Control Relevance
+
+Question 4 of 5
+When performing a Type I audit, which aspect of controls is typically focused on?
+
+Choose only ONE best answer.
+
+A
+Operating Effectiveness of the controls
+
+B
+Design only (of the controls)
+
+C
+Design and implementation of the controls
+
+D
+Definition of the controls relevant to the framework
+
+Who is authorised to perform SOC 2 audits and issue the relevant assertion reports?
+
+Choose only ONE best answer.
+
+A
+Any person who is in a position of 'Auditor', independent of the organisation
+
+B
+A qualified IT expert
+
+C
+A qualified CPA
+
+D
+Any audit company
+
+
+
+Module 2 
+Question 1 of 5
+Which of the below criteria (principles) is mandatory in every SOC 2 audit?
+
+Choose only ONE best answer.
+
+A
+Security
+
+B
+Availability
+
+C
+Confidentiality
+
+D
+Privacy
+
+Question 2 of 5
+The gap analysis process should include:
+
+Choose only ONE best answer.
+
+A
+All relevant parties for the gap analysis process in order to have an accurate understanding of the organisational controls and processes.
+
+B
+Only the top level management who approve and make decisions on the business objectives
+
+C
+Everyone in the organisation
+
+D
+Anyone in an IT-specific role
+
+Question 3 of 5
+With SaaS and modern day technology, organizations are able to have controls relevant to their organization which are performed outside of the organization itself (performed by external parties). This practice within SOC 2 is known as making use of:
+
+Choose only ONE best answer.
+
+A
+Subordinate-organisations
+
+B
+Sub-service organisations
+
+C
+Outsourced Authority
+
+D
+Business by Benefit principle
+
+Question 4 of 5
+The section III report is also known as?
+
+Choose only ONE best answer.
+
+A
+IT Guide
+
+B
+Management assertion document
+
+C
+System Description
+
+D
+Entire company portfolio
+
+Question 5 of 5
+Which one of the below options provides coverage of an IT control environment as at a point in time (rather than over a period of time)?
+
+Choose only ONE best answer.
+
+A
+Type I Audit
+
+B
+Type II Audit
+
+Module 3 
+Question 1 of 5
+How may Trust Service Criteria are there in total, including the additional criteria?
+
+Choose only ONE best answer.
+
+A
+9
+
+B
+4
+
+C
+13
+
+D
+14
+
+Question 2 of 5
+What Trust Service Criteria contains the following COSO Principle: COSO Principle 13: The entity obtains or generates and uses relevant, quality information to support the functioning of internal control.
+
+Choose only ONE best answer.
+
+A
+System Operations
+
+B
+Control Activities
+
+C
+Risk Mitigation
+
+D
+Communication and Information
+
+Question 3 of 5
+The below control will address what Trust Service Criteria: A monitoring tool is deployed 24/7 to detect anomalies and service disruption.
+
+Choose only ONE best answer.
+
+A
+Risk Assessment
+
+B
+System Operations
+
+C
+Monitoring Activities
+
+D
+Control Activities
+
+Question 4 of 5
+The below control will address what Trust Service Criteria: Environments should be segregated between, dev, test/QA, and prod.
+
+Choose only ONE best answer.
+
+A
+Control Environment
+
+B
+Control Activities
+
+C
+Change Management
+
+D
+None of the above
+
+Question 5 of 5
+Which of the following COSO principles are found under the Control Environment TSC?
+
+Choose only ONE best answer.
+
+A
+The entity demonstrates a commitment to integrity and ethical values.
+
+B
+The entity holds individuals accountable for their internal control responsibilities in the pursuit of objectives.
+
+C
+Management establishes, with board oversight, structures, reporting lines, and appropriate authorities and responsibilities in the pursuit of objectives.
+
+D
+All of the above
+
+
+Module 4 
+
+Question 1 of 5
+The model in place between you as a lead implementer, the service auditor, and the organization, is known as:
+
+Choose only ONE best answer.
+
+A
+Multiple-party involvement Model
+
+B
+Holistic responsibility Rule
+
+C
+Shared Responsibility Model
+
+D
+Specific rule chart
+
+Question 2 of 5
+Which order below is correct in terms of establishing processes in an organization?
+
+Choose only ONE best answer.
+
+A
+Processes > Policies > Procedures
+
+B
+Policies > Processes > Procedures
+
+C
+Procedures > Policies > Processes
+
+D
+Plan > Process > Procedure
+
+Question 3 of 5
+What are the responsibilities of the organization?
+
+Choose only ONE best answer.
+
+A
+Define Control Owners
+
+B
+Testing control operating effectiveness
+
+C
+Testing control implementation
+
+D
+All of the above
+
+Question 4 of 5
+What is an example of an Administrative control?
+
+Choose only ONE best answer.
+
+A
+New user request approvals
+
+B
+Policies and procedures
+
+C
+System Incident Event Management System
+
+D
+Penetration testing
+
+Question 5 of 5
+Your job will be to prioritize both the auditors' needs and the organizations' needs. What task would have the highest priority?
+
+Choose only ONE best answer.
+
+A
+Submission of Evidence
+
+B
+Control Implementation
+
+C
+Performing a Gap Analysis
+
+D
+Control Monitoring
+
+
+
+Module 5
+Question 1 of 5
+When considering policy relevance and development, which of the below is NOT a key consideration?
+
+Choose only ONE best answer.
+
+A
+People
+
+B
+Technology
+
+C
+Coding language
+
+D
+Processes
+
+Question 2 of 5
+An organization should perform a risk assessment HOW OFTEN, according to best practices?
+
+Choose only ONE best answer.
+
+A Every month
+
+B Only when the system has a major change
+
+C Based on the approach of the CTO
+
+D Annually
+
+Question 3 of 5
+At a minimum, an organization should perform which of the below processes relevant to technical risks?
+
+Choose only ONE best answer.
+
+A
+External penetration testing
+
+B
+Code scanning enforcement
+
+C
+Vulnerability scanning on the infrastructure
+
+D
+All of the above
+
+Question 4 of 5
+Risk acceptance is an acceptable risk mitigation option when...
+
+Choose only ONE best answer.
+
+A
+The CISO deems that the risk will have an immaterial impact
+
+B
+The risk level is 9 or less
+
+C
+The board agrees the risk is irrelevant in the current review year
+
+D
+The risk is governed by an external party
+
+Question 5 of 5
+What is the primary objective of a user access review?
+
+Choose only ONE best answer.
+
+A
+Compliance with regulatory control requirement
+
+B
+Free up unnecessary user account licenses
+
+C
+Identify any instances of inappropriate user access
+
+D
+Achieve the KPI requirement of the person responsible for the review
+
+
+Module 6
+Question 1 of 5
+True or False: The Carve-out method is a method of dealing with the services provided by a subservice organization, but now the Subservice Organization controls are included in section 3 and are tested by the service auditor.
+
+Choose only ONE best answer.
+
+A
+TRUE
+
+B
+FALSE
+
+
+Question 2 of 5
+True or False: IPE cannot be generated by using an entity’s IT systems.
+
+Choose only ONE best answer.
+
+A
+TRUE
+
+B
+FALSE
+
+This answer is correct.
+
+
+Question 3 of 5
+True or False: A type II SOC 2 audit can be done over a period of 7 months.
+
+Choose only ONE best answer.
+
+A
+TRUE
+
+B
+FALSE
+
+Question 4 of 5
+Which of the following are considered to be SOC 2 Objectives?
+
+Choose only ONE best answer.
+
+A
+The service organization’s description of its system fairly presents the system as designed and implemented throughout the specified period.
+
+B
+The controls related to the criteria stated in the service organization's description of its system were suitably designed throughout the specified period.
+
+C
+A and B
+
+D
+None of the above
+
+
+Question 5 of 5
+Name the audit procedure that is performed: Performed a walkthrough with the IT manager of how users are given access to AWS, in order to obtain a better understanding of the process.
+
+Choose only ONE best answer.
+
+A
+Observation
+
+B
+Inquiry
+
+C
+Inspection
+
+D
+Walkthrough
+Module 7
+
+Question 1 of 5
+True or False: Audit evidence can only be obtained by manual means.
+
+Choose only ONE best answer.
+
+A
+TRUE
+
+B
+FALSE
+
+
+Question 2 of 5
+If automation is not being performed and the collection of evidence is not automated, what other option does management have?
+
+Choose only ONE best answer.
+
+A
+Management should notify the auditors that evidence will be collected manually and that they should come in earlier.
+
+B
+A team of internal compliance analysts will need to analyze the compliance data and spot deficiencies within the compliance program.
+
+C
+Inform HR to review the controls and provide feedback on the deficiencies
+
+D
+Start up an Internal Audit department.
+
+
+Question 3 of 5
+Which of the following are common issues found in the compliance program?
+
+Choose only ONE best answer.
+
+A
+Patches have not been deployed to all endpoints
+
+B
+Inadequate Password policies
+
+C
+Developer access to production
+
+D
+All of the above
+
+Question 4 of 5
+Which of the following are common issues found in the compliance program?
+
+Choose only ONE best answer.
+
+A
+Users have access to one or more system
+
+B
+Lack of security awareness training
+
+C
+Developer access to the QA environment
+
+D
+None of the above
+
+Question 5 of 5
+What is the biggest risk of not having a team of internal compliance analysts to analyze your compliance data and spot deficiencies within your compliance program?
+
+Choose only ONE best answer.
+
+A
+It raises the chances of getting a qualified audit opinion.
+
+B
+It raises the chances of getting an unqualified audit opinion.
+
+C
+The auditors will take more time to review the evidence.
+
+D
+The auditors will take more time to test the controls.
+Module 8
+
+Question 1 of 5
+Which of the below departments would not be necessary to include in a SOC 2 audit?
+
+Choose only ONE best answer.
+
+A
+Shared facility team members
+
+B
+HR team
+
+C
+IT team and managers
+
+D
+Board of directors
+
+Question 2 of 5
+Why does an audit period need to be defined?
+
+Choose only ONE best answer.
+
+A
+The audit period is important to ensure that controls work correctly only for this time period
+
+B
+The audit period is in place to ensure participants are available to assist with the audit and it is built into their work plan
+
+C
+The audit period gives guidelines for when employees should be extra careful about their actions on the system
+
+D
+The audit period provides the timeline over which the environment, controls, and processes are evaluated
+
+
+Question 3 of 5
+The audit process should always begin with..
+
+Choose only ONE best answer.
+
+A
+Management meetings
+
+B
+Audit findings
+
+C
+Gap analysis
+
+D
+Selecting a firm
+
+Question 3 of 5
+The audit process should always begin with..
+
+Choose only ONE best answer.
+
+A
+Management meetings
+
+B
+Audit findings
+
+C
+Gap analysis
+
+D
+Selecting a firm
+
+Question 4 of 5
+Once the audit period is complete and evidence is provided, an auditor can request additional supporting evidence for controls from the auditee.
+
+Choose only ONE best answer.
+
+A
+TRUE
+
+B
+FALSE
+
+Question 5 of 5
+The primary purpose of audit evidence is to
+
+Choose only ONE best answer.
+
+A
+Seek to identify control gaps
+
+B
+Provide supporting evidence to verify the operation of the control and alignment to the control description
+
+C
+Gather evidence to support a control deficiency
+
+D
+Attach audit evidence in the final report
+
+
+Module 9 
+
+Question 1 of 5
+The SOC 2 audit report can have four opinions, which are...?
+
+Choose only ONE best answer.
+
+A
+Disclaimer of opinion
+
+B
+Qualified
+
+C
+Unqualified
+
+D
+All of the above
+
+Question 2 of 5
+A qualified opinion is when...?
+
+Choose only ONE best answer.
+
+A
+When the auditing team can not determine if the controls designed were operating effectively.
+
+B
+When the auditing team has found multiple controls that have not been designed properly and are failing.
+
+C
+When the auditing team have determined that the controls are well designed and operating effectively.
+
+D
+When the auditing team could not obtain sufficient evidence that the controls were in place and operating effectively.
+
+
+Question 3 of 5
+True or False: Management does not have to provide a response on any deviations and/or findings.
+
+Choose only ONE best answer.
+
+A
+TRUE
+
+B
+FALSE
+
+Question 4 of 5
+If no findings were found on any of the controls, generally the report will result in what type of opinion?
+
+Choose only ONE best answer.
+
+A
+Adverse opinion
+
+B
+Unqualified opinion
+
+C
+Qualified opinion
+
+D
+Successful opinion
+
+Question 5 of 5
+An adverse opinion is when...?
+
+Choose only ONE best answer.
+
+A
+When the auditing team have determined that the controls are well designed and operating effectively.
+
+B
+When the auditing team could not obtain sufficient evidence that the controls were in place and operating effectively.
+
+C
+When the auditing team has determined that the system description provided by management has failed.
+
+D
+None of the above
+
+
+Final Exam
+
+Question 1 of 40
+True or False: Testing the operating effectiveness of a control will require the auditor to select a sample.
+
+Choose only ONE best answer.
+
+A
+TRUE
+
+B
+FALSE
+
+Question 2 of 40
+What is an example of a Procedural control?
+
+Choose only ONE best answer.
+
+A
+User access reviews
+
+B
+Firewall configurations
+
+C
+24/7 Monitoring system
+
+D
+Code of conduct
+
+Question 3 of 40
+Which of the below would be considered unacceptable audit evidence?
+
+Choose only ONE best answer.
+
+A
+A listing provided that cannot be agreed to the source system
+
+B
+A screenshot that is taken outside of the audit period
+
+C
+A user listing provided with exclusions applied by the owner of the control
+
+D
+All of the above
+
+Question 4 of 40
+For an organisation implementing an internal audit function, it is most important that...
+
+Choose only ONE best answer.
+
+A
+The IA team report to all top-level management
+
+B
+The IA team do not have the ability to conceal or manipulate data or results
+
+C
+The IA team audit the systems on a weekly basis
+
+D
+The IA team consists of members from all business units
+
+Question 5 of 40
+Controls that fall on the user entity are known as:
+
+Choose only ONE best answer.
+
+A
+Mandatory controls
+
+B
+Entity Oriented controls (EOC)
+
+C
+Business Entity Operations (BEO)
+
+D
+Complementary User Entity Controls (CUECs)
+
+Question 6 of 40
+An internal audit function within an organisation allows the ability to exclude the requirement for an external audit process?
+
+Choose only ONE best answer.
+
+A
+TRUE
+
+B
+FALSE
+
+Question 7 of 40
+What Trust Service Criteria will include the following Common Criteria: The entity authorizes, designs, develops or acquires, implements, operates, approves, maintains, and monitors environmental protections, software, data backup processes, and recovery infrastructure to meet its objectives.
+
+Choose only ONE best answer.
+
+A
+Change Management
+
+B
+Risk Mitigation
+
+C
+Back Ups
+
+D
+Additional Criteria for Availability
+
+Question 8 of 40
+The main reason to have audit logs enabled is to:
+
+Choose only ONE best answer.
+
+A
+Comply with legal requirements
+
+B
+Collect system data
+
+C
+Enforce accountability
+
+D
+Trace system changes
+
+
+Question 9 of 40
+When parting ways with & offboarding an employee, which of the below is the most important action to take FIRST?
+
+Choose only ONE best answer.
+
+A
+Contact HR to perform the exit interview
+
+B
+Revoke access to user accounts
+
+C
+Pay any outstanding amounts from either party
+
+D
+Find a replacement employee
+
+Question 10 of 40
+Which of the below is most relevant for SOC 2?
+
+Choose only ONE best answer.
+
+A
+It has flexible criteria, which can be adapted to suit the organisation based on the type of business, data and customers involved
+
+B
+All 5 TSC must be included in every SOC 2 audit
+
+C
+SOC 2 is a forward-looking view of an organisation and their control environment
+
+D
+SOC 2 is a legal requirement for all financial organisations in East-Africa and Europe
+
+Question 11 of 40
+What Trust Service Criteria contains the following COSO Principle: COSO Principle 9: The entity identifies and assesses changes that could significantly impact the system of internal control.
+
+Choose only ONE best answer.
+
+A
+Change Management
+
+B
+Risk Mitigation
+
+C
+Control Environment
+
+D
+Risk Assessment
+
+
+Question 12 of 40
+Which of the below TSC are more commonly referred to as the 'common criteria'?
+
+Choose only ONE best answer.
+
+A
+Availability
+
+B
+Prohibition
+
+C
+Processing Integrity
+
+D
+Security
+
+
+Question 13 of 40
+MFA is important because...
+
+Choose only ONE best answer.
+
+A
+It provides an additional layer of defense against unauthorised access/intrusion
+
+B
+It aligns to industry best-standard
+
+C
+It is not necessary
+
+D
+A & B
+
+Question 14 of 40
+The primary purpose of an endpoint management tool is to manage, monitor, detect non-compliance and alert of any security threats on the devices relevant to the organisation, that have been registered on the endpoint solution.
+
+Choose only ONE best answer.
+
+A
+TRUE
+
+B
+FALSE
+
+Question 15 of 40
+Which of the below represents the most critical risk associated with change management?
+
+Choose only ONE best answer.
+
+A
+The production environment is unavailable for 3 hours
+
+B
+All changes are testing in the live, production environment
+
+C
+Changes are created in a development environment that replicates production and tested (using sanitised production data), but there is no QA environment
+
+D
+There are three authorised code reviewers
+
+Question 16 of 40
+True or False: Companies tend to have more findings in the 2nd year audits.
+
+Choose only ONE best answer.
+
+A
+TRUE
+
+B
+FALSE
+
+Question 17 of 40
+Onboarding of a new employee should include:
+
+Choose only ONE best answer.
+
+A
+Training on the company
+
+B
+Training relevant to the role performed by the employee
+
+C
+Provisioning of access & necessary accounts
+
+D
+All of the above
+
+Question 18 of 40
+A risk assessment should include...
+
+Choose only ONE best answer.
+
+A
+Business risks
+
+B
+A & C
+
+C
+Technical risks
+
+D
+back-end Development risks only
+
+This answer is correct.
+Question 19 of 40
+Which of the below would be the most notable exception that should be followed up on immediately when performing a UAR?
+
+Choose only ONE best answer.
+
+A
+A user with read only rights to their email account that was terminated a week ago and is still active on the system
+
+B
+A user with developer rights that was terminated 3 months ago, that is actively using the account
+
+C
+A terminated user that has write access on their user account, but has a deactivated account login
+
+D
+An active user with access to develop and migrate changes to production
+
+Question 20 of 40
+Once the organization has received its final report and the audit period is officially over, what should management do next?
+
+Choose only ONE best answer.
+
+A
+Start using the AICPA SOC II logo on their website for marketing purposes
+
+B
+Plan the next SOC 2 audit and inform the auditors when they can come back.
+
+C
+Compare the final report with the draft report, to ensure that the auditors didn't make any mistakes
+
+D
+Recap on processes and controls that went well during the audit and in retrospect the processes that didn't go so well
+
+Question 21 of 40
+Which of the below is NOT a risk mitigation option?
+
+Choose only ONE best answer.
+
+A
+Risk avoidance
+
+B
+Risk acceptance
+
+C
+Risk mitigation
+
+D
+Risk cancellation
+
+Question 22 of 40
+At a minimum, a user access review should include a review of all user on which systems?
+
+Choose only ONE best answer.
+
+A
+All systems used by the organisation that have user accounts
+
+B
+Email & IdP systems
+
+C
+Systems that deal with financial data primarily
+
+D
+Systems identified as critical by the organisation (in the information asset inventory)
+
+Question 23 of 40
+Who should attend the close out meeting with the auditors?
+
+Choose only ONE best answer.
+
+A
+Compliance Manager
+
+B
+IT Manager
+
+C
+HR Manager
+
+D
+All of the above
+
+Question 23 of 40
+Who should attend the close out meeting with the auditors?
+
+Choose only ONE best answer.
+
+A
+Compliance Manager
+
+B
+IT Manager
+
+C
+HR Manager
+
+D
+All of the above
+
+Question 24 of 40
+Along with providing the auditors with a description of its system (Section 3), management must also provide the auditors with which other document?
+
+Choose only ONE best answer.
+
+A
+Section 4
+
+B
+Management representation letter
+
+C
+Fraud letter
+
+D
+List of gaps
+
+Question 25 of 40
+What is an example of a Technical control?
+
+Choose only ONE best answer.
+
+A
+Risk assessment
+
+B
+Anti Malware is installed on all endpoints
+
+C
+User access reviews
+
+D
+Policies and procedures
+Question 26 of 40
+Evidence is obtained from management at three various stages of the audit. What are those three stages?
+
+Choose only ONE best answer.
+
+A
+Obtaining Evidence Regarding the Description, Obtaining Evidence Regarding Design and implementation of Controls, Obtaining Evidence Regarding Section 2.
+
+B
+Obtaining Evidence Regarding the Description, Obtaining Evidence Regarding Design and implementation of Controls, Obtaining Evidence Regarding Operating Effectiveness of Controls
+
+C
+Obtaining Evidence Regarding the Description, Obtaining Evidence Regarding the Design of the Controls, Obtaining Evidence Regarding that findings were resolved.
+
+D
+Obtaining Evidence Regarding the gaps that were resolved, Obtaining Evidence Regarding Design and implementation of Controls, Obtaining Evidence Regarding Operating Effectiveness of Controls
+
+Question 27 of 40
+A risk assessment risk rating is determined by?
+
+Choose only ONE best answer.
+
+A
+The product of the risk impact and the mitigation plan
+
+B
+The product of the risk impact and the associated likelihood
+
+C
+The sum of the risk impact and the associated likelihood
+
+D
+The division of the risk level and the likelihood of it occurring
+
+Question 28 of 40
+Audit logs are a type of ___ control
+
+Choose only ONE best answer.
+
+A
+Preventative
+
+B
+Detective
+
+C
+Corrective
+
+D
+Compensating
+
+Question 29 of 40
+Which of the below describes a control that is preventative in nature?
+
+Choose only ONE best answer.
+
+A
+A system control automatically changes a delimiter of "," to "." for a monetary amount entered.
+
+B
+A system control identifies that an authorised approver has not signed off on a change.
+
+C
+A system control restricts a change from being migrated until it is approved by an authorised reviewer.
+
+D
+A user reviews a list of users and manually signs off that access of each is appropriate
+
+Question 30 of 40
+Change management is one of the most important functions of an organisation, and audit alike. Change management control should:
+
+Choose only ONE best answer.
+
+A
+Enforce that a change be developed in a non-production environment before going live
+
+B
+Enforce that all change are appropriately reviewed and approved before migration
+
+C
+A, B, and D
+
+D
+Ensure that a request exists for all system changes that can be traced back to (for purposes of the development life cycle)
+
+Question 31 of 40
+Which of the below are NOT a type of internal auditing control?
+
+Choose only ONE best answer.
+
+A
+Manipulative
+
+B
+Detective
+
+C
+Preventative
+
+D
+Corrective
+
+
+Question 32 of 40
+True or False: Management will only receive a Final Report, after the audit is concluded.
+
+Choose only ONE best answer.
+
+A
+TRUE
+
+B
+FALSE
+
+
+Question 33 of 40
+When performing a Type II audit, which aspect of controls is typically focused on?
+
+Choose only ONE best answer.
+
+A
+Design, implementation, and Operating Effectiveness of the controls
+
+B
+Operation of controls
+
+C
+Design and implementation of the controls
+
+D
+Definition of the controls relevant to the framework
+Question 34 of 40
+Which of the below is the best description of an SoD violation?
+
+Choose only ONE best answer.
+
+A
+A sales representative that can get another sales rep to sign a finance document
+
+B
+A developer who can migrate their own change to production without an additional approval
+
+C
+An HR manager that needs IT to provision account creation for a new user
+
+D
+A developer who can develop and test a change in a non-production environment
+
+Question 35 of 40
+Which of the below represents the correct HR process flow for a new user joining an organisation?
+
+Choose only ONE best answer.
+
+A
+Review submitted application -> Perform first interviews -> perform background/screening check -> follow up interview -> offer
+
+B
+Perform first interview -> perform second interview -> offer acceptance -> screening/background check
+
+
+Question 36 of 40
+When assigning user access, which of the below principles should be followed?
+
+Choose only ONE best answer.
+
+A
+Least-privilege principle
+
+B
+Efficiency-coverage method (providing slightly expanded roles to improve system efficiency)
+
+C
+All employees should get the same basic access
+
+D
+Ensuring two users have the same access for cases of unavailability
+
+Question 37 of 40
+Security awareness training is a crucial control because...
+
+Choose only ONE best answer.
+
+A
+People are any organisations biggest security risk
+
+B
+It is needed as part of user onboarding
+
+C
+It upskills all participants on how to be more security-minded to prevent cyber attacks
+
+D
+A & C
+
+
+Question 38 of 40
+After the gap analysis has been performed, what do you as the lead implementer need to do next?
+
+Choose only ONE best answer.
+
+A
+Reperform the gap analysis to ensure there were no gaps that were missed.
+
+B
+Assess the system description to see if any updates need to be made.
+
+C
+Assess if any new controls need to be designed to ensure the organization is meeting its compliance requirements.
+
+D
+Perform a risk assessment on the environment to ensure all risks has been addressed.
+
+Question 39 of 40
+Which of the below data classifications would require the highest level of protection?
+
+Choose only ONE best answer.
+
+A
+Financial data
+
+B
+Personal health care information
+
+C
+List of organisational assets
+
+D
+Organisational structure & roles
+
+Question 40 of 40
+Which one of the following is NOT a Trust Service Criteria?
+
+Choose only ONE best answer.
+
+A
+Control Environment
+
+B
+Internal Control
+
+C
+Monitoring Activities
+
+D
+Logical and Physical Access

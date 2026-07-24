@@ -102,6 +102,19 @@ export function facebookProfileIdFromUrl(url: string | null | undefined): string
   return m?.[1] ?? null;
 }
 
+export function libraryCourseIdFromSource(source: {
+  tags?: string[] | null;
+}): string | null {
+  for (const tag of source.tags ?? []) {
+    const raw = String(tag || "").trim();
+    if (raw.toLowerCase().startsWith("course_id:")) {
+      const cid = raw.slice("course_id:".length).trim();
+      if (cid) return cid;
+    }
+  }
+  return null;
+}
+
 export function mapSource(s: any): Source {
   return {
     id: s.id,

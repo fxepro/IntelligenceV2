@@ -272,15 +272,15 @@ export async function GET() {
       label: "Domains",
       status: "active",
       blurb: "www, .net and other TLDs — registries, WHOIS, DNS, availability and ownership",
-      home: "/domain-names/sources",
+      home: "/domain-names/portfolio",
       docs_url: null,
     },
     {
       id: "library",
-      label: "Library",
+      label: "Courses",
       status: "active",
       blurb: "Lessons from courses, books, and videos — text, PDF, and video by topic",
-      home: "/library/lessons",
+      home: "/library/sources",
       docs_url: null,
     },
     {

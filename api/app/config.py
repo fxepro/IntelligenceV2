@@ -22,6 +22,10 @@ class Settings(BaseSettings):
 
     openai_api_key: str = ""
 
+    # NameBright Domain API (My domains)
+    namebright_client_id: str = ""
+    namebright_client_secret: str = ""
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
