@@ -323,8 +323,13 @@ def _read_markdown(path: Path) -> tuple[str, str, dict[str, str]]:
 
 
 def _lesson_id(index: int, file_rel: str) -> str:
-    stem = Path(file_rel).stem
-    return f"scy-{index:03d}-{stem[:40]}"
+    rel = (file_rel or "").replace("\\", "/")
+    stem = Path(rel).stem if rel else f"lesson-{index:03d}"
+    if "scytale-soc2" in rel:
+        return f"scy-{index:03d}-{stem[:40]}"
+    if "drata-soc2" in rel and "drata-soc-2-learn" not in rel:
+        return f"dra-{index:03d}-{stem[:40]}"
+    return f"lesson-{index}"
 
 
 def _load_scytale() -> list[LessonDetail]:
@@ -396,48 +401,82 @@ def _load_scytale() -> list[LessonDetail]:
 def _load_drata() -> list[LessonDetail]:
     if not DRATA_MANIFEST.is_file():
         return []
-    rows = json.loads(DRATA_MANIFEST.read_text(encoding="utf-8"))
+    return _load_manifest_course(DRATA_MANIFEST, "drata-soc-2", "Drata SOC 2")
+
+
+def _load_manifest_course(manifest_path: Path, course_id: str, course_name: str) -> list[LessonDetail]:
+    if not manifest_path.is_file():
+        return []
+    rows = json.loads(manifest_path.read_text(encoding="utf-8"))
     out: list[LessonDetail] = []
     for row in rows:
         if not row.get("ok"):
             continue
         file_rel = row.get("file") or ""
         path = ROOT / file_rel
-        if not path.is_file():
+        body = ""
+        meta: dict = {}
+        if path.is_file():
+            _doc_title, body, meta = _read_markdown(path)
+        elif not row.get("url"):
             continue
-        _doc_title, body, meta = _read_markdown(path)
         title = (
             meta.get("title")
             or row.get("title")
             or _doc_title
             or _clean_title(row.get("label") or "", url=row.get("url") or "", fallback=Path(file_rel).stem)
         )
-        category = meta.get("category") or row.get("category") or "Drata"
+        category = meta.get("category") or row.get("category") or "General"
         url = row.get("url") or meta.get("url") or ""
-        course_id, course_name = "drata-soc-2", "Drata SOC 2"
-        if meta.get("course"):
-            course_name = meta["course"]
-        lid = f"dra-{int(row.get('index') or 0):03d}-{Path(file_rel).stem[:40]}"
+        cname = meta.get("course") or course_name
+        cid = meta.get("course_id") or course_id
+        raw_kind = (row.get("kind") or meta.get("kind") or "text").lower()
+        kind = _KIND_MAP.get(raw_kind, raw_kind if raw_kind in ("text", "video", "pdf", "quiz") else "text")
+        lid = row.get("lesson_id") or _lesson_id(int(row.get("index") or 0), file_rel)
         out.append(
             LessonDetail(
                 id=lid,
                 title=title,
-                course_id=course_id,
-                course=course_name,
+                course_id=cid,
+                course=cname,
                 category=category,
-                kind="text",
+                kind=kind,
                 label=row.get("label") or title,
                 source_url=url or None,
                 chars=len(body),
                 has_text=bool(body),
-                has_video=False,
-                has_pdf=False,
+                has_video=kind == "video" or bool(meta.get("has_video")),
+                has_pdf=kind == "pdf",
                 content_status="ready" if body else "empty",
                 body=body,
-                assets=[LessonAsset(kind="text", url=url or None, file=file_rel.replace("\\", "/"))],
+                assets=[LessonAsset(kind=kind, url=url or None, file=file_rel.replace("\\", "/"))],
                 fetched_at=meta.get("fetched_at"),
             )
         )
+    return out
+
+
+def _load_discovered() -> list[LessonDetail]:
+    """Courses under v2/data/{slug}/ with manifest.json (excluding scytale/drata)."""
+    from app.services.library_course_paths import KNOWN_MANIFEST_DIRS
+
+    out: list[LessonDetail] = []
+    if not DATA_ROOT.is_dir():
+        return out
+    for child in sorted(DATA_ROOT.iterdir()):
+        if not child.is_dir() or child.name in KNOWN_MANIFEST_DIRS:
+            continue
+        manifest = child / "manifest.json"
+        if not manifest.is_file():
+            continue
+        try:
+            rows = json.loads(manifest.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        if not rows:
+            continue
+        course_name = child.name.replace("-", " ").title()
+        out.extend(_load_manifest_course(manifest, child.name, course_name))
     return out
 
 
@@ -531,7 +570,7 @@ def _load_manual() -> list[LessonDetail]:
 
 
 def _all_lessons() -> list[LessonDetail]:
-    return _load_scytale() + _load_drata() + _load_parsed() + _load_manual()
+    return _load_scytale() + _load_drata() + _load_discovered() + _load_parsed() + _load_manual()
 
 
 def _lesson_published_flag(item: LessonSummary | LessonDetail) -> bool:
@@ -574,9 +613,25 @@ def _lesson_sort_key(item: LessonSummary | LessonDetail) -> tuple:
         if m:
             idx = int(m.group(1))
         else:
-            m2 = re.search(r"-(\d{3})-", item.id or "")
-            idx = int(m2.group(1)) if m2 else 10_000
+            m_lesson = re.match(r"^lesson-(\d+)$", item.id or "")
+            if m_lesson:
+                idx = int(m_lesson.group(1))
+            else:
+                m2 = re.search(r"-(\d{3})-", item.id or "")
+                idx = int(m2.group(1)) if m2 else 10_000
     return (_module_sort_key(item.category), idx, (item.title or "").lower())
+
+
+def _course_query_keys(course_key: str) -> frozenset[str]:
+    """Map destination ids to all disk/catalog course_id values (legacy folder names)."""
+    aliases: dict[str, frozenset[str]] = {
+        "soc-2-compliance": frozenset({"soc-2-compliance", "scytale-soc2", "scytale-soc-2"}),
+        "scytale-soc2": frozenset({"soc-2-compliance", "scytale-soc2", "scytale-soc-2"}),
+        "scytale-soc-2": frozenset({"soc-2-compliance", "scytale-soc2", "scytale-soc-2"}),
+        "drata-soc-2": frozenset({"drata-soc-2", "drata-soc2"}),
+        "drata-soc2": frozenset({"drata-soc-2", "drata-soc2"}),
+    }
+    return aliases.get(course_key, frozenset({course_key}))
 
 
 def list_lessons(
@@ -601,8 +656,9 @@ def list_lessons(
     query = (q or "").strip().lower()
 
     scoped: list[LessonDetail] = []
+    course_keys = _course_query_keys(course_key) if course_key else frozenset()
     for item in items:
-        if course_key and item.course_id.lower() != course_key and item.course.lower() != course_key:
+        if course_key and item.course_id.lower() not in course_keys and item.course.lower() != course_key:
             continue
         if published_only and not _is_publishable(item):
             continue

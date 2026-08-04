@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 from celery_app import celery_app
@@ -22,15 +23,51 @@ def _load_script(name: str):
     return mod
 
 
+def _course_data_dir(course_id: str) -> Path:
+    from app.services.library_course_paths import course_data_dir
+
+    return course_data_dir(course_id)
+
+
+def _acquire_article_bodies(course_id: str) -> dict:
+    """Generic manifest-based body fetch for any article_hub destination."""
+    from app.services.article_acquire import run_acquire_bodies
+
+    out = _course_data_dir(course_id)
+    manifest_path = out / "manifest.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"No manifest at {manifest_path} — run Discover first")
+    rows = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(rows, list) or not any(r.get("url") for r in rows if isinstance(r, dict)):
+        raise ValueError("manifest.json has no article URLs — run Discover first")
+    return run_acquire_bodies(out_dir=out)
+
+
 def _refresh_library_course(course_id: str) -> dict:
+    """Full re-download for legacy scripted courses, or generic acquire when manifest exists."""
     key = (course_id or "").strip().lower()
+    out = _course_data_dir(key)
+    manifest_path = out / "manifest.json"
+
+    if manifest_path.is_file():
+        try:
+            rows = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            rows = []
+        if isinstance(rows, list) and any(r.get("url") for r in rows if isinstance(r, dict)):
+            return _acquire_article_bodies(key)
+
+    # Legacy full BFS scripts when no discover manifest yet
     if key in ("soc-2-compliance", "scytale", "scytale-soc2"):
         return _load_script("download_scytale_soc2").run()
-    if key in ("drata-soc-2", "drata", "drata-soc2"):
-        return _load_script("download_drata_soc2").run()
+    if key in ("drata-soc-2", "drata", "drata-soc2", "drata-soc-2-learn"):
+        mod = _load_script("download_drata_soc2")
+        if hasattr(mod, "run"):
+            return mod.run(out_dir=out)
+        return mod.run()
+
     raise ValueError(
-        f"No library refresh scraper for course_id={course_id!r} "
-        "(supported: soc-2-compliance, drata-soc-2)"
+        f"No lessons to acquire for course_id={course_id!r} — run Discover first or add a refresh script"
     )
 
 
@@ -44,6 +81,7 @@ def run_acquire(self, job_id: str):
             payload = job.payload or {}
             action = (payload.get("action") or "").strip().lower()
             course_id = (payload.get("course_id") or "").strip()
+            job_source_id = job.source_id
 
         if action == "library_refresh":
             if not course_id:
@@ -53,6 +91,26 @@ def run_acquire(self, job_id: str):
                 raise RuntimeError(f"library_refresh returned invalid result: {result!r}")
             with session_scope() as session:
                 mark_completed(session, job_id, result)
+            return {"job_id": job_id, **result}
+
+        if action == "library_acquire_articles":
+            sid = (payload.get("source_id") or "").strip()
+            cid = (payload.get("course_id") or course_id or "").strip()
+            if not cid:
+                raise ValueError("library_acquire_articles requires course_id")
+            result = _acquire_article_bodies(cid)
+            if not isinstance(result, dict) or result.get("total") is None:
+                raise RuntimeError(f"library_acquire_articles returned invalid result: {result!r}")
+            if sid:
+                from uuid import UUID
+
+                from app.services.library_source_lessons import sync_lessons_from_disk
+
+                with session_scope() as session:
+                    sync_lessons_from_disk(session, source_id=UUID(sid), course_id=cid)
+                    session.commit()
+            with session_scope() as session:
+                mark_completed(session, job_id, {**result, "action": action, "source_id": sid})
             return {"job_id": job_id, **result}
 
         if action == "namebright_portfolio_sync":
@@ -75,19 +133,39 @@ def run_acquire(self, job_id: str):
                 mark_completed(session, job_id, result)
             return {"job_id": job_id, **result}
 
+        if action == "sam_gov_opportunities_sync":
+            from uuid import UUID
+
+            from app.services.sam_gov_sync import sync_opportunities
+
+            sid = payload.get("source_id") or job_source_id
+            if not sid:
+                raise ValueError("sam_gov_opportunities_sync requires source_id")
+            with session_scope() as session:
+                result = sync_opportunities(
+                    session,
+                    source_id=UUID(str(sid)),
+                    posted_from=(payload or {}).get("posted_from"),
+                    posted_to=(payload or {}).get("posted_to"),
+                    limit=int((payload or {}).get("limit") or 100),
+                    max_pages=int((payload or {}).get("max_pages") or 1),
+                )
+                mark_completed(session, job_id, result)
+            return {"job_id": job_id, **result}
+
         with session_scope() as session:
             mark_completed(
                 session,
                 job_id,
                 {
                     "note": "acquisition stub",
-                    "hint": "Pass payload.action=library_refresh, namebright_portfolio_sync, or namebright_dns_sync",
+                    "hint": "Pass payload.action=library_refresh, library_acquire_articles, namebright_portfolio_sync, namebright_dns_sync, or sam_gov_opportunities_sync",
                 },
             )
         return {"job_id": job_id, "ok": True, "note": "acquisition stub"}
     except Exception as exc:
         with session_scope() as session:
             mark_failed(session, job_id, f"{type(exc).__name__}: {exc}")
-        if action in ("library_refresh", "namebright_portfolio_sync", "namebright_dns_sync"):
+        if action in ("library_refresh", "library_acquire_articles", "namebright_portfolio_sync", "namebright_dns_sync", "sam_gov_opportunities_sync"):
             return {"job_id": job_id, "ok": False, "error": str(exc)}
         raise self.retry(exc=exc, countdown=60)

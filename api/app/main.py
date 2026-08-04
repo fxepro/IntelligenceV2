@@ -4,18 +4,20 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api import health, jobs, records, sources, discover, media, research, credentials, system, app_settings, ask, library, trademarks, domain_names
+from app.api import health, jobs, records, sources, discover, media, research, credentials, system, app_settings, ask, courses, trademarks, domain_names, library, government
 from app.config import get_settings
 from app.database import Base, engine
 from app.models import (  # noqa: F401 — register metadata
     AppSetting,
     DomainDetail,
+    GovernmentDetail,
     Job,
     Record,
     Source,
     SourceStream,
     PlatformCredential,
     TrademarkSourceDetail,
+    LibrarySourceLesson,
 )
 
 
@@ -50,8 +52,10 @@ async def _run_dev_migrations() -> None:
     patches = [
         "ALTER TYPE platform ADD VALUE IF NOT EXISTS 'x'",
         "ALTER TYPE platform ADD VALUE IF NOT EXISTS 'government'",
+        "ALTER TYPE platform ADD VALUE IF NOT EXISTS 'local'",
         "ALTER TYPE source_type ADD VALUE IF NOT EXISTS 'x_posts'",
         "ALTER TYPE source_type ADD VALUE IF NOT EXISTS 'website'",
+        "ALTER TYPE source_type ADD VALUE IF NOT EXISTS 'local_folder'",
         """
         DO $$ BEGIN
             CREATE TYPE source_priority AS ENUM ('low', 'normal', 'high', 'urgent');
@@ -102,6 +106,10 @@ async def _run_dev_migrations() -> None:
         (
             "category",
             "ALTER TABLE sources ADD COLUMN IF NOT EXISTS category VARCHAR(128)",
+        ),
+        (
+            "connector",
+            "ALTER TABLE sources ADD COLUMN IF NOT EXISTS connector VARCHAR(64)",
         ),
     ]
     for column, sql in column_patches:
@@ -200,6 +208,24 @@ async def _run_dev_migrations() -> None:
             f"{type(exc).__name__}: {exc}"
         )
 
+    # government_details — user-created shell table may have no columns yet
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SET lock_timeout = '3s'"))
+            if not await _column_exists(conn, "government_details", "id"):
+                await conn.execute(text("DROP TABLE IF EXISTS government_details CASCADE"))
+                await conn.commit()
+    except Exception as exc:
+        print(f"[lifespan] government_details reset skipped: {type(exc).__name__}: {exc}")
+
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SET lock_timeout = '3s'"))
+            await conn.run_sync(Base.metadata.create_all)
+            await conn.commit()
+    except Exception as exc:
+        print(f"[lifespan] government_details create skipped: {type(exc).__name__}: {exc}")
+
     # Backfill MEDIA-0001… (and any other domain missing ids).
     try:
         from sqlalchemy import create_engine
@@ -225,6 +251,20 @@ async def _run_dev_migrations() -> None:
         sync_engine.dispose()
     except Exception as exc:
         print(f"[lifespan] catalog/category backfill skipped: {type(exc).__name__}: {exc}")
+
+    # Phase 0: curriculum vertical library → courses (idempotent).
+    try:
+        from app.migrations.courses_domain import migrate_library_to_courses
+
+        sync_engine = create_engine(get_settings().database_url_sync)
+        with sync_engine.connect() as conn:
+            counts = migrate_library_to_courses(conn)
+            conn.commit()
+        sync_engine.dispose()
+        if counts:
+            print(f"[lifespan] courses domain migration: {counts}")
+    except Exception as exc:
+        print(f"[lifespan] courses domain migration skipped: {type(exc).__name__}: {exc}")
 
 
 @asynccontextmanager
@@ -268,14 +308,16 @@ app.include_router(sources.router, prefix=f"{prefix}/sources", tags=["Sources"])
 app.include_router(records.router, prefix=f"{prefix}/records", tags=["Records"])
 app.include_router(discover.router, prefix=f"{prefix}/discover", tags=["Discover"])
 app.include_router(media.router, prefix=f"{prefix}/media", tags=["Media"])
+app.include_router(library.router, prefix=f"{prefix}/library", tags=["Library"])
 app.include_router(research.router, prefix=f"{prefix}/research", tags=["Research"])
 app.include_router(credentials.router, prefix=f"{prefix}/credentials", tags=["Credentials"])
 app.include_router(system.router, prefix=f"{prefix}/system", tags=["System"])
 app.include_router(app_settings.router, prefix=f"{prefix}/settings", tags=["Settings"])
 app.include_router(ask.router, prefix=f"{prefix}/ask", tags=["Ask"])
-app.include_router(library.router, prefix=f"{prefix}/library", tags=["Library"])
+app.include_router(courses.router, prefix=f"{prefix}/courses", tags=["Courses"])
 app.include_router(trademarks.router, prefix=f"{prefix}/trademarks", tags=["Trademarks"])
 app.include_router(domain_names.router, prefix=f"{prefix}/domain-names", tags=["Domains"])
+app.include_router(government.router, prefix=f"{prefix}/government", tags=["Government"])
 
 
 @app.get("/")

@@ -7,7 +7,7 @@ export default function LibraryLessonsRoute() {
   return (
     <Suspense
       fallback={
-        <div className="p-6 text-sm text-muted-foreground">Loading library…</div>
+        <div className="p-6 text-sm text-muted-foreground">Loading lessons…</div>
       }
     >
       <LibraryLessonsPage />

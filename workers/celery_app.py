@@ -35,13 +35,17 @@ celery_app.conf.update(
     },
     task_routes={
         "tasks.discovery.*": {"queue": "discovery"},
+        "tasks.library_inventory.*": {"queue": "discovery"},
         "tasks.acquisition.*": {"queue": "acquisition"},
+        "tasks.government_sync.*": {"queue": "acquisition"},
         "tasks.transcription.*": {"queue": "transcription"},
         "tasks.intelligence.*": {"queue": "intelligence"},
     },
     imports=(
         "tasks.discovery",
+        "tasks.library_inventory",
         "tasks.acquisition",
+        "tasks.government_sync",
         "tasks.transcription",
         "tasks.intelligence",
     ),

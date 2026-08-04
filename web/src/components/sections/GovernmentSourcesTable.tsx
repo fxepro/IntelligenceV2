@@ -32,7 +32,7 @@ const PRIORITY_CLASS: Record<SourcePriority, string> = {
 };
 
 const th =
-  "h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-center";
+  "h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-center";
 const td = "px-3 py-3 text-center";
 
 export function GovernmentSourcesTable({
@@ -74,20 +74,20 @@ export function GovernmentSourcesTable({
 
       <div className="overflow-x-auto bg-card">
         <Table className="bg-card">
-          <TableHeader className="bg-card">
+          <TableHeader>
             <TableRow className="hover:bg-transparent bg-card">
               <TableHead className={`${th} w-[48px]`}>#</TableHead>
               <TableHead className={`${th} w-[100px]`}>ID</TableHead>
-              <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider text-muted-foreground text-left">
+              <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-left">
                 Name
               </TableHead>
-              <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-left w-[160px]">
+              <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-left w-[160px]">
                 Category
               </TableHead>
               <TableHead className={`${th} w-[64px]`} title="1 = highest, 5 = lowest">
                 Priority
               </TableHead>
-              <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-left min-w-[200px]">
+              <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-left min-w-[200px]">
                 Access
               </TableHead>
               <TableHead className={`${th} w-[72px]`}>Status</TableHead>

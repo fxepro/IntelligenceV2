@@ -74,24 +74,15 @@ function tablePipelineStatus(status: string | null | undefined): string {
   return pipelineStatusLabel(status);
 }
 
-interface SourceDetail {
-  id: string;
-  platform: Platform;
-  source_type: string;
-  source_url: string;
-  vanity_url?: string | null;
-  name: string | null;
-  description: string | null;
-  tags?: string[];
-  priority?: "urgent" | "high" | "normal" | "low" | "lowest";
-  autorun?: boolean;
+import type { Source } from "@/lib/mock-data/sources";
+
+export interface SourceDetail extends Omit<Source, 'last_checked' | 'description' | 'item_count' | 'streams'> {
+  description?: string | null;
   auto_transcribe?: boolean;
-  status: string;
-  last_checked: string | null;
-  subscriber_count: number | null;
-  video_count: number | null;
+  vanity_url?: string | null;
+  last_checked?: string | null;
+  error_message?: string | null;
   item_count?: number | null;
-  error_message: string | null;
   streams?: Array<{
     id: string;
     stream_type: string;
@@ -578,12 +569,10 @@ export default function SourceDetailPage() {
           <div className="flex flex-wrap items-center gap-2">
             <PlatformBadge platform={source.platform} variant="logo" />
             <SourceStatusBadge status={source.status} />
-            {(source.streams?.length ? source.streams : [{ stream_type: source.source_type, item_count: source.item_count ?? total }]).map((stream) => (
-              <Badge key={String(stream.stream_type)} variant="outline" className="gap-1.5 text-fine tracking-normal normal-case">
-                <span>{sourceTypeLabel(String(stream.stream_type))}</span>
-                <span className="tabular-nums text-muted-foreground">{stream.item_count ?? 0}</span>
-              </Badge>
-            ))}
+            <Badge variant="outline" className="gap-1.5 text-fine tracking-normal normal-case">
+              <span>{sourceTypeLabel(source.source_type)}</span>
+              <span className="tabular-nums text-muted-foreground">{source.item_count ?? total}</span>
+            </Badge>
           </div>
           <h1 className="page-title truncate">{title}</h1>
           {(() => {
@@ -1123,7 +1112,7 @@ export default function SourceDetailPage() {
 
           <div className="rounded-xl border border-border/50 overflow-hidden">
             <Table>
-              <TableHeader className="bg-muted/10">
+              <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider w-[52px] text-right">#</TableHead>
                   <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider w-[56px]"> </TableHead>
@@ -1273,7 +1262,7 @@ export default function SourceDetailPage() {
         open={showEditSource}
         onClose={() => setShowEditSource(false)}
         onAdd={handleSaveSource}
-        initialSource={source}
+        initialSource={source as any}
       />
 
       <MediaDetailDialog id={detailId} onClose={() => setDetailId(null)} />

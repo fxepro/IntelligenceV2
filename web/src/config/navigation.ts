@@ -33,6 +33,7 @@ export const domainNav: Record<DomainKey, NavItem[]> = {
   torrents: [],
   trademarks: [],
   domain_names: [],
+  courses: [],
   library: [],
   patents: [],
   songs: [],

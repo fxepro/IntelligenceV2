@@ -167,6 +167,7 @@ def run_autorun_scan():
     """Queue due discovery jobs for active sources with Autorun enabled."""
     from app.models.job import Job, JobStatus, JobType
     from app.models.source import Source, SourceStatus
+    from app.models.source_stream import SourceStream
 
     from app.services.discovery_config import get_discovery_settings_sync
 
@@ -235,28 +236,55 @@ def run_url_check_scan(force: bool = False):
     return {"checked": 0, "failed": 0, "skipped": "removed"}
 
 
-@celery_app.task(name="tasks.discovery.run_discover", bind=True, max_retries=3)
+@celery_app.task(
+    name="tasks.discovery.run_discover",
+    bind=True,
+    max_retries=3,
+    soft_time_limit=120,
+    time_limit=150,
+)
 def run_discover(self, job_id: str):
     try:
+        # Library courses use a separate impl — must not nest session_scope (solo worker deadlock).
         with session_scope() as session:
-            job = mark_running(session, job_id)
-            payload = job.payload or {}
-            max_items = int(payload.get("max_items") or 50)
+            from app.models.job import Job
 
-            from app.models.source import Source, SourceStatus
-            from app.models.source_stream import SourceStream
-            from app.services.discover_media import (
-                extract_items,
-                facebook_items,
-                facebook_video_items,
-            )
-
+            job = session.get(Job, uuid.UUID(str(job_id)))
+            if not job:
+                raise ValueError(f"Job {job_id} not found")
             if not job.source_id:
                 raise ValueError("Discover job missing source_id")
+            from app.models.source import Source
 
             source = session.get(Source, job.source_id)
             if not source:
                 raise ValueError(f"Source {job.source_id} not found")
+            from app.domain_keys import is_courses_domain
+
+            courses_route = is_courses_domain(source.domain)
+
+        if courses_route:
+            from tasks.course_discovery import _run_course_discover_impl
+
+            return _run_course_discover_impl(job_id)
+
+        with session_scope() as session:
+            job = mark_running(session, job_id)
+            payload = job.payload or {}
+
+            if not job.source_id:
+                raise ValueError("Discover job missing source_id")
+
+            from app.models.source import Source, SourceStatus
+            from app.models.source_stream import SourceStream
+
+            source = session.get(Source, job.source_id)
+            if not source:
+                raise ValueError(f"Source {job.source_id} not found")
+
+            # Media domain discovery continues below
+            max_items = int(payload.get("max_items") or 50)
+
             if source.status != SourceStatus.active:
                 mark_completed(
                     session,
@@ -266,6 +294,12 @@ def run_discover(self, job_id: str):
                 return {"job_id": job_id, "skipped": True}
 
             platform = source.platform.value if hasattr(source.platform, "value") else str(source.platform)
+            from app.services.discover_media import (
+                extract_items,
+                facebook_items,
+                facebook_video_items,
+            )
+
             stream_rows = (
                 session.query(SourceStream)
                 .filter(SourceStream.source_id == source.id)

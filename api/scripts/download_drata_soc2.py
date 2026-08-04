@@ -274,7 +274,14 @@ def _extract_article(page) -> tuple[str, str, list[dict]]:
     return title, body, links
 
 
-def _localize_body_images(page, body: str, slug: str) -> str:
+def _localize_body_images(
+    page,
+    body: str,
+    slug: str,
+    *,
+    target: Path,
+    files_prefix: str,
+) -> str:
     from app.services.library_media import localize_markdown_images
 
     def request_get(url: str):
@@ -282,15 +289,24 @@ def _localize_body_images(page, body: str, slug: str) -> str:
 
     return localize_markdown_images(
         body,
-        disk_dir=OUT_DIR / "assets" / slug,
-        files_prefix=f"drata-soc-2/assets/{slug}",
+        disk_dir=target / "assets" / slug,
+        files_prefix=files_prefix,
         request_get=request_get,
     )
 
 
-def run() -> dict:
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUT_DIR / "pages").mkdir(exist_ok=True)
+def run_acquire_bodies(out_dir: Path | None = None) -> dict:
+    """Drata script entrypoint — delegates to generic article acquire."""
+    from app.services.article_acquire import run_acquire_bodies as generic_acquire
+
+    target = Path(out_dir) if out_dir else OUT_DIR
+    return generic_acquire(out_dir=target, course_name="Drata SOC 2 Learn")
+
+
+def run(out_dir: Path | None = None) -> dict:
+    target = Path(out_dir) if out_dir else OUT_DIR
+    target.mkdir(parents=True, exist_ok=True)
+    (target / "pages").mkdir(exist_ok=True)
 
     from playwright.sync_api import sync_playwright
 
@@ -326,7 +342,7 @@ def run() -> dict:
             ordered.append(url)
             idx = len(ordered)
             slug = f"{idx:03d}-{_slug_from_url(url)}"
-            out_path = OUT_DIR / "pages" / f"{slug}.md"
+            out_path = target / "pages" / f"{slug}.md"
             print(f"[{idx}] {label[:70]}")
             print(f"     {url}")
             try:
@@ -338,7 +354,13 @@ def run() -> dict:
                     title, body, links = _extract_article(page)
                 title = title or label or _title_from_slug(url)
                 if body:
-                    body = _localize_body_images(page, body, slug)
+                    body = _localize_body_images(
+                        page,
+                        body,
+                        slug,
+                        target=target,
+                        files_prefix=f"data/{target.name}/assets/{slug}",
+                    )
                 # Enqueue in-article SOC 2 learn links
                 for link in links:
                     nu = _norm_url(link.get("href") or "")
@@ -399,19 +421,20 @@ def run() -> dict:
 
         browser.close()
 
-    (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    (target / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     ok = sum(1 for m in manifest if m.get("ok"))
     featured = sum(1 for m in manifest if m.get("featured") and m.get("ok"))
     failed = sum(1 for m in manifest if not m.get("ok"))
-    print(f"done — {ok}/{len(manifest)} saved ({featured} featured) -> {OUT_DIR}")
+    print(f"done — {ok}/{len(manifest)} saved ({featured} featured) -> {target}")
+    course_slug = target.name
     return {
-        "course_id": "drata-soc-2",
+        "course_id": course_slug,
         "ok": ok,
         "locked": 0,
         "failed": failed,
         "total": len(manifest),
         "featured": featured,
-        "out_dir": str(OUT_DIR),
+        "out_dir": str(target),
     }
 
 

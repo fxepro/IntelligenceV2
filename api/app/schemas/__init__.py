@@ -61,6 +61,9 @@ class SourceCreate(BaseModel):
     autorun: bool = False
     auto_transcribe: bool = False
     access_mode: str = "public"
+    # Library course slug → v2/data/{course_id}/ on disk
+    course_id: str | None = Field(default=None, max_length=128)
+    connector: str | None = Field(default=None, max_length=64)
 
 
 class SourceUpdate(BaseModel):
@@ -77,6 +80,8 @@ class SourceUpdate(BaseModel):
     auto_transcribe: bool | None = None
     tags: list[str] | None = None
     priority: SourcePriority | None = None
+    course_id: str | None = Field(default=None, max_length=128)
+    connector: str | None = Field(default=None, max_length=64)
 
 
 class SourceOut(BaseModel):
@@ -112,6 +117,7 @@ class SourceOut(BaseModel):
     transcription_completed: int = 0
     transcription_done: bool = False
     streams: list[SourceStreamOut] = Field(default_factory=list)
+    connector: str | None = None
     created_at: datetime
     updated_at: datetime
 

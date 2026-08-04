@@ -54,7 +54,7 @@ const SUBTABS = [
 ] as const;
 
 const th =
-  "h-11 px-2 text-fine font-bold uppercase tracking-wider text-muted-foreground text-center";
+  "h-11 px-2 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-center";
 const td = "px-2 py-2.5 text-center text-sm";
 
 function formatDate(raw?: string | null): string {

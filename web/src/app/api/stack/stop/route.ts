@@ -54,9 +54,10 @@ export async function POST(req: Request) {
     if (id === "celery" || id === "workers") {
       const r = await ps(`
         $killed = @()
-        Get-CimInstance Win32_Process -Filter "Name = 'python.exe'" |
+        Get-CimInstance Win32_Process |
           Where-Object {
             $_.CommandLine -and
+            $_.CommandLine -match 'intelligence\\\\v2' -and
             $_.CommandLine -match 'celery' -and
             $_.CommandLine -match 'worker' -and
             $_.CommandLine -notmatch 'beat'
@@ -74,9 +75,10 @@ export async function POST(req: Request) {
     if (id === "celery_beat" || id === "beat") {
       const r = await ps(`
         $killed = @()
-        Get-CimInstance Win32_Process -Filter "Name = 'python.exe'" |
+        Get-CimInstance Win32_Process |
           Where-Object {
             $_.CommandLine -and
+            $_.CommandLine -match 'intelligence\\\\v2' -and
             $_.CommandLine -match 'celery' -and
             $_.CommandLine -match 'beat'
           } |

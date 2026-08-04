@@ -28,6 +28,7 @@ DOMAIN_PREFIX: dict[str, str] = {
     "torrents": "TOR",
     "trademarks": "TMK",
     "domain_names": "WWW",
+    "courses": "CRS",
     "library": "LIB",
     "patents": "PAT",
     "songs": "SONG",

@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 from app.services.library_catalog import DATA_ROOT
 
 _IMG_MD = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")
-_FILES_PREFIX = "/api/v1/library/files/"
+_FILES_PREFIX = "/api/v1/courses/files/"
 
 
 def _ext_for(url: str, content_type: str | None) -> str:
@@ -41,7 +41,7 @@ def localize_markdown_images(
 ) -> str:
     """
     Download remote / data: images referenced in markdown into disk_dir.
-    Rewrite to /api/v1/library/files/{files_prefix}/NNN.ext
+    Rewrite to /api/v1/courses/files/{files_prefix}/NNN.ext
 
     request_get: callable(url) -> response with .ok, .headers, .body() / .content
                  (Playwright APIResponse) or None to use httpx.
@@ -134,7 +134,7 @@ def localize_markdown_images(
 
 
 def resolve_library_file(file_path: str) -> Path | None:
-    """Map /api/v1/library/files/... relative path to a file under DATA_ROOT."""
+    """Map /api/v1/courses/files/... relative path to a file under DATA_ROOT."""
     rel = (file_path or "").replace("\\", "/").lstrip("/")
     if not rel or ".." in rel.split("/"):
         return None

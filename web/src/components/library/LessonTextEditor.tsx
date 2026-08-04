@@ -88,7 +88,7 @@ export function LessonTextEditor({
         payload.course = nextCourse;
       }
       const res = await fetch(
-        `${API_BASE}/api/v1/library/lessons/${encodeURIComponent(lessonId)}`,
+        `${API_BASE}/api/v1/courses/lessons/${encodeURIComponent(lessonId)}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

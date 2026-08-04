@@ -7,7 +7,9 @@ export type Platform =
   | "rss"
   | "podcast"
   | "website"
-  | "government";
+  | "government"
+  | "local"
+  | "course";
 export type SourceType =
   | "facebook_reels"
   | "facebook_videos"
@@ -19,9 +21,11 @@ export type SourceType =
   | "rss_feed"
   | "sitemap"
   | "website"
+  | "local_folder"
   | "channel"
   | "playlist"
-  | "profile";
+  | "profile"
+  | "curriculum";
 export type SourceStatus = "active" | "paused" | "error";
 /** 1=urgent (highest) … 5=lowest — stored as enum names in the API. */
 export type SourcePriority = "urgent" | "high" | "normal" | "low" | "lowest";
@@ -68,6 +72,8 @@ export interface Source {
   total_views?: number | null;
   joined_at?: string | null;
   description?: string | null;
+  /** Curriculum page shape for auto-discover (youtube_curriculum, article_hub, manual, …). */
+  connector?: string | null;
   /** Trademark machine-channel readiness: api | bulk | api_bulk (only ~17 sources). */
   connect_readiness?: "api" | "bulk" | "api_bulk" | null;
 }
@@ -239,6 +245,7 @@ export const PLATFORM_LABELS: Record<Platform, string> = {
   podcast: "Podcast",
   website: "Website",
   government: "Government",
+  course: "Course",
 };
 
 export const PLATFORM_COLORS: Record<Platform, string> = {
@@ -251,4 +258,5 @@ export const PLATFORM_COLORS: Record<Platform, string> = {
   podcast: "bg-purple-500/10 text-purple-400 border-purple-500/20",
   website: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   government: "bg-amber-500/10 text-amber-700 border-amber-500/25",
+  course: "bg-blue-500/10 text-blue-400 border-blue-500/25",
 };

@@ -44,6 +44,10 @@ export function detectPlatform(raw: string): { platform: Platform; source_type: 
     return { platform: "tiktok", source_type: "tiktok_videos" };
   if (u.includes("x.com") || u.includes("twitter.com"))
     return { platform: "x", source_type: "x_posts" };
+  if (u.includes(".gov") || u.includes("government"))
+    return { platform: "government", source_type: "sitemap" };
+  if (u.includes("strongdm.com") || u.includes("course") || u.includes("academy"))
+    return { platform: "course", source_type: "curriculum" };
   if (
     u.endsWith(".rss") ||
     u.endsWith(".xml") ||
@@ -115,6 +119,32 @@ export function libraryCourseIdFromSource(source: {
   return null;
 }
 
+/** Auto-synced library sources use mi:// — content already lives under v2/data/. */
+export function isFileBackedLibrarySource(source: {
+  source_url?: string | null;
+}): boolean {
+  return (source.source_url ?? "").startsWith("mi://courses/");
+}
+
+/** Destination tag vs legacy on-disk folder (e.g. soc-2-compliance → scytale-soc2). */
+export const LEGACY_DISK_ALIASES: Record<string, string> = {
+  "soc-2-compliance": "scytale-soc2",
+  "drata-soc-2": "drata-soc2",
+};
+
+export function libraryDiskFolderId(courseId: string): string {
+  return LEGACY_DISK_ALIASES[courseId] ?? courseId;
+}
+
+export function slugifyCourseId(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
 export function mapSource(s: any): Source {
   return {
     id: s.id,
@@ -149,7 +179,8 @@ export function mapSource(s: any): Source {
     video_count: s.video_count,
     total_views: s.total_views,
     joined_at: s.joined_at,
-    description: s.description,
+    description: s.description ?? null,
+    connector: s.connector ?? null,
     created_at: s.created_at,
     connect_readiness: s.connect_readiness ?? null,
   };
@@ -164,6 +195,8 @@ export const PLATFORM_OPTIONS: { id: Platform; label: string; hint: string }[] =
   { id: "podcast", label: "Podcast", hint: "RSS / feed URL" },
   { id: "rss", label: "RSS", hint: "Any RSS / Atom feed" },
   { id: "website", label: "Website", hint: "Site or sitemap" },
+  { id: "government", label: "Government", hint: "Gov Portal" },
+  { id: "course", label: "Course", hint: "Course curriculum URL" },
 ];
 
 export const PLATFORM_GUIDES: Record<
@@ -226,6 +259,16 @@ export const PLATFORM_GUIDES: Record<
     bullets: ["Homepage or sitemap URL. We’ll probe common feed paths first."],
     examples: ["https://example.com", "https://example.com/sitemap.xml"],
   },
+  government: {
+    title: "Government Portal",
+    bullets: ["Agency, municipality, or portal URL."],
+    examples: ["https://www.example.gov"],
+  },
+  course: {
+    title: "Course Provider",
+    bullets: ["Link to a curriculum or course homepage."],
+    examples: ["https://www.strongdm.com/soc2/course/curriculum"],
+  },
 };
 
 export const SOURCE_TYPES_BY_PLATFORM: Record<Platform, { value: string; label: string }[]> = {
@@ -243,6 +286,9 @@ export const SOURCE_TYPES_BY_PLATFORM: Record<Platform, { value: string; label: 
   podcast: [{ value: "rss_feed", label: "RSS Feed" }],
   rss: [{ value: "rss_feed", label: "RSS Feed" }],
   website: [{ value: "sitemap", label: "Site / Sitemap" }],
+  government: [{ value: "sitemap", label: "Gov Portal" }],
+  local: [{ value: "local_folder", label: "Local folder" }],
+  course: [{ value: "curriculum", label: "Curriculum" }],
 };
 
 export function sourceTypeLabel(sourceType: string): string {

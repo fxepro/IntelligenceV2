@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { Loader2, ArrowRight, FileDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { OnOffToggle } from "@/components/ui/on-off-toggle";
 import {
   Table,
   TableBody,
@@ -13,24 +15,37 @@ import {
 } from "@/components/ui/table";
 import type { Source } from "@/lib/mock-data/sources";
 import { Icon } from "@/lib/icons";
-import { libraryCourseIdFromSource } from "@/lib/sources/helpers";
+import { libraryCourseIdFromSource, libraryDiskFolderId } from "@/lib/sources/helpers";
 
 const th =
-  "h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-center";
+  "h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-center";
 const td = "px-3 py-3 text-center";
+
+export type CourseRowMeta = {
+  lesson_count?: number;
+  published?: boolean;
+};
 
 export function CoursesSourcesTable({
   sources,
   totalSources,
   loading,
+  lessonCounts = {},
+  courseMeta = {},
+  exportingId = null,
+  onExport,
   onStatusChange,
 }: {
   sources: Source[];
   totalSources: number;
   loading: boolean;
+  lessonCounts?: Record<string, number>;
+  courseMeta?: Record<string, CourseRowMeta>;
+  exportingId?: string | null;
+  onExport?: (courseId: string, published: boolean) => void;
   onStatusChange: (id: string, status: "active" | "paused") => void;
 }) {
-  const colSpan = 5;
+  const colSpan = 7;
 
   return (
     <Card className="shadow-sm border border-border/50 overflow-hidden rounded-2xl bg-card">
@@ -48,14 +63,16 @@ export function CoursesSourcesTable({
 
       <div className="overflow-x-auto bg-card">
         <Table className="bg-card">
-          <TableHeader className="bg-card">
+          <TableHeader>
             <TableRow className="hover:bg-transparent bg-card">
               <TableHead className={`${th} w-[48px]`}>#</TableHead>
               <TableHead className={`${th} w-[100px]`}>ID</TableHead>
-              <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider text-muted-foreground text-left">
+              <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-left">
                 Name
               </TableHead>
               <TableHead className={`${th} w-[72px]`}>On/Off</TableHead>
+              <TableHead className={`${th} w-[80px]`}>Lessons</TableHead>
+              <TableHead className={`${th} w-[72px]`}>DOCX</TableHead>
               <TableHead className={`${th} w-[72px]`}>Open</TableHead>
             </TableRow>
           </TableHeader>
@@ -80,9 +97,18 @@ export function CoursesSourcesTable({
             ) : null}
             {sources.map((source, index) => {
               const courseId = libraryCourseIdFromSource(source);
+              const exportId = courseId ? libraryDiskFolderId(courseId) : null;
+              const meta = exportId
+                ? courseMeta[exportId] ?? courseMeta[courseId ?? ""] ?? {}
+                : {};
+              const lessonCount =
+                exportId != null
+                  ? (lessonCounts[exportId] ?? lessonCounts[courseId ?? ""] ?? meta.lesson_count)
+                  : undefined;
+              const coursePublished = meta.published !== false;
               const href = courseId
-                ? `/library/lessons?course=${encodeURIComponent(courseId)}`
-                : `/library/sources/${source.id}`;
+                ? `/courses/sources/${source.id}`
+                : `/courses/sources/${source.id}`;
               const isPaused = source.status === "paused";
               const isError = source.status === "error" || Boolean(source.error_message);
 
@@ -112,10 +138,11 @@ export function CoursesSourcesTable({
                   </TableCell>
                   <TableCell className="px-3 py-3">
                     <div className="flex justify-center">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onStatusChange(source.id, isPaused || isError ? "active" : "paused")
+                      <OnOffToggle
+                        size="sm"
+                        checked={!isPaused && !isError}
+                        onCheckedChange={(on) =>
+                          onStatusChange(source.id, on ? "active" : "paused")
                         }
                         title={
                           isError
@@ -124,22 +151,37 @@ export function CoursesSourcesTable({
                               ? "Off — click to turn on"
                               : "On — click to turn off"
                         }
-                        className={`inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors ${
-                          isError
-                            ? "text-red-500 hover:bg-red-500/10"
-                            : isPaused
-                              ? "text-muted-foreground hover:bg-muted"
-                              : "text-emerald-500 hover:bg-emerald-500/10"
-                        }`}
-                      >
-                        {isError ? (
-                          <AlertCircle className="w-4 h-4" />
-                        ) : isPaused ? (
-                          <span className="block h-2.5 w-2.5 rounded-full bg-muted-foreground/50" />
-                        ) : (
-                          <CheckCircle2 className="w-4 h-4" />
-                        )}
-                      </button>
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell className={`${td} tabular-nums text-sm font-medium`}>
+                    {lessonCount != null ? lessonCount : "—"}
+                  </TableCell>
+                  <TableCell className="px-3 py-3">
+                    <div className="flex justify-center">
+                      {exportId && onExport ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                          disabled={exportingId === exportId || !coursePublished}
+                          title={
+                            coursePublished
+                              ? "Export all publishable lessons to DOCX"
+                              : "Turn course Publish on before exporting"
+                          }
+                          onClick={() => onExport(exportId, coursePublished)}
+                        >
+                          {exportingId === exportId ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <FileDown className="h-4 w-4" />
+                          )}
+                        </Button>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="px-3 py-3">
@@ -147,9 +189,9 @@ export function CoursesSourcesTable({
                       <Link
                         href={href}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted"
-                        title="Open course"
+                        title="Open course details"
                       >
-                        <Icon name="arrowRight" className="w-4 h-4" />
+                        <ArrowRight className="w-4 h-4" />
                       </Link>
                     </div>
                   </TableCell>

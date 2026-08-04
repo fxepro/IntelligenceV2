@@ -59,7 +59,7 @@ export default function LibraryLessonDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/library/lessons/${encodeURIComponent(id)}`);
+      const res = await fetch(`${API_BASE}/api/v1/courses/lessons/${encodeURIComponent(id)}`);
       if (!res.ok) throw new Error(`Failed to load lesson (${res.status})`);
       setLesson(await res.json());
     } catch (err: unknown) {
@@ -75,14 +75,18 @@ export default function LibraryLessonDetailPage() {
   }, [loadLesson]);
 
   const courseHref = lesson?.course_id
-    ? `/library/lessons?course=${encodeURIComponent(lesson.course_id)}`
-    : "/library/sources";
+    ? `/courses/lessons?course=${encodeURIComponent(lesson.course_id)}`
+    : "/courses/sources";
 
   // No auto-skip: unpublished lessons stay open so you can edit or review them.
   // Next/Prev and DOCX already skip Publish Off rows.
 
   const locked = lesson?.content_status === "locked";
-  const body = lesson?.body || "";
+  const rawBody = lesson?.body || "";
+  const body = rawBody.replace(/^Article:\s*/i, "").trim();
+  const isStub =
+    lesson?.content_status === "stub"
+    || lesson?.content_status === "index";
   const showText =
     !locked
     && (
@@ -114,7 +118,7 @@ export default function LibraryLessonDetailPage() {
       <div className="space-y-3">
         <LibraryBreadcrumb
           items={[
-            { label: "Sources", href: "/library/sources" },
+            { label: "Sources", href: "/courses/sources" },
             ...(lesson?.course_id
               ? [{ label: lesson.course || lesson.course_id, href: courseHref }]
               : []),
@@ -125,7 +129,7 @@ export default function LibraryLessonDetailPage() {
           title={lesson?.title || "Lesson"}
           description={
             lesson
-              ? [KIND_LABEL[lesson.kind] || lesson.kind, lesson.category].filter(Boolean).join(" · ")
+              ? lesson.category
               : "Course lesson"
           }
           icon={<Icon name="library" className="h-5 w-5 text-primary" />}
@@ -155,9 +159,6 @@ export default function LibraryLessonDetailPage() {
         <div className="space-y-4">
           <Card className="rounded-2xl border-border/50 p-5">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="border-transparent bg-secondary text-secondary-foreground text-fine font-medium normal-case tracking-normal">
-                {KIND_LABEL[lesson.kind] || lesson.kind}
-              </Badge>
               {locked ? (
                 <Badge className="border-transparent bg-amber-500/15 text-amber-700 dark:text-amber-400 text-fine font-medium normal-case tracking-normal">
                   Locked
@@ -182,9 +183,26 @@ export default function LibraryLessonDetailPage() {
                   "This page was locked by course prerequisites when it was downloaded. The prerequisite dialog is not lesson content."}
               </p>
             </Card>
+          ) : isStub ? (
+            <Card className="rounded-2xl border-border/50 p-5 space-y-3">
+              <p className="text-fine font-bold uppercase tracking-wider text-muted-foreground">
+                Body not fetched yet
+              </p>
+              <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
+                Only the index is on disk (title + URL from Discover). Full text is a separate step you
+                run on the source when you want bodies fetched.
+              </p>
+              {lesson.source_url ? (
+                <Button asChild variant="outline" size="sm">
+                  <a href={lesson.source_url} target="_blank" rel="noopener noreferrer">
+                    Open source page
+                  </a>
+                </Button>
+              ) : null}
+            </Card>
           ) : null}
 
-          {showText ? (
+          {showText && !isStub ? (
             <Card className="rounded-2xl border-border/50 p-5">
               <LessonTextEditor
                 lessonId={lesson.id}
@@ -207,7 +225,7 @@ export default function LibraryLessonDetailPage() {
               </Button>
               {lesson.prev_id ? (
                 <Button asChild variant="ghost" className="gap-2 max-w-[14rem]">
-                  <Link href={`/library/lessons/${encodeURIComponent(lesson.prev_id)}`}>
+                  <Link href={`/courses/lessons/${encodeURIComponent(lesson.prev_id)}`}>
                     <ArrowLeft className="h-4 w-4 shrink-0" />
                     <span className="truncate">{lesson.prev_title || "Previous"}</span>
                   </Link>
@@ -216,7 +234,7 @@ export default function LibraryLessonDetailPage() {
             </div>
             {lesson.next_id ? (
               <Button asChild className="gap-2 max-w-[48%]">
-                <Link href={`/library/lessons/${encodeURIComponent(lesson.next_id)}`}>
+                <Link href={`/courses/lessons/${encodeURIComponent(lesson.next_id)}`}>
                   <span className="truncate">
                     Next{lesson.next_title ? `: ${lesson.next_title}` : ""}
                   </span>

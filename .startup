@@ -40,7 +40,7 @@ $Host.UI.RawUI.WindowTitle = "MI Celery Worker"
 Write-Host "`n=== MI Celery Worker ===`n" -ForegroundColor Green
 $env:PYTHONPATH = "$PWD;$PWD\..\api"
 $env:PLAYWRIGHT_BROWSERS_PATH = "$PWD\..\infra\playwright-browsers"
-python -m celery -A celery_app.celery_app worker -l info -Q discovery,acquisition,transcription,intelligence,default --pool=solo
+.\..\.venv\Scripts\celery_worker.exe -m celery -A celery_app.celery_app worker -l info -Q transcription,acquisition,discovery,intelligence,default --pool=solo
 
 # ── 4. Celery Beat (scheduler only — ticks Autorun) ───────────────────────
 # Console title: MI Celery Beat
@@ -49,9 +49,9 @@ cd C:\AIProjects\intelligence\v2
 .\.venv\Scripts\Activate.ps1
 cd workers
 $Host.UI.RawUI.WindowTitle = "MI Celery Beat"
-Write-Host "`n=== MI Celery Beat ===`n" -Foregrouncd dColor Yellow
+Write-Host "`n=== MI Celery Beat ===`n" -ForegroundColor Yellow
 $env:PYTHONPATH = "$PWD;$PWD\..\api"
-python -m celery -A celery_app.celery_app beat -l info
+.\..\.venv\Scripts\celery_beat.exe -m celery -A celery_app.celery_app beat -l info
 
 # ── 5. Web  →  http://localhost:3000 ──────────────────────────────────────
 # Console title: MI Web 3000
@@ -59,3 +59,22 @@ cd C:\AIProjects\intelligence\v2\web
 $Host.UI.RawUI.WindowTitle = "MI Web 3000"
 Write-Host "`n=== MI Web 3000 ===`n" -ForegroundColor Magenta
 npm run dev
+
+
+# Kill all processes
+C:\AIProjects\intelligence\v2> Get-WmiObject Win32_Process | Where-Object { $_.CommandLine -match "intelligence\\v2" } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+
+
+How to stop API  reliably
+--------------------------------------------
+Option A — kill port 8000:
+
+Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue |
+  ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+Option B — use the kill line already in v2/.startup:
+
+Get-WmiObject Win32_Process | Where-Object { $_.CommandLine -match "intelligence\\v2" } |
+  ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+Option C — when you don't need hot reload, run without --reload:
+
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000

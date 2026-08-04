@@ -62,8 +62,8 @@ def _add_picture(doc, src: str, alt: str = "") -> None:
     from app.services.library_media import resolve_library_file
 
     path = None
-    if src.startswith("/api/v1/library/files/"):
-        path = resolve_library_file(src[len("/api/v1/library/files/") :])
+    if src.startswith("/api/v1/courses/files/"):
+        path = resolve_library_file(src[len("/api/v1/courses/files/") :])
     if path and path.is_file():
         try:
             doc.add_picture(str(path), width=Inches(5.5))

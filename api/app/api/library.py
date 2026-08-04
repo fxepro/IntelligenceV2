@@ -1,310 +1,147 @@
-"""Library / Lessons API — file-backed catalog under data/ (+ optional Docling parse)."""
+"""Library items list + asset streaming for local folder sources."""
 from __future__ import annotations
 
-from pathlib import Path
+import mimetypes
+import uuid
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.responses import FileResponse, Response
-from pydantic import BaseModel, Field
+from fastapi.responses import FileResponse
+from sqlalchemy import func, not_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.models.job import JobType
-from app.schemas import JobOut
-from app.services.jobs import enqueue_job
-from app.services.library_catalog import (
-    DATA_ROOT,
-    CourseSummary,
-    LessonDetail,
-    LessonSummary,
-    create_lesson,
-    get_lesson,
-    list_courses,
-    list_lessons,
-    parse_document_to_lesson,
-    update_lesson,
-)
-from app.services.library_export_docx import build_course_docx
-from app.services.library_media import resolve_library_file
-from app.services.library_publish import (
-    update_course_publish_settings,
-    update_lesson_publish_settings,
-)
-from app.services.library_sources import ensure_library_sources
+from app.domain_keys import LIBRARY_DOMAIN, is_library_domain
+from app.models.record import Record
+from app.models.source import Source
+from app.schemas import MediaItemList, MediaItemOut
+from app.services.discovery_config import MEDIA_PAGE_SIZE_CEILING
+from app.services.library_assets import resolve_record_file
 
 router = APIRouter()
 
 
-class LessonListOut(BaseModel):
-    items: list[LessonSummary]
-    total: int
-    kinds: dict[str, int]
-    categories: list[str]
+def _record_to_library_item(r: Record) -> MediaItemOut:
+    fields = r.fields or {}
+    inventory_status = fields.get("inventory_status") or "present"
+    modified_raw = fields.get("modified_at")
+    modified_at: datetime | None = None
+    if isinstance(modified_raw, str):
+        try:
+            modified_at = datetime.fromisoformat(modified_raw)
+        except ValueError:
+            modified_at = None
+    elif isinstance(modified_raw, datetime):
+        modified_at = modified_raw
 
+    display_status = "completed" if inventory_status == "present" else "failed"
+    media_type = fields.get("media_type") or fields.get("stream_type") or "other"
 
-class CourseListOut(BaseModel):
-    items: list[CourseSummary]
-    total: int
-
-
-class CoursePublishUpdate(BaseModel):
-    published: bool
-
-
-class LessonPublishUpdate(BaseModel):
-    published: bool
-
-
-class LessonCreate(BaseModel):
-    title: str = Field(..., min_length=1, max_length=512)
-    category: str | None = Field(default="Overview", max_length=256)
-    kind: str | None = Field(default="text", max_length=32)
-    body: str | None = Field(default="", max_length=2_000_000)
-    place: str | None = Field(
-        default="end",
-        description="start = top of course (e.g. TOC); end = after scraped lessons",
+    return MediaItemOut(
+        id=r.id,
+        source_id=r.source_id,
+        platform="local",
+        external_id=fields.get("relative_path"),
+        canonical_url=r.canonical_url,
+        title=r.title or fields.get("title"),
+        description=fields.get("relative_path"),
+        content_type=media_type,
+        stream_type=media_type,
+        thumbnail_url=None,
+        channel_name=None,
+        duration_seconds=None,
+        file_size_bytes=fields.get("size_bytes") or fields.get("file_size_bytes"),
+        view_count=None,
+        download_status="completed" if inventory_status == "present" else "failed",
+        transcription_status="pending",
+        transcript=None,
+        summary=None,
+        published_at=modified_at or r.captured_at,
+        discovered_at=r.created_at,
+        processed_at=r.updated_at,
+        status=display_status,
+        error_message=r.error_message if inventory_status != "present" else None,
     )
 
 
-class ParseDocumentRequest(BaseModel):
-    """Parse a local PDF/DOCX/TXT under data/ into a Library lesson (Docling)."""
-
-    path: str = Field(..., min_length=1, max_length=1024)
-    title: str | None = Field(default=None, max_length=512)
-    category: str | None = Field(default=None, max_length=128)
-
-
-class LessonBodyUpdate(BaseModel):
-    body: str = Field(..., max_length=2_000_000)
-    course: str | None = Field(default=None, max_length=512)
-    title: str | None = Field(default=None, max_length=512)
-
-
-REFRESHABLE = {
-    "soc-2-compliance": "Scytale SOC 2 Academy (authenticated scrape)",
-    "drata-soc-2": "Drata SOC 2 Learn (public scrape)",
-}
-
-
-@router.get("/courses", response_model=CourseListOut)
-async def library_courses():
-    items = list_courses()
-    return CourseListOut(items=items, total=len(items))
-
-
-@router.post("/sources/ensure")
-async def library_ensure_sources(db: AsyncSession = Depends(get_db)):
-    """
-    Sync file-backed courses into domain=library sources (one source per course).
-    Idempotent — safe to call when opening Courses → Sources.
-    """
-    rows = await ensure_library_sources(db)
-    await db.commit()
-    return {"ok": True, "total": len(rows)}
-
-
-@router.get("/files/{file_path:path}")
-async def library_file(file_path: str):
-    """Serve scraped lesson assets (images) under v2/data/."""
-    path = resolve_library_file(file_path)
-    if not path:
-        raise HTTPException(status_code=404, detail="File not found")
-    return FileResponse(path)
-
-
-@router.post("/courses/{course_id}/lessons", response_model=LessonDetail)
-async def library_create_lesson(course_id: str, payload: LessonCreate):
-    """
-    Manually add a lesson to any Library course (TOC, notes, etc.).
-    Survives Refresh — stored under data/library/manual/.
-    """
-    courses = {c.id.lower(): c for c in list_courses()}
-    # Allow creating into a known course, or first-time course id
-    row = courses.get((course_id or "").strip().lower())
-    cid = row.id if row else (course_id or "").strip()
-    if not cid:
-        raise HTTPException(status_code=400, detail="course_id is required")
-    try:
-        return create_lesson(
-            cid,
-            title=payload.title,
-            category=payload.category or "Overview",
-            kind=payload.kind or "text",
-            body=payload.body or "",
-            place=payload.place or "end",
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except OSError as exc:
-        raise HTTPException(status_code=500, detail=f"Could not write lesson: {exc}") from exc
-
-
-@router.patch("/courses/{course_id}/publish", response_model=CourseSummary)
-async def library_update_course_publish(course_id: str, payload: CoursePublishUpdate):
-    """Toggle whether a course is live for DOCX export."""
-    courses = {c.id.lower(): c for c in list_courses()}
-    row = courses.get((course_id or "").strip().lower())
-    if not row:
-        raise HTTPException(status_code=404, detail=f"Course not found: {course_id}")
-    try:
-        update_course_publish_settings(row.id, published=payload.published)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    refreshed = {c.id.lower(): c for c in list_courses()}
-    out = refreshed.get(row.id.lower())
-    if not out:
-        raise HTTPException(status_code=404, detail=f"Course not found: {course_id}")
-    return out
-
-
-@router.get("/courses/{course_id}/export.docx")
-async def library_export_course_docx(course_id: str):
-    """
-    Export all published lessons for a course to a formatted DOCX.
-    Per-lesson Publish Off rows (e.g. videos) are skipped.
-    """
-    courses = {c.id.lower(): c for c in list_courses()}
-    row = courses.get((course_id or "").strip().lower())
-    if not row:
-        raise HTTPException(status_code=404, detail=f"Course not found: {course_id}")
-    if not row.published:
-        raise HTTPException(
-            status_code=400,
-            detail="Course is unpublished. Turn Publish on to export.",
-        )
-    try:
-        data, filename = build_course_docx(row.id)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-    return Response(
-        content=data,
-        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"',
-        },
-    )
-
-
-@router.post("/courses/{course_id}/refresh", response_model=JobOut)
-async def library_refresh_course(course_id: str, db: AsyncSession = Depends(get_db)):
-    """
-    Enqueue a Celery acquire job to re-download a Library course.
-    Use after gating quizzes unlock later modules (e.g. Scytale SOC 2).
-    """
-    key = (course_id or "").strip().lower()
-    if key not in REFRESHABLE:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Course {course_id!r} is not refreshable. Supported: {', '.join(sorted(REFRESHABLE))}",
-        )
-    try:
-        job = await enqueue_job(
-            db,
-            job_type=JobType.acquire,
-            domain="library",
-            payload={"action": "library_refresh", "course_id": key},
-        )
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-    return job
-
-
-@router.get("/lessons", response_model=LessonListOut)
-async def library_lessons(
-    course: str | None = Query(None, description="Course id or name"),
-    kind: str | None = Query(None, description="text | video | pdf | quiz"),
-    category: str | None = None,
-    q: str | None = None,
+@router.get("", response_model=MediaItemList)
+async def list_library_items(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=MEDIA_PAGE_SIZE_CEILING),
+    source_id: uuid.UUID | None = None,
+    media_type: str | None = Query(None, alias="stream_type"),
+    domain: str = Query(LIBRARY_DOMAIN),
+    db: AsyncSession = Depends(get_db),
 ):
-    items, kinds, categories = list_lessons(
-        course=course, kind=kind, category=category, q=q
+    if not is_library_domain(domain):
+        raise HTTPException(status_code=400, detail="domain must be library")
+
+    # Library inventories can be large — allow full page up to ceiling (not media UI cap).
+    page_size = min(page_size, MEDIA_PAGE_SIZE_CEILING)
+
+    rel_path_field = Record.fields["relative_path"].as_string()
+    q = select(Record).where(Record.domain == LIBRARY_DOMAIN)
+    q = q.where(
+        func.coalesce(Record.fields["inventory_status"].as_string(), "present") == "present"
     )
-    return LessonListOut(items=items, total=len(items), kinds=kinds, categories=categories)
+    # Top-level entries only — hide legacy nested rows until re-scan marks them missing.
+    q = q.where(not_(rel_path_field.like("%/%")))
+    if source_id:
+        q = q.where(Record.source_id == source_id)
+    if media_type:
+        q = q.where(Record.fields["media_type"].as_string() == media_type)
+
+    count_q = select(func.count()).select_from(Record).where(Record.domain == LIBRARY_DOMAIN)
+    count_q = count_q.where(
+        func.coalesce(Record.fields["inventory_status"].as_string(), "present") == "present"
+    )
+    count_q = count_q.where(not_(rel_path_field.like("%/%")))
+    if source_id:
+        count_q = count_q.where(Record.source_id == source_id)
+    if media_type:
+        count_q = count_q.where(Record.fields["media_type"].as_string() == media_type)
+    total = await db.scalar(count_q)
+
+    rel_path = Record.fields["relative_path"].as_string()
+    rows = (
+        await db.scalars(
+            q.order_by(rel_path.asc().nulls_last())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+    ).all()
+
+    items = [_record_to_library_item(r) for r in rows]
+    return MediaItemList(items=items, total=total or 0, page=page, page_size=page_size)
 
 
-@router.get("/lessons/{lesson_id}", response_model=LessonDetail)
-async def library_lesson(lesson_id: str):
-    lesson = get_lesson(lesson_id)
-    if not lesson:
-        raise HTTPException(status_code=404, detail="Lesson not found")
-    return lesson
+@router.get("/assets/{item_id}")
+async def stream_library_asset(item_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    record = await db.get(Record, item_id)
+    if not record or not is_library_domain(record.domain):
+        raise HTTPException(status_code=404, detail="Library item not found")
+    if not record.source_id:
+        raise HTTPException(status_code=404, detail="Item has no source")
+    source = await db.get(Source, record.source_id)
+    if not source or not is_library_domain(source.domain):
+        raise HTTPException(status_code=404, detail="Source not found")
 
+    path = resolve_record_file(record, source)
+    if not path:
+        raise HTTPException(status_code=404, detail="File not found on disk")
 
-@router.patch("/lessons/{lesson_id}/publish", response_model=LessonSummary)
-async def library_update_lesson_publish(lesson_id: str, payload: LessonPublishUpdate):
-    """Turn an individual lesson On/Off for reading, nav, and DOCX export."""
-    lesson = get_lesson(lesson_id)
-    if not lesson:
-        raise HTTPException(status_code=404, detail="Lesson not found")
-    try:
-        update_lesson_publish_settings(lesson.id, published=payload.published)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    refreshed = get_lesson(lesson_id)
-    if not refreshed:
-        raise HTTPException(status_code=404, detail="Lesson not found")
-    return LessonSummary(
-        id=refreshed.id,
-        title=refreshed.title,
-        course_id=refreshed.course_id,
-        course=refreshed.course,
-        category=refreshed.category,
-        kind=refreshed.kind,
-        label=refreshed.label,
-        source_url=refreshed.source_url,
-        chars=refreshed.chars,
-        has_text=refreshed.has_text,
-        has_video=refreshed.has_video,
-        has_pdf=refreshed.has_pdf,
-        content_status=refreshed.content_status,
-        published=refreshed.published,
+    media_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+    safe_name = path.name.replace('"', "")
+    return FileResponse(
+        path,
+        media_type=media_type,
+        headers={"Content-Disposition": f'inline; filename="{safe_name}"'},
     )
 
 
-@router.patch("/lessons/{lesson_id}", response_model=LessonDetail)
-async def library_update_lesson(lesson_id: str, payload: LessonBodyUpdate):
-    """Update lesson body / title / course name on disk."""
-    try:
-        return update_lesson(
-            lesson_id,
-            body=payload.body,
-            course=payload.course,
-            title=payload.title,
-        )
-    except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except OSError as exc:
-        raise HTTPException(status_code=500, detail=f"Could not write lesson: {exc}") from exc
-
-
-@router.post("/parse-document", response_model=LessonDetail)
-async def library_parse_document(payload: ParseDocumentRequest):
-    """
-    Parse a book/material file with Docling into a text lesson under data/library/parsed/.
-    Long Docling runs belong in workers later — this is a control-plane convenience for local files.
-    """
-    raw = Path(payload.path)
-    path = raw if raw.is_absolute() else (DATA_ROOT / raw).resolve()
-    try:
-        path.relative_to(DATA_ROOT.resolve())
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail="Path must be under v2/data/") from exc
-    if not path.is_file():
-        raise HTTPException(status_code=404, detail=f"File not found: {path}")
-    try:
-        return parse_document_to_lesson(
-            path,
-            title=payload.title,
-            category=payload.category,
-        )
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-    except Exception as exc:
-        raise HTTPException(
-            status_code=500,
-            detail=f"{type(exc).__name__}: {exc}",
-        ) from exc
+@router.get("/{item_id}", response_model=MediaItemOut)
+async def get_library_item(item_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    record = await db.get(Record, item_id)
+    if not record or not is_library_domain(record.domain):
+        raise HTTPException(status_code=404, detail="Library item not found")
+    return _record_to_library_item(record)

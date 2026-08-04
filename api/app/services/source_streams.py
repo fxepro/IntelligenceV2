@@ -64,6 +64,14 @@ def default_streams_for_platform(
         url = normalize_stream_url(source_url)
         stream = primary if primary else SourceType.website
         return [(stream, bool(url), url)]
+    if p == "local":
+        url = normalize_stream_url(source_url)
+        stream = primary if primary else SourceType.local_folder
+        return [(stream, bool(url), url)]
+    if p == "course":
+        url = normalize_stream_url(source_url)
+        stream = primary if primary else SourceType.curriculum
+        return [(stream, bool(url), url)]
     if primary:
         url = normalize_stream_url(source_url)
         return [(primary, bool(url), url)]

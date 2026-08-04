@@ -78,18 +78,19 @@ async def list_media(
     page_size: int = Query(50, ge=1, le=MEDIA_PAGE_SIZE_CEILING),
     source_id: uuid.UUID | None = None,
     stream_type: str | None = None,
+    domain: str = Query("media"),
     db: AsyncSession = Depends(get_db),
 ):
     discovery = await get_discovery_settings(db)
     page_size = min(page_size, discovery["media_page_size"])
 
-    q = select(Record).where(Record.domain == "media")
+    q = select(Record).where(Record.domain == domain)
     if source_id:
         q = q.where(Record.source_id == source_id)
     if stream_type:
         q = q.where(Record.fields["stream_type"].as_string() == stream_type)
 
-    count_q = select(func.count()).select_from(Record).where(Record.domain == "media")
+    count_q = select(func.count()).select_from(Record).where(Record.domain == domain)
     if source_id:
         count_q = count_q.where(Record.source_id == source_id)
     if stream_type:

@@ -102,7 +102,7 @@ function DnsTable({
                   {columns.map((c) => (
                     <TableHead
                       key={c.key}
-                      className="h-10 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground"
+                      className="h-10 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground"
                     >
                       {c.label}
                     </TableHead>

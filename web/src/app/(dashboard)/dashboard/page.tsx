@@ -8,7 +8,7 @@ import { StatCard } from "@/components/sections/StatCard";
 import { Icon } from "@/lib/icons";
 import { site } from "@/config/site";
 import { chromeNav, intelligenceNav } from "@/config/navigation";
-import { DOMAINS } from "@/lib/domains";
+import { DOMAINS, type DomainDef, type DomainKey } from "@/lib/domains";
 import { mapSource } from "@/lib/sources/helpers";
 import type { Source } from "@/lib/mock-data/sources";
 import { API_BASE } from "@/lib/api-base";
@@ -25,9 +25,9 @@ const QUICK_LINKS = [
         ? "landmark"
         : d.key === "domain_names"
           ? "globe"
-          : d.key === "library"
+          : d.key === "courses" || d.key === "library"
             ? "library"
-            : "radio") as const,
+            : "radio") as any,
   })),
   ...intelligenceNav,
   chromeNav.settings,

@@ -1,11 +1,12 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select, func
+from sqlalchemy import func, not_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.models.job import Job, JobStatus, JobType
+from app.models.government_detail import GovernmentDetail
 from app.models.record import Record
 from app.models.source import Source, SourcePriority, SourceStatus
 from app.models.source_stream import SourceStream
@@ -65,29 +66,55 @@ def _source_priority(source: Source) -> SourcePriority:
 
 
 async def _stream_item_counts(
-    db: AsyncSession, source_ids: list[uuid.UUID]
+    db: AsyncSession, source_ids: list[uuid.UUID], *, domain: str = "media"
 ) -> dict[uuid.UUID, dict[str, int]]:
     """Per-source item counts keyed by stream_type (from records.fields)."""
     if not source_ids:
         return {}
-    stream_type_expr = func.coalesce(Record.fields["stream_type"].as_string(), "unknown")
-    rows = (
-        await db.execute(
-            select(
-                Record.source_id,
-                stream_type_expr.label("stream_type"),
-                func.count().label("n"),
-            )
-            .where(Record.domain == "media", Record.source_id.in_(source_ids))
-            .group_by(Record.source_id, stream_type_expr)
+    type_key = "media_type" if domain == "library" else "stream_type"
+    stream_type_expr = func.coalesce(Record.fields[type_key].as_string(), "unknown")
+    rel_path_expr = Record.fields["relative_path"].as_string()
+    q = (
+        select(
+            Record.source_id,
+            stream_type_expr.label("stream_type"),
+            func.count().label("n"),
         )
-    ).all()
+        .where(Record.domain == domain, Record.source_id.in_(source_ids))
+    )
+    if domain == "library":
+        q = q.where(
+            func.coalesce(Record.fields["inventory_status"].as_string(), "present") == "present",
+            not_(rel_path_expr.like("%/%")),
+        )
+    rows = (await db.execute(q.group_by(Record.source_id, stream_type_expr))).all()
     out: dict[uuid.UUID, dict[str, int]] = {}
     for sid, stream_type, n in rows:
         if sid is None:
             continue
         key = sid if isinstance(sid, uuid.UUID) else uuid.UUID(str(sid))
         out.setdefault(key, {})[str(stream_type)] = int(n)
+    return out
+
+
+async def _government_item_counts(
+    db: AsyncSession, source_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, int]:
+    if not source_ids:
+        return {}
+    rows = (
+        await db.execute(
+            select(GovernmentDetail.source_id, func.count().label("n"))
+            .where(GovernmentDetail.source_id.in_(source_ids))
+            .group_by(GovernmentDetail.source_id)
+        )
+    ).all()
+    out: dict[uuid.UUID, int] = {}
+    for sid, n in rows:
+        if sid is None:
+            continue
+        key = sid if isinstance(sid, uuid.UUID) else uuid.UUID(str(sid))
+        out[key] = int(n)
     return out
 
 
@@ -141,17 +168,27 @@ def _source_out(
     stream_counts: dict[str, int],
     *,
     transcription_completed: int = 0,
+    government_total: int = 0,
 ) -> SourceOut:
+    from app.domain_keys import is_library_domain
+
     stream_outs: list[SourceStreamOut] = []
     total_items = 0
+    library_total = sum(stream_counts.values()) if is_library_domain(s.domain) else 0
+    is_government = (s.domain or "").strip().lower() == "government"
     for stream in streams:
-        count = stream_counts.get(
-            stream.stream_type.value
-            if hasattr(stream.stream_type, "value")
-            else str(stream.stream_type),
-            0,
-        )
-        total_items += count
+        if is_library_domain(s.domain):
+            count = library_total
+        elif is_government:
+            count = government_total
+        else:
+            count = stream_counts.get(
+                stream.stream_type.value
+                if hasattr(stream.stream_type, "value")
+                else str(stream.stream_type),
+                0,
+            )
+        total_items += count if not is_library_domain(s.domain) and not is_government else 0
         stream_outs.append(
             SourceStreamOut(
                 id=stream.id,
@@ -163,6 +200,10 @@ def _source_out(
                 error_message=stream.error_message,
             )
         )
+    if is_library_domain(s.domain):
+        total_items = library_total
+    elif is_government:
+        total_items = government_total
     primary_type = streams[0].stream_type if streams else s.source_type
     tx_done = total_items > 0 and transcription_completed >= total_items
     return SourceOut(
@@ -193,14 +234,60 @@ def _source_out(
         transcription_completed=transcription_completed,
         transcription_done=tx_done,
         streams=stream_outs,
+        connector=getattr(s, "connector", None),
         created_at=s.created_at,
         updated_at=s.updated_at,
     )
 
 
+def _is_library_course(payload_domain: str, category: str | None) -> bool:
+    from app.domain_keys import is_courses_domain
+
+    return is_courses_domain(payload_domain) and (category or "").strip().lower() in {
+        "course",
+        "courses",
+    }
+
+
+def _apply_library_course_metadata(
+    *,
+    tags: list[str],
+    course_id: str | None,
+    name: str | None,
+    source_url: str,
+    connector: str | None,
+) -> tuple[list[str], str, str]:
+    from app.services.library_course_paths import (
+        course_id_from_tags,
+        course_id_tag,
+        ensure_course_data_dir,
+        infer_connector,
+        normalize_connector,
+        slugify_course_id,
+    )
+
+    cid = slugify_course_id(course_id or course_id_from_tags(tags) or name or "")
+    if not cid or cid == "course":
+        raise HTTPException(
+            status_code=400,
+            detail="Course name is required — destination folder is created from the name automatically.",
+        )
+    cleaned = [t for t in _normalize_tags(tags) if not t.lower().startswith("course_id:")]
+    cleaned.insert(0, course_id_tag(cid))
+    conn = (connector or infer_connector(source_url) or "website").strip().lower()[:64]
+    conn = normalize_connector(conn)
+    ensure_course_data_dir(cid)
+    return cleaned, cid, conn
+
+
 async def _serialize_source(db: AsyncSession, source: Source) -> SourceOut:
     streams_by_source = await _load_streams(db, [source.id])
-    counts_by_source = await _stream_item_counts(db, [source.id])
+    counts_by_source = await _stream_item_counts(db, [source.id], domain=source.domain)
+    gov_counts = (
+        await _government_item_counts(db, [source.id])
+        if source.domain == "government"
+        else {}
+    )
     tx_by_source = await _transcription_completed_counts(db, [source.id])
     streams = streams_by_source.get(source.id, [])
     counts = counts_by_source.get(source.id, {})
@@ -209,6 +296,7 @@ async def _serialize_source(db: AsyncSession, source: Source) -> SourceOut:
         streams,
         counts,
         transcription_completed=tx_by_source.get(source.id, 0),
+        government_total=gov_counts.get(source.id, 0),
     )
 
 
@@ -222,9 +310,19 @@ async def list_sources(
             select(Source).where(Source.domain == domain).order_by(Source.created_at.desc())
         )
     ).all()
+
+    if domain == "courses":
+        from app.services.library_course_ready import repair_library_sources
+
+        if repair_library_sources(list(items)):
+            await db.flush()
+            for source in items:
+                await db.refresh(source)
+
     source_ids = [s.id for s in items]
     streams_by_source = await _load_streams(db, source_ids)
-    counts_by_source = await _stream_item_counts(db, source_ids)
+    counts_by_source = await _stream_item_counts(db, source_ids, domain=domain)
+    gov_counts = await _government_item_counts(db, source_ids) if domain == "government" else {}
     tx_by_source = await _transcription_completed_counts(db, source_ids)
     total = await db.scalar(select(func.count()).select_from(Source).where(Source.domain == domain))
     return SourceList(
@@ -234,6 +332,7 @@ async def list_sources(
                 streams_by_source.get(s.id, []),
                 counts_by_source.get(s.id, {}),
                 transcription_completed=tx_by_source.get(s.id, 0),
+                government_total=gov_counts.get(s.id, 0),
             )
             for s in items
         ],
@@ -245,11 +344,27 @@ async def list_sources(
 async def create_source(payload: SourceCreate, db: AsyncSession = Depends(get_db)):
     import asyncio
 
-    url = payload.source_url.rstrip("/")
+    from app.domain_keys import COURSES_DOMAIN, LIBRARY_DOMAIN, is_courses_domain, is_library_domain
+
+    domain = payload.domain
     vanity_url = (payload.vanity_url or "").rstrip("/") or None
+    url = payload.source_url.rstrip("/")
     platform = payload.platform.value if hasattr(payload.platform, "value") else str(payload.platform)
 
-    if platform == "facebook":
+    if is_library_domain(domain):
+        from app.services.library_paths import normalize_folder_source_url, path_from_source_url
+
+        try:
+            url = normalize_folder_source_url(payload.source_url)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        folder_path = await asyncio.to_thread(path_from_source_url, url)
+        if not folder_path.is_dir():
+            raise HTTPException(status_code=400, detail=f"Folder not found: {folder_path}")
+        domain = LIBRARY_DOMAIN
+        platform = "local"
+        vanity_url = None
+    elif platform == "facebook":
         from app.services.facebook_reels import (
             extract_facebook_profile_id,
             resolve_facebook_identity_from_vanity,
@@ -284,7 +399,7 @@ async def create_source(payload: SourceCreate, db: AsyncSession = Depends(get_db
     if catalog_id:
         clash = await db.scalar(
             select(Source).where(
-                Source.domain == payload.domain,
+                Source.domain == domain,
                 Source.catalog_id == catalog_id,
             )
         )
@@ -294,32 +409,72 @@ async def create_source(payload: SourceCreate, db: AsyncSession = Depends(get_db
                 detail=f"catalog_id {catalog_id} already exists in domain {payload.domain}",
             )
     else:
-        catalog_id = await allocate_catalog_id(db, payload.domain)
+        catalog_id = await allocate_catalog_id(db, domain)
 
     category = (payload.category or "").strip() or None
     if category:
         category = category[:128]
+
+    tags = _normalize_tags(payload.tags)
+    connector = (payload.connector or "").strip() or None
+    source_name = payload.name
+    source_platform = payload.platform
+    source_type = payload.source_type
+
+    library_mode = is_library_domain(domain)
+
+    if is_courses_domain(domain):
+        domain = COURSES_DOMAIN
+        category = category or "course"
+        tags, _cid, connector = _apply_library_course_metadata(
+            tags=tags,
+            course_id=payload.course_id,
+            name=payload.name,
+            source_url=url,
+            connector=connector,
+        )
+    elif _is_library_course(domain, category):
+        domain = COURSES_DOMAIN
+        tags, _cid, connector = _apply_library_course_metadata(
+            tags=tags,
+            course_id=payload.course_id,
+            name=payload.name,
+            source_url=url,
+            connector=connector,
+        )
+    elif library_mode or is_library_domain(domain):
+        from app.models.source import Platform, SourceType
+        from app.services.library_paths import path_from_source_url
+
+        domain = LIBRARY_DOMAIN
+        connector = connector or "local_fs"
+        source_platform = Platform.local
+        source_type = SourceType.local_folder
+        if not source_name:
+            source_name = path_from_source_url(url).name
+
     source = Source(
-        domain=payload.domain,
+        domain=domain,
         catalog_id=catalog_id,
-        platform=payload.platform,
-        source_type=payload.source_type,
+        platform=source_platform,
+        source_type=source_type,
         source_url=url,
         vanity_url=vanity_url,
-        name=payload.name,
+        name=source_name,
         description=payload.description,
         category=category,
-        tags=_normalize_tags(payload.tags),
+        tags=tags,
         priority=payload.priority,
         autorun=payload.autorun,
         auto_transcribe=payload.auto_transcribe,
+        connector=connector,
     )
     db.add(source)
     await db.flush()
 
     for stream_type, enabled, stream_url in default_streams_for_platform(
-        payload.platform,
-        payload.source_type,
+        source_platform,
+        source_type,
         source_url=url,
         stream_urls=payload.stream_urls,
     ):
@@ -523,6 +678,29 @@ async def _patch_source_impl(
                 status_code=409,
                 detail=f"Another source already uses URL {data['source_url']}",
             )
+    course_id = data.pop("course_id", None)
+    from app.domain_keys import is_courses_domain
+
+    if is_courses_domain(source.domain) or _is_library_course(
+        source.domain, source.category or data.get("category")
+    ):
+        tags = data["tags"] if "tags" in data else _source_tags(source)
+        url = data.get("source_url") or source.source_url or ""
+        if url.startswith("mi://"):
+            url = source.vanity_url or url
+        conn = data.get("connector") or getattr(source, "connector", None)
+        name = data.get("name") or source.name
+        if not data.get("category") and is_courses_domain(source.domain):
+            data["category"] = source.category or "course"
+        tags, _cid, conn = _apply_library_course_metadata(
+            tags=tags,
+            course_id=course_id,
+            name=name,
+            source_url=url if url.startswith("http") else (source.source_url or ""),
+            connector=conn,
+        )
+        data["tags"] = tags
+        data["connector"] = conn
     for k, v in data.items():
         setattr(source, k, v)
     if "tags" in data:
@@ -587,6 +765,11 @@ async def discover_source(
     source = await db.get(Source, source_id)
     if not source:
         raise HTTPException(status_code=404, detail="Source not found")
+    if source.status != SourceStatus.active:
+        raise HTTPException(
+            status_code=409,
+            detail="Source is off — turn it on before running Discover",
+        )
     body = payload or DiscoverRequest()
     job = await enqueue_job(
         db,

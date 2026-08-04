@@ -65,6 +65,12 @@ async def enqueue_job(
     await db.refresh(job)
 
     task_name, queue = QUEUE_BY_TYPE[job_type]
+    if job_type == JobType.discover and (domain or "").strip().lower() == "library":
+        task_name = "tasks.library_inventory.run_library_scan"
+    payload_action = ((payload or {}).get("action") or "").strip().lower()
+    if payload_action == "sam_gov_opportunities_sync":
+        task_name = "tasks.government_sync.run_sam_opportunities"
+        queue = "acquisition"
     try:
         task_id = await asyncio.wait_for(
             asyncio.to_thread(_send_task, task_name, [str(job.id)], queue),

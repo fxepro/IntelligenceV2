@@ -20,6 +20,8 @@ class Platform(str, enum.Enum):
     website = "website"
     # Offices / public authorities (trademarks, gov intel, etc.)
     government = "government"
+    # Local folder on disk (Library domain).
+    local = "local"
 
 
 class SourceType(str, enum.Enum):
@@ -40,6 +42,8 @@ class SourceType(str, enum.Enum):
     playlist = "playlist"
     profile = "profile"
     video = "video"
+    # Library: manually registered folder path.
+    local_folder = "local_folder"
 
 
 class SourceStatus(str, enum.Enum):
@@ -95,6 +99,8 @@ class Source(Base):
     last_checked: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     # Last automatic source-URL health probe (Settings → Discovery URL check).
     last_url_check: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Connector type for routing discovery (e.g., "strongdm", "drata", "youtube")
+    connector: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

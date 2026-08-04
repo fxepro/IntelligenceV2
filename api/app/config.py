@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     namebright_client_id: str = ""
     namebright_client_secret: str = ""
 
+    # SAM.gov public API (Contract Opportunities, Entity, etc.)
+    sam_gov_api_key: str = ""
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

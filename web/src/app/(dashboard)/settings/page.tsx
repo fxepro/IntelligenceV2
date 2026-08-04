@@ -54,6 +54,20 @@ import { Icon } from "@/lib/icons";
 
 import { API_BASE, BACKEND_URL } from "@/lib/api-base";
 const API_DOCS = `${BACKEND_URL}/docs`;
+
+/** Plain-language “what does this do?” for Stack start/stop rows. */
+const STACK_PLAIN_ENGLISH: Record<string, string> = {
+  api: "The helper that talks to the database when you click things. Start it so the app can load sources and run jobs. Stop it when you’re done working on the backend.",
+  postgres:
+    "Where all your data lives — like a big notebook. It usually runs on its own; you don’t start or stop it from here.",
+  redis:
+    "A waiting line for jobs. When you click Sync or Discover, the job sits here until a worker picks it up. Start this before the workers.",
+  celery:
+    "The workers that do the slow stuff — scanning folders, pulling SAM.gov, downloading media. Start after Redis. Stop and restart after you change worker code.",
+  celery_beat:
+    "A timer that checks “Autorun” sources on a schedule. You only need it if you want things to run automatically while you’re away.",
+  web: "The website in your browser — the pages you click. Start this to open the app at localhost:3000.",
+};
 /** Default Website / App when platform=website (Scytale academy access). */
 const DEFAULT_WEBSITE_APP_URL = "https://academy.scytale.ai";
 const AUTH_PLATFORMS: Platform[] = [
@@ -370,7 +384,8 @@ export default function SettingsPage() {
         { id: "torrents", label: "Torrents", status: "planned", blurb: "Torrent indexes, releases, magnets, swarm activity and distribution signals", home: "/torrents" },
         { id: "trademarks", label: "Trademarks", status: "active", blurb: "Marks, owners, classes, status, prosecution history and related brands", home: "/trademarks/sources" },
         { id: "domain_names", label: "Domains", status: "active", blurb: "www, .net and other TLDs — registries, WHOIS, DNS, availability and ownership", home: "/domain-names/portfolio" },
-        { id: "library", label: "Courses", status: "active", blurb: "Lessons from courses, books, and videos — text, PDF, and video by topic", home: "/library/sources" },
+        { id: "courses", label: "Courses", status: "active", blurb: "Online curricula — YouTube, article hubs, and LMS-style discover and acquire", home: "/courses/sources" },
+        { id: "library", label: "Library", status: "active", blurb: "Local folders — videos, PDFs, ebooks, and files from your drives", home: "/library/sources" },
         { id: "patents", label: "Patents", status: "planned", blurb: "Applications, grants, claims, inventors, assignees, citations and legal status" },
         { id: "songs", label: "Songs", status: "planned", blurb: "Musical compositions and associated writers, publishers and rights" },
         { id: "music", label: "Music", status: "planned", blurb: "Sound recordings, releases, artists, labels and catalogs" },
@@ -814,71 +829,76 @@ export default function SettingsPage() {
               <Loader2 className="w-4 h-4 animate-spin" /> Checking…
             </p>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="space-y-3 max-w-3xl">
             {processes.map((p) => (
-              <Card
+              <div
                 key={p.id}
-                className="shadow-sm border-border/50 rounded-2xl p-4 flex flex-col gap-3"
+                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h3 className="font-display text-sm font-semibold tracking-tight truncate">
-                      {p.label}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {p.detail || "—"}
-                    </p>
+                <Card className="shadow-sm border-border/50 rounded-2xl p-4 w-full sm:w-72 shrink-0 flex flex-col gap-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h3 className="font-display text-sm font-semibold tracking-tight truncate">
+                        {p.label}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {p.detail || "—"}
+                      </p>
+                    </div>
+                    <ProcessPill status={p.status} />
                   </div>
-                  <ProcessPill status={p.status} />
-                </div>
-                <div className="mt-auto flex flex-wrap items-center gap-2">
-                  {p.docs_url && (
-                    <a
-                      href={p.docs_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-fine text-primary inline-flex items-center gap-0.5 hover:underline"
-                    >
-                      docs <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                  {p.can_start !== false && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={startingId === p.id || p.status === "up"}
-                      onClick={() => startProcess(p.id)}
-                      className="h-8 min-w-[5.75rem] justify-center gap-1.5 text-fine font-bold uppercase tracking-wider border-emerald-600/40 text-emerald-700 hover:bg-emerald-600/10 hover:text-emerald-800 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
-                    >
-                      {startingId === p.id ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Play className="w-3.5 h-3.5" />
-                      )}
-                      Start
-                    </Button>
-                  )}
-                  {p.can_stop !== false && p.id !== "postgres" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={stoppingId === p.id || p.status === "down"}
-                      onClick={() => stopProcess(p.id)}
-                      className="h-8 min-w-[5.75rem] justify-center gap-1.5 text-fine font-bold uppercase tracking-wider border-red-600/40 text-red-700 hover:bg-red-600/10 hover:text-red-800 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300"
-                    >
-                      {stoppingId === p.id ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Square className="w-3.5 h-3.5" />
-                      )}
-                      Stop
-                    </Button>
-                  )}
-                  {p.id === "postgres" && (
-                    <span className="text-fine text-muted-foreground">external</span>
-                  )}
-                </div>
-              </Card>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {p.docs_url && (
+                      <a
+                        href={p.docs_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-fine text-primary inline-flex items-center gap-0.5 hover:underline"
+                      >
+                        docs <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                    {p.can_start !== false && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={startingId === p.id || p.status === "up"}
+                        onClick={() => startProcess(p.id)}
+                        className="h-8 min-w-[5.75rem] justify-center gap-1.5 text-fine font-bold uppercase tracking-wider border-emerald-600/40 text-emerald-700 hover:bg-emerald-600/10 hover:text-emerald-800 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
+                      >
+                        {startingId === p.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Play className="w-3.5 h-3.5" />
+                        )}
+                        Start
+                      </Button>
+                    )}
+                    {p.can_stop !== false && p.id !== "postgres" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={stoppingId === p.id || p.status === "down"}
+                        onClick={() => stopProcess(p.id)}
+                        className="h-8 min-w-[5.75rem] justify-center gap-1.5 text-fine font-bold uppercase tracking-wider border-red-600/40 text-red-700 hover:bg-red-600/10 hover:text-red-800 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300"
+                      >
+                        {stoppingId === p.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Square className="w-3.5 h-3.5" />
+                        )}
+                        Stop
+                      </Button>
+                    )}
+                    {p.id === "postgres" && (
+                      <span className="text-fine text-muted-foreground">external</span>
+                    )}
+                  </div>
+                </Card>
+                <p className="text-sm text-muted-foreground leading-relaxed sm:flex-1 sm:py-1">
+                  {STACK_PLAIN_ENGLISH[p.id] ?? p.detail ?? "—"}
+                </p>
+              </div>
             ))}
           </div>
           <p className="text-xs text-muted-foreground">
@@ -1526,7 +1546,7 @@ export default function SettingsPage() {
             </div>
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader className="bg-muted/10">
+                <TableHeader>
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider w-[72px]">Platform</TableHead>
                     <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider">Website / App</TableHead>

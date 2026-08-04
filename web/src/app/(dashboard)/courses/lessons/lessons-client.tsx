@@ -30,6 +30,7 @@ import { LibraryBreadcrumb } from "@/components/library/LibraryBreadcrumb";
 import { Icon } from "@/lib/icons";
 import { API_BASE } from "@/lib/api-base";
 import { Label } from "@/components/ui/label";
+import { downloadCourseDocx } from "@/lib/courses/export-docx";
 
 type LessonKind = "text" | "video" | "pdf" | "quiz";
 
@@ -102,13 +103,13 @@ export default function LibraryLessonsPage() {
 
   useEffect(() => {
     if (!courseId) {
-      router.replace("/library/sources");
+      router.replace("/courses/sources");
     }
   }, [courseId, router]);
 
   const fetchCourses = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/v1/library/courses`);
+      const res = await fetch(`${API_BASE}/api/v1/courses/courses`);
       if (!res.ok) throw new Error(`Failed to load courses (${res.status})`);
       const json = await res.json();
       setCourses(json.items ?? []);
@@ -132,7 +133,7 @@ export default function LibraryLessonsPage() {
       if (kind !== "all") params.set("kind", kind);
       if (category !== "all") params.set("category", category);
       if (q.trim()) params.set("q", q.trim());
-      const res = await fetch(`${API_BASE}/api/v1/library/lessons?${params}`);
+      const res = await fetch(`${API_BASE}/api/v1/courses/lessons?${params}`);
       if (!res.ok) throw new Error(`Failed to load lessons (${res.status})`);
       setData(await res.json());
     } catch (err: unknown) {
@@ -176,7 +177,7 @@ export default function LibraryLessonsPage() {
     setCategory("all");
     setQ("");
     setFlash(null);
-    router.push("/library/sources");
+    router.push("/courses/sources");
   };
 
   const patchLessonPublish = async (lesson: LessonSummary, published: boolean) => {
@@ -184,7 +185,7 @@ export default function LibraryLessonsPage() {
     setError(null);
     try {
       const res = await fetch(
-        `${API_BASE}/api/v1/library/lessons/${encodeURIComponent(lesson.id)}/publish`,
+        `${API_BASE}/api/v1/courses/lessons/${encodeURIComponent(lesson.id)}/publish`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -227,7 +228,7 @@ export default function LibraryLessonsPage() {
     setError(null);
     try {
       const res = await fetch(
-        `${API_BASE}/api/v1/library/courses/${encodeURIComponent(courseId)}/lessons`,
+        `${API_BASE}/api/v1/courses/courses/${encodeURIComponent(courseId)}/lessons`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -253,7 +254,7 @@ export default function LibraryLessonsPage() {
       setFlash(`Created “${title}”.`);
       await Promise.all([fetchLessons(), fetchCourses()]);
       if (body.id) {
-        router.push(`/library/lessons/${encodeURIComponent(body.id)}`);
+        router.push(`/courses/lessons/${encodeURIComponent(body.id)}`);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Create failed";
@@ -276,27 +277,7 @@ export default function LibraryLessonsPage() {
     setError(null);
     setFlash(null);
     try {
-      const res = await fetch(
-        `${API_BASE}/api/v1/library/courses/${encodeURIComponent(id)}/export.docx`,
-      );
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(
-          typeof body.detail === "string" ? body.detail : `Export failed (${res.status})`,
-        );
-      }
-      const blob = await res.blob();
-      const cd = res.headers.get("Content-Disposition") || "";
-      const match = /filename="([^"]+)"/i.exec(cd);
-      const filename = match?.[1] || `${id}.docx`;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      const filename = await downloadCourseDocx(id);
       setFlash(`Exported ${filename}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Export failed");
@@ -328,7 +309,7 @@ export default function LibraryLessonsPage() {
       <div className="space-y-3">
         <LibraryBreadcrumb
           items={[
-            { label: "Sources", href: "/library/sources" },
+            { label: "Sources", href: "/courses/sources" },
             { label: activeCourse?.name || courseId || "Course" },
           ]}
         />
@@ -537,22 +518,22 @@ export default function LibraryLessonsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-center w-[48px]">
+                  <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-center w-[48px]">
                     #
                   </TableHead>
-                  <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider text-muted-foreground text-left">
+                  <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-left">
                     Lesson
                   </TableHead>
-                  <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-left w-[200px]">
+                  <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-left w-[200px]">
                     Module
                   </TableHead>
-                  <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-center w-[88px]">
+                  <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-center w-[88px]">
                     Kind
                   </TableHead>
-                  <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-center w-[110px]">
+                  <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-center w-[110px]">
                     Publish
                   </TableHead>
-                  <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-center w-[72px]">
+                  <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-center w-[72px]">
                     Open
                   </TableHead>
                 </TableRow>
@@ -595,7 +576,7 @@ export default function LibraryLessonsPage() {
                           </TableCell>
                           <TableCell className="px-5 py-3 text-left">
                             <Link
-                              href={`/library/lessons/${encodeURIComponent(lesson.id)}`}
+                              href={`/courses/lessons/${encodeURIComponent(lesson.id)}`}
                               className="text-sm font-medium hover:text-primary truncate block max-w-xl"
                               title={lesson.title}
                             >
@@ -638,7 +619,7 @@ export default function LibraryLessonsPage() {
                           </TableCell>
                           <TableCell className="px-3 py-3 text-center">
                             <Link
-                              href={`/library/lessons/${encodeURIComponent(lesson.id)}`}
+                              href={`/courses/lessons/${encodeURIComponent(lesson.id)}`}
                               className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted"
                               title="Open lesson"
                             >

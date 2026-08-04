@@ -1,21 +1,18 @@
-"""Ensure Courses (library) domain sources mirror file-backed courses."""
+"""Ensure Courses domain sources mirror file-backed courses on disk."""
 from __future__ import annotations
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.domain_keys import COURSES_DOMAIN, course_source_url
 from app.models.source import Platform, Source, SourcePriority, SourceStatus, SourceType
+from app.models.source_stream import SourceStream
 from app.services.catalog_ids import allocate_catalog_id
 from app.services.library_catalog import list_courses
 from app.services.source_streams import default_streams_for_platform
-from app.models.source_stream import SourceStream
 
-DOMAIN = "library"
+DOMAIN = COURSES_DOMAIN
 COURSE_TAG_PREFIX = "course_id:"
-
-
-def course_source_url(course_id: str) -> str:
-    return f"mi://library/courses/{course_id}"
 
 
 def course_id_from_tags(tags: list | None) -> str | None:
@@ -31,7 +28,7 @@ def course_id_from_tags(tags: list | None) -> str | None:
 async def ensure_library_sources(db: AsyncSession) -> list[Source]:
     """
     Upsert one source per file-backed course (name = course name).
-    Idempotent by source_url mi://library/courses/{course_id}.
+    Idempotent by source_url mi://courses/{course_id}.
     """
     courses = list_courses()
     out: list[Source] = []
@@ -49,6 +46,7 @@ async def ensure_library_sources(db: AsyncSession) -> list[Source]:
 
         if existing:
             existing.domain = DOMAIN
+            existing.source_url = url
             existing.name = course.name or cid
             existing.description = desc
             existing.category = "Course"

@@ -32,7 +32,7 @@ const PRIORITY_CLASS: Record<SourcePriority, string> = {
 };
 
 const th =
-  "h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-center";
+  "h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-center";
 const td = "px-3 py-3 text-center";
 
 export function TrademarkSourcesTable({
@@ -66,14 +66,14 @@ export function TrademarkSourcesTable({
 
       <div className="overflow-x-auto bg-card">
         <Table className="bg-card table-fixed w-full min-w-[960px]">
-          <TableHeader className="bg-card">
+          <TableHeader>
             <TableRow className="hover:bg-transparent bg-card">
               <TableHead className={`${th} w-[3%]`}>#</TableHead>
               <TableHead className={`${th} w-[8%]`}>ID</TableHead>
-              <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-left w-[30%]">
+              <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-left w-[30%]">
                 Name
               </TableHead>
-              <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-left w-[11%]">
+              <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-left w-[11%]">
                 Category
               </TableHead>
               <TableHead className={`${th} w-[6%]`} title="1 = highest, 5 = lowest">
@@ -85,7 +85,7 @@ export function TrademarkSourcesTable({
               >
                 Connect
               </TableHead>
-              <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-left w-[17%]">
+              <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-left w-[17%]">
                 Access
               </TableHead>
               <TableHead className={`${th} w-[6%]`}>Status</TableHead>

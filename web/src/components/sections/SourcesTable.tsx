@@ -52,7 +52,7 @@ const PRIORITY_CLASS: Record<SourcePriority, string> = {
 };
 
 const th =
-  "h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-center";
+  "h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-center";
 const td = "px-3 py-3 text-center";
 const tdCenterFlex = "px-3 py-3";
 const centerInner = "flex items-center justify-center";
@@ -175,14 +175,14 @@ export function SourcesTable({
 
       <div className="overflow-x-auto bg-card">
         <Table className="bg-card">
-          <TableHeader className="bg-card">
+          <TableHeader>
             <TableRow className="hover:bg-transparent bg-card">
               <TableHead className={`${th} w-[48px]`}>#</TableHead>
               <TableHead className={`${th} w-[72px]`}>Platform</TableHead>
-              <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider text-muted-foreground text-left">
+              <TableHead className="h-11 px-5 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-left">
                 Name
               </TableHead>
-              <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-muted-foreground text-left w-[160px]">
+              <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider text-sidebar-foreground text-left w-[160px]">
                 Tags
               </TableHead>
               <TableHead className={`${th} w-[56px]`} title="1 = highest, 5 = lowest">
@@ -218,7 +218,7 @@ export function SourcesTable({
             )}
             {!loading && sources.length === 0 && (
               <TableRow>
-                <TableCell colSpan={colSpan} className="h-24 text-center text-muted-foreground text-sm">
+                <TableCell colSpan={colSpan} className="h-24 text-center text-sidebar-foreground text-sm">
                   {totalSources === 0
                     ? "No sources yet. Add one above, or promote candidates from Research."
                     : "No sources match this filter."}
@@ -512,7 +512,7 @@ export function SourcesTable({
                             aria-label={discoverTitle}
                             className={`h-8 w-8 ${
                               isDiscovering
-                                ? "text-muted-foreground"
+                                ? "text-sidebar-foreground"
                                 : discoverFailed
                                   ? "text-red-500 hover:text-red-400 hover:bg-red-500/10"
                                   : discoverOk

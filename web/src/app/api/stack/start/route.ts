@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
-import { spawn } from "child_process";
+import { spawn, execFile } from "child_process";
+import { promisify } from "util";
 import path from "path";
 import fs from "fs";
 import os from "os";
+
+const execFileAsync = promisify(execFile);
 
 const V2_ROOT = path.resolve(process.cwd(), "..");
 const VENV_PY = path.join(V2_ROOT, ".venv", "Scripts", "python.exe");
@@ -60,6 +63,21 @@ export async function POST(req: Request) {
   if (id === "celery" || id === "workers") {
     if (!fs.existsSync(VENV_PY)) {
       return NextResponse.json({ detail: "v2/.venv python missing" }, { status: 404 });
+    }
+    const { stdout } = await execFileAsync(
+      "powershell.exe",
+      [
+        "-NoProfile",
+        "-Command",
+        `Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -and $_.CommandLine -match 'intelligence\\\\v2' -and $_.CommandLine -match 'celery' -and $_.CommandLine -match 'worker' -and $_.CommandLine -notmatch 'beat' } | Measure-Object | Select-Object -ExpandProperty Count`,
+      ],
+      { timeout: 5000, windowsHide: true },
+    );
+    if ((parseInt(String(stdout).trim(), 10) || 0) > 0) {
+      return NextResponse.json(
+        { detail: "Celery worker already running — Stop first, then Start." },
+        { status: 409 },
+      );
     }
     const pid = startInConsole("MI Celery Worker", WORKERS_DIR, [
       `set PYTHONPATH=${WORKERS_DIR};${API_DIR}`,

@@ -51,7 +51,7 @@ async function countCeleryProcesses(kind: "worker" | "beat"): Promise<{ ok: bool
       [
         "-NoProfile",
         "-Command",
-        `Get-CimInstance Win32_Process -Filter "Name = 'python.exe'" | Where-Object { $_.CommandLine -and (${match}) } | Measure-Object | Select-Object -ExpandProperty Count`,
+        `Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -and $_.CommandLine -match 'intelligence\\\\v2' -and (${match}) } | Measure-Object | Select-Object -ExpandProperty Count`,
       ],
       { timeout: 5000, windowsHide: true },
     );
@@ -276,10 +276,18 @@ export async function GET() {
       docs_url: null,
     },
     {
-      id: "library",
+      id: "courses",
       label: "Courses",
       status: "active",
-      blurb: "Lessons from courses, books, and videos — text, PDF, and video by topic",
+      blurb: "Online curricula — YouTube, article hubs, and LMS-style discover and acquire",
+      home: "/courses/sources",
+      docs_url: null,
+    },
+    {
+      id: "library",
+      label: "Library",
+      status: "active",
+      blurb: "Local folders — videos, PDFs, ebooks, and files from your drives",
       home: "/library/sources",
       docs_url: null,
     },
