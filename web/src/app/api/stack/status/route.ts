@@ -72,70 +72,106 @@ async function countCeleryProcesses(kind: "worker" | "beat"): Promise<{ ok: bool
 }
 
 export async function GET() {
-  const [apiTcp, apiHealth, postgres, redis, web, celery, beat] = await Promise.all([
-    tcpOk(8000),
-    httpOk(`${API_BASE.replace(/\/$/, "")}/api/v1/health`),
-    tcpOk(5432),
-    tcpOk(6379),
-    tcpOk(3000),
-    countCeleryProcesses("worker"),
-    countCeleryProcesses("beat"),
-  ]);
+  const checked_at = new Date().toISOString();
+  const host = "127.0.0.1";
 
-  const apiDocs = `${API_BASE.replace(/\/$/, "")}/docs`;
+  try {
+    const apiBase = API_BASE.replace(/\/$/, "");
+    const apiHealthUrl = `${apiBase}/api/v1/health`;
+    const apiDocs = `${apiBase}/docs`;
 
-  // Shells match v2/.startup (plus Postgres as external dependency).
-  const processes = [
-    {
-      id: "api",
-      label: "API",
-      status: apiHealth || apiTcp ? "up" : "down",
-      detail: apiHealth ? "health ok" : apiTcp ? "port 8000 open" : "not on :8000",
-      docs_url: apiDocs,
-      can_start: true,
-      can_stop: true,
-    },
-    {
-      id: "postgres",
-      label: "PostgreSQL",
-      status: postgres ? "up" : "down",
-      detail: postgres ? "port 5432" : "not listening",
-      can_start: false,
-      can_stop: false,
-    },
-    {
-      id: "redis",
-      label: "Redis (Celery broker)",
-      status: redis ? "up" : "down",
-      detail: redis ? "port 6379" : "not listening",
-      can_start: true,
-      can_stop: true,
-    },
-    {
-      id: "celery",
-      label: "Celery workers",
-      status: celery.ok ? "up" : "down",
-      detail: celery.detail,
-      can_start: true,
-      can_stop: true,
-    },
-    {
-      id: "celery_beat",
-      label: "Celery Beat",
-      status: beat.ok ? "up" : "down",
-      detail: beat.detail,
-      can_start: true,
-      can_stop: true,
-    },
-    {
-      id: "web",
-      label: "Web (Next.js)",
-      status: web ? "up" : "down",
-      detail: web ? "port 3000" : "not listening",
-      can_start: true,
-      can_stop: true,
-    },
-  ];
+    const [apiTcp, apiHealth, postgres, redis, web, celery, beat] = await Promise.all([
+      tcpOk(8000),
+      httpOk(apiHealthUrl),
+      tcpOk(5432),
+      tcpOk(6379),
+      tcpOk(3000),
+      countCeleryProcesses("worker"),
+      countCeleryProcesses("beat"),
+    ]);
+
+    // Shells match v2/.startup (plus Postgres as external dependency).
+    const processes = [
+      {
+        id: "api",
+        label: "API",
+        status: apiHealth || apiTcp ? "up" : "down",
+        port: 8000,
+        host,
+        probe: apiHealth ? "http" : apiTcp ? "tcp" : "none",
+        endpoint: `${host}:8000`,
+        url: apiHealthUrl,
+        detail: apiHealth ? "health ok" : apiTcp ? "port open, health failed" : "not listening",
+        docs_url: apiDocs,
+        can_start: true,
+        can_stop: true,
+      },
+      {
+        id: "postgres",
+        label: "PostgreSQL",
+        status: postgres ? "up" : "down",
+        port: 5432,
+        host,
+        probe: "tcp",
+        endpoint: `${host}:5432`,
+        url: null,
+        detail: postgres ? "listening" : "not listening",
+        can_start: false,
+        can_stop: false,
+      },
+      {
+        id: "redis",
+        label: "Redis (Celery broker)",
+        status: redis ? "up" : "down",
+        port: 6379,
+        host,
+        probe: "tcp",
+        endpoint: `${host}:6379`,
+        url: null,
+        detail: redis ? "listening" : "not listening",
+        can_start: true,
+        can_stop: true,
+      },
+      {
+        id: "celery",
+        label: "Celery workers",
+        status: celery.ok ? "up" : "down",
+        port: null,
+        host,
+        probe: "process",
+        endpoint: "—",
+        url: null,
+        detail: celery.detail,
+        can_start: true,
+        can_stop: true,
+      },
+      {
+        id: "celery_beat",
+        label: "Celery Beat",
+        status: beat.ok ? "up" : "down",
+        port: null,
+        host,
+        probe: "process",
+        endpoint: "—",
+        url: null,
+        detail: beat.detail,
+        can_start: true,
+        can_stop: true,
+      },
+      {
+        id: "web",
+        label: "Web (Next.js)",
+        status: web ? "up" : "down",
+        port: 3000,
+        host,
+        probe: "tcp",
+        endpoint: `${host}:3000`,
+        url: "http://localhost:3000",
+        detail: web ? "listening" : "not listening",
+        can_start: true,
+        can_stop: true,
+      },
+    ];
 
   // Domain control planes — alphabetical by label (matches docs/domains)
   const control_planes = [
@@ -341,9 +377,22 @@ export async function GET() {
     },
   ].sort((a, b) => a.label.localeCompare(b.label));
 
-  return NextResponse.json({
-    processes,
-    control_planes,
-    v2_root: V2_ROOT,
-  });
+    return NextResponse.json({
+      processes,
+      control_planes,
+      v2_root: V2_ROOT,
+      checked_at,
+      host,
+    });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "status probe failed";
+    return NextResponse.json({
+      processes: [],
+      control_planes: [],
+      v2_root: V2_ROOT,
+      checked_at,
+      host,
+      error: message,
+    });
+  }
 }

@@ -19,6 +19,7 @@ import {
   Server,
   Layers,
   FileAudio,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -114,6 +115,7 @@ const SESSION_PLATFORMS: {
 ];
 
 type Tab = "stack" | "planes" | "discovery" | "transcription" | "access";
+type StackView = "status" | "docs";
 
 interface CredentialRow {
   id: string;
@@ -133,6 +135,11 @@ interface ProcessStatus {
   label: string;
   status: string;
   detail?: string | null;
+  port?: number | null;
+  host?: string | null;
+  probe?: string | null;
+  endpoint?: string | null;
+  url?: string | null;
   docs_url?: string | null;
   can_start?: boolean;
   can_stop?: boolean;
@@ -221,6 +228,13 @@ function ProcessPill({ status }: { status: string }) {
       </span>
     );
   }
+  if (status === "unknown") {
+    return (
+      <span className="inline-flex items-center gap-1 text-fine font-bold uppercase tracking-wider text-amber-500">
+        <AlertCircle className="w-3 h-3" /> Unknown
+      </span>
+    );
+  }
   return (
     <span className="inline-flex items-center gap-1 text-fine font-bold uppercase tracking-wider text-red-400">
       <AlertCircle className="w-3 h-3" /> Down
@@ -228,8 +242,22 @@ function ProcessPill({ status }: { status: string }) {
   );
 }
 
+function formatCheckedAt(iso: string | null): string {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
+}
+
 export default function SettingsPage() {
   const [tab, setTab] = useState<Tab>("stack");
+  const [stackView, setStackView] = useState<StackView>("status");
   const [items, setItems] = useState<CredentialRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
@@ -256,6 +284,8 @@ export default function SettingsPage() {
   const [processes, setProcesses] = useState<ProcessStatus[]>([]);
   const [planes, setPlanes] = useState<ControlPlane[]>([]);
   const [sysLoading, setSysLoading] = useState(true);
+  const [stackError, setStackError] = useState<string | null>(null);
+  const [lastChecked, setLastChecked] = useState<string | null>(null);
   const [startingId, setStartingId] = useState<string | null>(null);
   const [stoppingId, setStoppingId] = useState<string | null>(null);
   const [transcription, setTranscription] = useState<TranscriptionConfig | null>(null);
@@ -309,90 +339,125 @@ export default function SettingsPage() {
   const loadSystem = useCallback(async () => {
     setSysLoading(true);
     try {
-      // Prefer Next.js stack routes (works even if FastAPI is stale/down)
-      const res = await fetch("/api/stack/status");
-      if (!res.ok) throw new Error("status failed");
-      const data = await res.json();
+      const res = await fetch("/api/stack/status", { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.error) {
+        throw new Error(
+          typeof data.error === "string"
+            ? data.error
+            : `Status probe failed (${res.status})`,
+        );
+      }
       setProcesses(data.processes ?? []);
       setPlanes(data.control_planes ?? []);
-    } catch {
-      setProcesses([
-        {
-          id: "api",
-          label: "API",
-          status: "down",
-          detail: "Stack status unavailable — is Web running?",
-          docs_url: API_DOCS,
-          can_start: true,
-          can_stop: true,
-        },
-        {
-          id: "redis",
-          label: "Redis (Celery broker)",
-          status: "unknown",
-          detail: "—",
-          can_start: true,
-          can_stop: true,
-        },
-        {
-          id: "celery",
-          label: "Celery workers",
-          status: "unknown",
-          detail: "—",
-          can_start: true,
-          can_stop: true,
-        },
-        {
-          id: "celery_beat",
-          label: "Celery Beat",
-          status: "unknown",
-          detail: "—",
-          can_start: true,
-          can_stop: true,
-        },
-        {
-          id: "web",
-          label: "Web (Next.js)",
-          status: "unknown",
-          detail: "—",
-          can_start: true,
-          can_stop: true,
-        },
-      ]);
-      setPlanes([
-        {
-          id: "media",
-          label: "Media",
-          status: "active",
-          blurb: "Social posts, videos, websites, podcasts, newsletters and channels",
-          home: "/media/sources",
-          docs_url: API_DOCS,
-        },
-        { id: "finance", label: "Finance", status: "planned", blurb: "Markets, filings, companies, securities and financial signals", home: "/finance" },
-        { id: "software", label: "Software", status: "planned", blurb: "Products, vendors, licenses, codebases and digital platforms", home: "/software" },
-        { id: "business", label: "Business", status: "planned", blurb: "Companies, ownership, operations, filings and commercial signals", home: "/business" },
-        { id: "government", label: "Government", status: "active", blurb: "Agencies, regulations, procurement, public records and policy", home: "/government/sources" },
-        { id: "taxes", label: "Taxes", status: "planned", blurb: "Rules, filings, jurisdictions, incentives and compliance signals", home: "/taxes" },
-        { id: "healthcare", label: "Healthcare/Medical", status: "planned", blurb: "Providers, facilities, claims, treatments, pharma and clinical signals", home: "/healthcare" },
-        { id: "people", label: "People", status: "planned", blurb: "Individuals, roles, relationships, affiliations and influence signals", home: "/people" },
-        { id: "geography", label: "Geography", status: "planned", blurb: "Places, regions, borders, corridors and spatial economic signals", home: "/geography" },
-        { id: "politics", label: "Politics", status: "planned", blurb: "Campaigns, officials, legislation, elections and civic power signals", home: "/politics" },
-        { id: "nonprofit", label: "Non-profit", status: "planned", blurb: "Orgs, missions, funding, grants, programs and civic initiatives", home: "/nonprofit" },
-        { id: "news", label: "News", status: "planned", blurb: "Published events, claims, organizations, people and developing stories" },
-        { id: "real_estate", label: "Real Estate", status: "planned", blurb: "Parcels, buildings, owners, liens, zoning, permits and transactions", home: "/real-estate" },
-        { id: "auctions", label: "Auctions", status: "planned", blurb: "HOA, tax, foreclosure and public auctions — lots, dates, bidders and jurisdictions", home: "/auctions" },
-        { id: "torrents", label: "Torrents", status: "planned", blurb: "Torrent indexes, releases, magnets, swarm activity and distribution signals", home: "/torrents" },
-        { id: "trademarks", label: "Trademarks", status: "active", blurb: "Marks, owners, classes, status, prosecution history and related brands", home: "/trademarks/sources" },
-        { id: "domain_names", label: "Domains", status: "active", blurb: "www, .net and other TLDs — registries, WHOIS, DNS, availability and ownership", home: "/domain-names/portfolio" },
-        { id: "courses", label: "Courses", status: "active", blurb: "Online curricula — YouTube, article hubs, and LMS-style discover and acquire", home: "/courses/sources" },
-        { id: "library", label: "Library", status: "active", blurb: "Local folders — videos, PDFs, ebooks, and files from your drives", home: "/library/sources" },
-        { id: "patents", label: "Patents", status: "planned", blurb: "Applications, grants, claims, inventors, assignees, citations and legal status" },
-        { id: "songs", label: "Songs", status: "planned", blurb: "Musical compositions and associated writers, publishers and rights" },
-        { id: "music", label: "Music", status: "planned", blurb: "Sound recordings, releases, artists, labels and catalogs" },
-        { id: "books", label: "Books", status: "planned", blurb: "Published works, editions, authors, publishers, rights and sales signals" },
-        { id: "movies", label: "Movies", status: "planned", blurb: "Films, television, video works, production entities and distribution rights" },
-        { id: "fiction", label: "Fiction", status: "planned", blurb: "Unpublished or independently created stories, characters, settings and story worlds" },
-      ].sort((a, b) => a.label.localeCompare(b.label)));
+      setLastChecked(data.checked_at ?? new Date().toISOString());
+      setStackError(null);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Could not load stack status";
+      setStackError(message);
+      // Browser fallback: at least probe API health when the stack route is broken.
+      try {
+        const healthRes = await fetch(`${BACKEND_URL}/api/v1/health`, {
+          signal: AbortSignal.timeout(2000),
+        });
+        const apiUp = healthRes.ok;
+        setProcesses((prev) => {
+          if (prev.length > 0) {
+            return prev.map((p) =>
+              p.id === "api"
+                ? {
+                    ...p,
+                    status: apiUp ? "up" : "down",
+                    detail: apiUp ? "health ok (browser probe)" : "health failed (browser probe)",
+                    probe: "http",
+                    endpoint: "127.0.0.1:8000",
+                    port: 8000,
+                  }
+                : p,
+            );
+          }
+          return [
+            {
+              id: "api",
+              label: "API",
+              status: apiUp ? "up" : "down",
+              port: 8000,
+              host: "127.0.0.1",
+              probe: "http",
+              endpoint: "127.0.0.1:8000",
+              url: `${BACKEND_URL}/api/v1/health`,
+              detail: apiUp ? "health ok (browser probe)" : "health failed (browser probe)",
+              docs_url: API_DOCS,
+              can_start: true,
+              can_stop: true,
+            },
+            {
+              id: "postgres",
+              label: "PostgreSQL",
+              status: "unknown",
+              port: 5432,
+              host: "127.0.0.1",
+              probe: "tcp",
+              endpoint: "127.0.0.1:5432",
+              detail: "probe unavailable",
+              can_start: false,
+              can_stop: false,
+            },
+            {
+              id: "redis",
+              label: "Redis (Celery broker)",
+              status: "unknown",
+              port: 6379,
+              host: "127.0.0.1",
+              probe: "tcp",
+              endpoint: "127.0.0.1:6379",
+              detail: "probe unavailable",
+              can_start: true,
+              can_stop: true,
+            },
+            {
+              id: "celery",
+              label: "Celery workers",
+              status: "unknown",
+              port: null,
+              host: "127.0.0.1",
+              probe: "process",
+              endpoint: "—",
+              detail: "probe unavailable",
+              can_start: true,
+              can_stop: true,
+            },
+            {
+              id: "celery_beat",
+              label: "Celery Beat",
+              status: "unknown",
+              port: null,
+              host: "127.0.0.1",
+              probe: "process",
+              endpoint: "—",
+              detail: "probe unavailable",
+              can_start: true,
+              can_stop: true,
+            },
+            {
+              id: "web",
+              label: "Web (Next.js)",
+              status: "up",
+              port: 3000,
+              host: "127.0.0.1",
+              probe: "tcp",
+              endpoint: "127.0.0.1:3000",
+              url: "http://localhost:3000",
+              detail: "you are viewing this page",
+              can_start: true,
+              can_stop: true,
+            },
+          ];
+        });
+      } catch {
+        setProcesses((prev) => (prev.length > 0 ? prev : []));
+      }
+      setLastChecked(new Date().toISOString());
     } finally {
       setSysLoading(false);
     }
@@ -406,10 +471,10 @@ export default function SettingsPage() {
   }, [load, loadSystem, loadTranscription, loadDiscovery]);
 
   useEffect(() => {
-    if (tab !== "stack") return;
+    if (tab !== "stack" || stackView !== "status") return;
     const t = setInterval(loadSystem, 8000);
     return () => clearInterval(t);
-  }, [tab, loadSystem]);
+  }, [tab, stackView, loadSystem]);
 
   const startProcess = async (id: string) => {
     setStartingId(id);
@@ -759,6 +824,12 @@ export default function SettingsPage() {
             <Button onClick={() => { resetAdd(); setShowAdd(true); }} className="gap-2 shrink-0">
               <Icon name="plus" className="w-4 h-4" /> Add
             </Button>
+          ) : tab === "stack" && stackView === "docs" ? (
+            <Button variant="outline" asChild className="gap-2 shrink-0">
+              <a href={API_DOCS} target="_blank" rel="noreferrer">
+                <ExternalLink className="w-4 h-4" /> Open in new tab
+              </a>
+            </Button>
           ) : (
             <Button
               variant="outline"
@@ -809,12 +880,53 @@ export default function SettingsPage() {
 
       {tab === "stack" && (
         <div className="space-y-4">
-          <div className="flex items-start justify-between gap-3 flex-wrap">
-            <p className="text-sm text-muted-foreground max-w-2xl">
-              <span className="text-foreground font-medium">Start</span> opens a console shell
-              (same commands as <span className="font-mono text-xs">v2/.startup</span>).{" "}
-              <span className="text-foreground font-medium">Stop</span> kills that process.
-            </p>
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/40 border border-border/50 w-fit">
+            <button
+              type="button"
+              onClick={() => setStackView("status")}
+              className={`inline-flex items-center gap-1.5 text-xs font-medium px-3.5 py-1.5 rounded-lg transition-colors ${
+                stackView === "status"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Server className="w-3.5 h-3.5" />
+              Stack status
+            </button>
+            <button
+              type="button"
+              onClick={() => setStackView("docs")}
+              className={`inline-flex items-center gap-1.5 text-xs font-medium px-3.5 py-1.5 rounded-lg transition-colors ${
+                stackView === "docs"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              API docs
+            </button>
+          </div>
+
+          {stackView === "status" ? (
+        <Card className="shadow-sm border-border/50 rounded-2xl overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-border/50 bg-muted/20">
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">
+                <span className="text-foreground font-medium">Start</span> opens a console shell
+                (same commands as <span className="font-mono text-xs">v2/.startup</span>).{" "}
+                <span className="text-foreground font-medium">Stop</span> kills that process.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Last checked:{" "}
+                <span className="font-mono text-foreground">{formatCheckedAt(lastChecked)}</span>
+                {sysLoading ? (
+                  <span className="inline-flex items-center gap-1 ml-2">
+                    <Loader2 className="w-3 h-3 animate-spin" /> refreshing…
+                  </span>
+                ) : null}
+                <span className="ml-2">· auto-refresh every 8s</span>
+              </p>
+            </div>
             <a
               href={API_DOCS}
               target="_blank"
@@ -824,86 +936,195 @@ export default function SettingsPage() {
               API docs <ExternalLink className="w-3 h-3" />
             </a>
           </div>
-          {sysLoading && processes.length === 0 && (
-            <p className="text-sm text-muted-foreground flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" /> Checking…
-            </p>
-          )}
-          <div className="space-y-3 max-w-3xl">
-            {processes.map((p) => (
-              <div
-                key={p.id}
-                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5"
-              >
-                <Card className="shadow-sm border-border/50 rounded-2xl p-4 w-full sm:w-72 shrink-0 flex flex-col gap-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <h3 className="font-display text-sm font-semibold tracking-tight truncate">
-                        {p.label}
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                        {p.detail || "—"}
-                      </p>
-                    </div>
-                    <ProcessPill status={p.status} />
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {p.docs_url && (
-                      <a
-                        href={p.docs_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-fine text-primary inline-flex items-center gap-0.5 hover:underline"
-                      >
-                        docs <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                    {p.can_start !== false && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={startingId === p.id || p.status === "up"}
-                        onClick={() => startProcess(p.id)}
-                        className="h-8 min-w-[5.75rem] justify-center gap-1.5 text-fine font-bold uppercase tracking-wider border-emerald-600/40 text-emerald-700 hover:bg-emerald-600/10 hover:text-emerald-800 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
-                      >
-                        {startingId === p.id ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Play className="w-3.5 h-3.5" />
-                        )}
-                        Start
-                      </Button>
-                    )}
-                    {p.can_stop !== false && p.id !== "postgres" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={stoppingId === p.id || p.status === "down"}
-                        onClick={() => stopProcess(p.id)}
-                        className="h-8 min-w-[5.75rem] justify-center gap-1.5 text-fine font-bold uppercase tracking-wider border-red-600/40 text-red-700 hover:bg-red-600/10 hover:text-red-800 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300"
-                      >
-                        {stoppingId === p.id ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Square className="w-3.5 h-3.5" />
-                        )}
-                        Stop
-                      </Button>
-                    )}
-                    {p.id === "postgres" && (
-                      <span className="text-fine text-muted-foreground">external</span>
-                    )}
-                  </div>
-                </Card>
-                <p className="text-sm text-muted-foreground leading-relaxed sm:flex-1 sm:py-1">
-                  {STACK_PLAIN_ENGLISH[p.id] ?? p.detail ?? "—"}
-                </p>
-              </div>
-            ))}
+
+          {stackError ? (
+            <div className="mx-5 mt-4 flex items-start gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/5 border border-amber-500/20 rounded-xl px-4 py-3">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              <span>
+                Stack probe error: {stackError}. Partial data shown where available — click Refresh
+                or restart Web if status stays blank.
+              </span>
+            </div>
+          ) : null}
+
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="h-11 px-3 text-fine font-bold uppercase tracking-wider w-[40px] text-center">
+                    #
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-fine font-bold uppercase tracking-wider min-w-[140px]">
+                    Service
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-fine font-bold uppercase tracking-wider w-[88px] text-center">
+                    Status
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-fine font-bold uppercase tracking-wider w-[72px] text-center">
+                    Port
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-fine font-bold uppercase tracking-wider w-[140px]">
+                    Endpoint
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-fine font-bold uppercase tracking-wider w-[80px]">
+                    Probe
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-fine font-bold uppercase tracking-wider min-w-[160px]">
+                    Detail
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-fine font-bold uppercase tracking-wider min-w-[240px]">
+                    What it does
+                  </TableHead>
+                  <TableHead className="h-11 px-4 text-fine font-bold uppercase tracking-wider w-[180px] text-right">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sysLoading && processes.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
+                      <span className="inline-flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" /> Checking stack…
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+                {!sysLoading && processes.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
+                      No process data — click Refresh.
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+                {processes.map((p, i) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="px-3 py-3 text-center tabular-nums text-xs text-muted-foreground">
+                      {i + 1}
+                    </TableCell>
+                    <TableCell className="px-4 py-3">
+                      <div className="font-medium text-sm">{p.label}</div>
+                      {p.url ? (
+                        <a
+                          href={p.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-primary hover:underline font-mono"
+                        >
+                          {p.url.replace(/^https?:\/\//, "")}
+                        </a>
+                      ) : null}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-center">
+                      <ProcessPill status={p.status} />
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-center font-mono text-sm tabular-nums">
+                      {p.port ?? "—"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                      {p.endpoint ?? "—"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-xs uppercase tracking-wider text-muted-foreground">
+                      {p.probe ?? "—"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-muted-foreground">
+                      {p.detail || "—"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-muted-foreground leading-relaxed">
+                      {STACK_PLAIN_ENGLISH[p.id] ?? "—"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3">
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        {p.docs_url ? (
+                          <a
+                            href={p.docs_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-fine text-primary inline-flex items-center gap-0.5 hover:underline"
+                          >
+                            docs <ExternalLink className="w-3 h-3" />
+                          </a>
+                        ) : null}
+                        {p.can_start !== false ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={startingId === p.id || p.status === "up"}
+                            onClick={() => startProcess(p.id)}
+                            className="h-8 min-w-[5.25rem] justify-center gap-1.5 text-fine font-bold uppercase tracking-wider border-emerald-600/40 text-emerald-700 hover:bg-emerald-600/10 hover:text-emerald-800 dark:border-emerald-500/40 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300"
+                          >
+                            {startingId === p.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Play className="w-3.5 h-3.5" />
+                            )}
+                            Start
+                          </Button>
+                        ) : null}
+                        {p.can_stop !== false && p.id !== "postgres" ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={stoppingId === p.id || p.status === "down"}
+                            onClick={() => stopProcess(p.id)}
+                            className="h-8 min-w-[5.25rem] justify-center gap-1.5 text-fine font-bold uppercase tracking-wider border-red-600/40 text-red-700 hover:bg-red-600/10 hover:text-red-800 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300"
+                          >
+                            {stoppingId === p.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Square className="w-3.5 h-3.5" />
+                            )}
+                            Stop
+                          </Button>
+                        ) : null}
+                        {p.id === "postgres" ? (
+                          <span className="text-fine text-muted-foreground">external</span>
+                        ) : null}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <div className="px-5 py-3 border-t border-border/50 text-xs text-muted-foreground">
             Cheat sheet: <span className="font-mono">v2/.startup</span>
-          </p>
+          </div>
+        </Card>
+          ) : (
+        <Card className="shadow-sm border-border/50 rounded-2xl overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-border/50 bg-muted/20">
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">
+                FastAPI Swagger UI served by the API on port{" "}
+                <span className="font-mono text-xs text-foreground">8000</span>.
+              </p>
+              <p className="text-xs text-muted-foreground font-mono">{API_DOCS}</p>
+            </div>
+            <ProcessPill
+              status={processes.find((p) => p.id === "api")?.status === "up" ? "up" : "down"}
+            />
+          </div>
+          {processes.find((p) => p.id === "api")?.status !== "up" ? (
+            <div className="mx-5 mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/5 border border-amber-500/20 rounded-xl px-4 py-3">
+              <span className="inline-flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                API is not up — start it from Stack status, then switch back here.
+              </span>
+              <Button size="sm" variant="outline" onClick={() => startProcess("api")} disabled={startingId === "api"}>
+                {startingId === "api" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                Start API
+              </Button>
+            </div>
+          ) : null}
+          <iframe
+            title="FastAPI docs"
+            src={API_DOCS}
+            className="w-full border-0 bg-background"
+            style={{ height: "min(78vh, 960px)", minHeight: "480px" }}
+          />
+        </Card>
+          )}
         </div>
       )}
 
